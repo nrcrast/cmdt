@@ -28,15 +28,15 @@ At this point, you should be able to run `cd cli && pnpm start -h` and get the h
 # Usage
 ```
 Options:
-  -m, --manifest <string>   Manifest URI. Can also be a local path.
-  -o, --output <string>     Output directory (default: "download")
-  -s, --skip-download       Skip download (debug)
-  -v, --verbose             Verbose output
-  --dash-conformance        Run DASH-IF conformance tool (DASH only)
-  -t, --thumbnails          Validate thumbnails (check for duplicates)
-  --media-stream-validator  Run apple's media stream validator (HLS only)
-  -p, --log-periods         Print a table of periods in manifest (DASH only)
-  -h, --help                display help for command
+  -m, --manifest <string>       Manifest URI. Can also be a local path.
+  -o, --output <string>         Output directory (default: "download")
+  -s, --skip-download           Skip download (debug)
+  -l, ----log-level <string>    Log level
+  --dash-conformance            Run DASH-IF conformance tool (DASH only)
+  -t, --thumbnails              Validate thumbnails (check for duplicates)
+  --media-stream-validator      Run apple's media stream validator (HLS only)
+  -p, --log-periods             Print a table of periods in manifest (DASH only)
+  -h, --help                    display help for command
 ```
 
 Typical usage is something like:
