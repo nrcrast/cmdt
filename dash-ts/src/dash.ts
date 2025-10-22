@@ -164,6 +164,7 @@ export type Period = {
 	startString?: string;
 	bitstreamSwitching?: boolean;
 	baseUrl?: BaseUrl[];
+	duration?: Seconds;
 	segmentBase?: SegmentBase;
 	segmentList?: SegmentList;
 	segmentTemplate?: SegmentTemplate;
@@ -471,6 +472,7 @@ export function parsePeriods(periodRoot: XmlNode, mpd: MPD): Period[] {
 		const period: Period = {
 			id: e.$?.id,
 			start: optionalDurationToSeconds(e.$?.start),
+			duration: optionalDurationToSeconds(e.$?.duration),
 			startString: e.$?.start,
 			bitstreamSwitching: e.$?.bitstreamSwitching,
 			baseUrl: parseBaseUrls(e.BaseURL),
