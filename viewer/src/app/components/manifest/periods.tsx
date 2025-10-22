@@ -55,6 +55,14 @@ export const columns: ColumnDef<Period>[] = [
 		sortingFn: "basic",
 	},
 	{
+		accessorKey: "periodOverlap",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Start Time Overlaps Previous Period End Time" />
+		),
+		enableHiding: true,
+		sortingFn: "basic",
+	},
+	{
 		accessorKey: "segmentsAvailable",
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Number of Segments Available" />,
 		enableHiding: true,
@@ -68,6 +76,7 @@ const defaultVisibleColumns = {
 	duration: true,
 	end: true,
 	startPrevEnd: true,
+	periodOverlap: true,
 	absoluteStartMs: false,
 	baseUrl: false,
 	startString: false,

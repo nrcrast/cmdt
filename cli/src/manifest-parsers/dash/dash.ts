@@ -9,13 +9,6 @@ import {
 	type Segment,
 	UniqueRepresentationMap,
 } from "cmdt-shared";
-import { deepmergeCustom } from "deepmerge-ts";
-import type winston from "winston";
-import { getInstance as getLogger } from "../../logger.js";
-import getStreamAndLanguages from "../../utils/cea/getStreamAndLanguages.js";
-import { CeaSchemeUri } from "../../utils/manifest/types.js";
-import { secondsToMilliseconds } from "../../utils/time-utils.js";
-import { wrapUrl } from "../../utils/url.js";
 import {
 	type AdaptationSet,
 	type ContentType,
@@ -25,6 +18,14 @@ import {
 	type Representation as RawRepresentation,
 	type SegmentTemplate,
 } from "dash-ts";
+import { deepmergeCustom } from "deepmerge-ts";
+import type winston from "winston";
+import { getInstance as getLogger } from "../../logger.js";
+import getStreamAndLanguages from "../../utils/cea/getStreamAndLanguages.js";
+import { CeaSchemeUri } from "../../utils/manifest/types.js";
+import { secondsToMilliseconds } from "../../utils/time-utils.js";
+import { wrapUrl } from "../../utils/url.js";
+
 export class DashManifest implements ManifestParser {
 	private logger: winston.Logger;
 	private manifest: Manifest;
@@ -339,6 +340,7 @@ export class DashManifest implements ManifestParser {
 			const previousPeriod = this.manifest.periods[this.manifest.periods.length - 1];
 			if (previousPeriod) {
 				p.startPrevEnd = p.start - previousPeriod.end < 0.1;
+				p.periodOverlap = previousPeriod.end - p.start > 0.1;
 			}
 		}
 

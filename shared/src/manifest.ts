@@ -38,6 +38,7 @@ export type Period = {
 	duration: number;
 	end: number;
 	startPrevEnd: boolean;
+	periodOverlap: boolean;
 };
 
 export enum MediaType {
