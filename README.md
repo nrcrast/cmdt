@@ -35,6 +35,7 @@ Options:
   --dash-conformance        Run DASH-IF conformance tool (DASH only)
   -t, --thumbnails          Validate thumbnails (check for duplicates)
   --media-stream-validator  Run apple's media stream validator (HLS only)
+  -p, --log-periods         Print a table of periods in manifest (DASH only)
   -h, --help                display help for command
 ```
 
