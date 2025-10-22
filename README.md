@@ -31,7 +31,7 @@ Options:
   -m, --manifest <string>       Manifest URI. Can also be a local path.
   -o, --output <string>         Output directory (default: "download")
   -s, --skip-download           Skip download (debug)
-  -l, ----log-level <string>    Log level
+  -l, --log-level <string>    Log level
   --dash-conformance            Run DASH-IF conformance tool (DASH only)
   -t, --thumbnails              Validate thumbnails (check for duplicates)
   --media-stream-validator      Run apple's media stream validator (HLS only)
