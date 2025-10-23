@@ -8,7 +8,7 @@ const createView = (
 	if (data instanceof ArrayBuffer) {
 		buffer = data;
 	} else {
-		buffer = data.buffer;
+		buffer = data.buffer as ArrayBuffer;
 	}
 
 	const dataOffset: number = "byteOffset" in data ? data.byteOffset : 0;

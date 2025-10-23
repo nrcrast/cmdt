@@ -10,7 +10,7 @@ class DataViewReader {
 	private _littleEndian: boolean;
 	private logger: winston.Logger;
 
-	constructor(data: ArrayBuffer, endianess: Endian) {
+	constructor(data: Uint8Array, endianess: Endian) {
 		this._dataView = createView(data, DataView) as DataView;
 		this._littleEndian = endianess === Endian.LITTLE;
 		this.logger = getLogger();

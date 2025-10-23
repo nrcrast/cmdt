@@ -1,40 +1,54 @@
 {
 	"name": "dash-ts",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "",
 	"type": "module",
 	"scripts": {
-		"build": "pkgroll",
+		"build": "tsdown",
 		"lint": "biome lint",
 		"format": "biome format",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest --run"
 	},
-	"main": "./dist/index.cjs",
+	"main": "./dist/index.mjs",
 	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.cts",
+	"browser": "./dist/index.cjs",
+	"types": "./dist/index.d.ts",
 	"exports": {
+		"types": "./dist/index.d.ts",
 		"require": {
-			"types": "./dist/index.d.cts",
+			"types": "./dist/index.d.ts",
 			"default": "./dist/index.cjs"
 		},
 		"import": {
-			"types": "./dist/index.d.mts",
+			"types": "./dist/index.d.ts",
 			"default": "./dist/index.mjs"
+		},
+		"browser": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.cjs"
 		}
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
-	"devDependencies": {
-		"@biomejs/biome": "2.2.4",
+	"files": [
+		"dist"
+	],
+	"dependencies": {
 		"@fast-csv/parse": "^5.0.5",
 		"@types/xml2js": "^0.4.14",
 		"axios": "^1.8.3",
 		"iso8601-duration": "^2.1.2",
-		"pkgroll": "^2.11.2",
-		"typescript": "^5.8.2",
-		"vitest": "^3.1.1",
 		"xml2js": "^0.6.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.4",
+		"@swc/core": "^1.13.5",
+		"npm-run-all": "^4.1.5",
+		"swc-loader": "^0.2.6",
+		"tsdown": "^0.15.9",
+		"typescript": "^5.8.2",
+		"vitest": "^3.1.1"
 	}
 }

@@ -22,7 +22,7 @@ function updateDecodeTime(data: Buffer, newTimeMs: number): Buffer {
 				box.reader.setUint32(box.reader.getPosition(), (newTimeMs / 1000) * TEST_SEGMENT_TIMESCALE);
 			}
 		})
-		.parse(data);
+		.parse(data.buffer as ArrayBuffer);
 	return data;
 }
 
@@ -58,7 +58,7 @@ function updateDuration(data: Buffer, newDuration: number): Buffer {
 			}
 			box.reader.setPosition(initialPosition);
 		})
-		.parse(data);
+		.parse(data.buffer as ArrayBuffer);
 	return data;
 }
 

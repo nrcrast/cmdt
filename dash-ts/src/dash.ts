@@ -100,7 +100,7 @@ type RepresentationBase = {
 	mimeType?: string;
 	segmentProfiles?: string;
 	codecs?: string;
-	'scte214:supplementalCodecs'?: string;
+	"scte214:supplementalCodecs"?: string;
 	containerProfiles?: string;
 	maximumSAPPeriod?: number;
 	startWithSAP?: string;
@@ -163,15 +163,15 @@ type Event = {
 	id?: string;
 	duration?: number;
 	presentationTime?: number;
-	'scte35:signal'?: {
-		'scte35:binary': string;
+	"scte35:signal"?: {
+		"scte35:binary": string;
 	};
-}
+};
 
 export type EventStream = {
 	timescale?: number;
 	presentationTimeOffset?: number;
-	event: Event[],
+	event: Event[];
 } & Descriptor;
 
 export type Period = {
@@ -267,9 +267,9 @@ function parseContentProtection(contentProtectionRoot: XmlNode): ContentProtecti
 			refId: e.$?.refId,
 			robustness: e.$?.robustness,
 			cencDefaultKid: e.$["cenc:default_KID"],
-		}
-		switch(baseProtection.schemeIdUri) {
-			case 'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95': {
+		};
+		switch (baseProtection.schemeIdUri) {
+			case "urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95": {
 				baseProtection.playready = {
 					cencPssh: e["cenc:pssh"]?.[0]?._,
 					isEncrypted: e["mspr:IsEncrypted"]?.[0]?._,
@@ -279,7 +279,7 @@ function parseContentProtection(contentProtectionRoot: XmlNode): ContentProtecti
 				};
 				break;
 			}
-			case 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed': {
+			case "urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed": {
 				baseProtection.widevine = {
 					cencPssh: e["cenc:pssh"]?.[0]?._,
 				};
@@ -386,8 +386,8 @@ function parseRepresentationBase(representationBaseRoot: XmlNode): Representatio
 	}
 
 	let label = parseLabel(representationBaseRoot.Label);
-	if(!label && representationBaseRoot.$.Label) {
-		label = [{value: representationBaseRoot.$.Label}];
+	if (!label && representationBaseRoot.$.Label) {
+		label = [{ value: representationBaseRoot.$.Label }];
 	}
 
 	return {
@@ -408,7 +408,7 @@ function parseRepresentationBase(representationBaseRoot: XmlNode): Representatio
 		scanType: representationBaseRoot.$.scanType,
 		selectionPriority: representationBaseRoot.$.selectionPriority,
 		tag: representationBaseRoot.$.tag,
-		'scte214:supplementalCodecs': representationBaseRoot.$['scte214:supplementalCodecs'],
+		"scte214:supplementalCodecs": representationBaseRoot.$["scte214:supplementalCodecs"],
 		framePacking: parseDescriptor(representationBaseRoot.FramePacking),
 		audioChannelConfiguration: parseDescriptor(representationBaseRoot.AudioChannelConfiguration),
 		contentProtection: parseContentProtection(representationBaseRoot.ContentProtection),
@@ -531,9 +531,9 @@ function parseEvent(eventRoot: XmlNode): Event[] | undefined {
 			id: e.$?.id,
 			duration: e.$?.duration,
 			presentationTime: e.$.presentationTime,
-			'scte35:signal': {
-				'scte35:binary': e['scte35:signal']?.[0]?.['scte35:binary']?.[0]?._,
-			}
+			"scte35:signal": {
+				"scte35:binary": e["scte35:signal"]?.[0]?.["scte35:binary"]?.[0]?._,
+			},
 		};
 	});
 }

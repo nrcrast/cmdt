@@ -1,5 +1,5 @@
 packages:
+  - 'dash-ts'
   - 'cli'
   - 'viewer'
   - 'shared'
-  - 'dash-ts'

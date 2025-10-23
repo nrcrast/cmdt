@@ -838,7 +838,7 @@ class Mp4Parser {
 	}
 
 	public parse(data: ArrayBuffer): void {
-		const reader: DataViewReader = new DataViewReader(data, Endian.BIG);
+		const reader: DataViewReader = new DataViewReader(new Uint8Array(data), Endian.BIG);
 		while (reader.hasMoreData()) {
 			this.parseNext(reader);
 		}
