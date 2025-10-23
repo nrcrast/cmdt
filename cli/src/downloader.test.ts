@@ -151,9 +151,8 @@ describe("SegmentDownloader", () => {
 		});
 
 		it("should download segments when skipDownload is false", async () => {
-			// Reset axios mock and set up test-specific mock
-			vi.mocked(axios.get).mockReset();
-			const axiosGetSpy = vi.mocked(axios.get).mockResolvedValue({
+			const axiosGetSpy = vi.spyOn(axios, "get");
+			axiosGetSpy.mockResolvedValue({
 				data: Buffer.from("fake segment data"),
 			});
 
@@ -189,8 +188,8 @@ describe("SegmentDownloader", () => {
 			vi.mocked(mkdirp).mockImplementation(mkdirpSpy);
 
 			// Reset axios mock and set up test-specific mock
-			vi.mocked(axios.get).mockReset();
-			const axiosGetSpy = vi.mocked(axios.get).mockResolvedValue({
+			const axiosGetSpy = vi.spyOn(axios, "get");
+			axiosGetSpy.mockResolvedValue({
 				data: Buffer.from("fake segment data"),
 			});
 
