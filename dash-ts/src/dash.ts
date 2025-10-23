@@ -480,7 +480,7 @@ function parseSegmentList(segmentListRoot: XmlNode): SegmentList | undefined {
 function parseRepresentation(representationRoot: XmlNode, adaptationSet: AdaptationSet): Representation[] | undefined {
 	return representationRoot?.map((e: XmlNode) => {
 		return {
-			id: e.$.id,
+			id: e.$.id.toString(),
 			bandwidth: e.$.bandwidth,
 			baseUrl: parseBaseUrls(e.BaseURL),
 			segmentBase: parseSegmentBase(e.SegmentBase?.[0]),
@@ -495,7 +495,7 @@ function parseRepresentation(representationRoot: XmlNode, adaptationSet: Adaptat
 function parseAdaptationSet(adaptationSetRoot: XmlNode, period: Period): AdaptationSet[] | undefined {
 	return adaptationSetRoot?.map((e: XmlNode) => {
 		const adaptationSet: AdaptationSet = {
-			id: e.$?.id,
+			id: e.$?.id?.toString(),
 			lang: e.$?.lang,
 			contentType: e.$?.contentType,
 			par: e.$?.par,
@@ -528,7 +528,7 @@ function parseAdaptationSet(adaptationSetRoot: XmlNode, period: Period): Adaptat
 function parseEvent(eventRoot: XmlNode): Event[] | undefined {
 	return eventRoot?.map((e: XmlNode) => {
 		return {
-			id: e.$?.id,
+			id: e.$?.id?.toString(),
 			duration: e.$?.duration,
 			presentationTime: e.$.presentationTime,
 			"scte35:signal": {
