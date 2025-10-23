@@ -100,6 +100,7 @@ type RepresentationBase = {
 	mimeType?: string;
 	segmentProfiles?: string;
 	codecs?: string;
+	'scte214:supplementalCodecs'?: string;
 	containerProfiles?: string;
 	maximumSAPPeriod?: number;
 	startWithSAP?: string;
@@ -133,7 +134,7 @@ export type Representation = {
 
 export type AdaptationSet = {
 	id?: string;
-	lang?: string;
+	lang?: string; // Not DASH standard, but does appear sometimes
 	contentType?: ContentType;
 	par?: string;
 	minBandwidth?: number;
@@ -158,6 +159,21 @@ export type AdaptationSet = {
 	period: Period;
 } & RepresentationBase;
 
+type Event = {
+	id?: string;
+	duration?: number;
+	presentationTime?: number;
+	'scte35:signal'?: {
+		'scte35:binary': string;
+	};
+}
+
+export type EventStream = {
+	timescale?: number;
+	presentationTimeOffset?: number;
+	event: Event[],
+} & Descriptor;
+
 export type Period = {
 	id?: string;
 	start?: Seconds;
@@ -170,7 +186,20 @@ export type Period = {
 	segmentTemplate?: SegmentTemplate;
 	contentProtection?: ContentProtection[];
 	adaptationSet?: AdaptationSet[];
+	eventStream?: EventStream[];
 	manifest: MPD;
+};
+
+export type PlayReadyInfo = {
+	cencPssh: string;
+	isEncrypted: number;
+	ivSize: number;
+	kid: string;
+	pro: string;
+};
+
+export type WidevineInfo = {
+	cencPssh: string;
 };
 
 export type ContentProtection = {
@@ -179,6 +208,9 @@ export type ContentProtection = {
 	ref?: string;
 	refId?: string;
 	robustness?: string;
+	cencDefaultKid?: string;
+	playready?: PlayReadyInfo;
+	widevine?: WidevineInfo;
 };
 
 export type MPD = {
@@ -228,13 +260,33 @@ function parseBaseUrls(baseUrlRoot: XmlNode): BaseUrl[] | undefined {
 
 function parseContentProtection(contentProtectionRoot: XmlNode): ContentProtection[] | undefined {
 	return contentProtectionRoot?.map((e: XmlNode) => {
-		return {
+		const baseProtection: ContentProtection = {
 			schemeIdUri: e.$.schemeIdUri,
 			value: e.$?.value,
 			ref: e.$?.ref,
 			refId: e.$?.refId,
 			robustness: e.$?.robustness,
-		};
+			cencDefaultKid: e.$["cenc:default_KID"],
+		}
+		switch(baseProtection.schemeIdUri) {
+			case 'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95': {
+				baseProtection.playready = {
+					cencPssh: e["cenc:pssh"]?.[0]?._,
+					isEncrypted: e["mspr:IsEncrypted"]?.[0]?._,
+					ivSize: e["mspr:IV_Size"]?.[0]?._,
+					kid: e["mspr:kid"]?.[0]?._,
+					pro: e["mspr:pro"]?.[0]?._,
+				};
+				break;
+			}
+			case 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed': {
+				baseProtection.widevine = {
+					cencPssh: e["cenc:pssh"]?.[0]?._,
+				};
+				break;
+			}
+		}
+		return baseProtection;
 	});
 }
 
@@ -299,7 +351,7 @@ function parseDescriptor(descriptorRoot: XmlNode): Descriptor[] | undefined {
 		return {
 			schemeIdUri: e.$.schemeIdUri,
 			value: e.$.value,
-			id: e.$.id,
+			id: e.$?.id,
 		};
 	});
 }
@@ -307,8 +359,8 @@ function parseDescriptor(descriptorRoot: XmlNode): Descriptor[] | undefined {
 function parseLabel(labelRoot: XmlNode): Label[] | undefined {
 	return labelRoot?.map((e: XmlNode) => {
 		return {
-			id: e.$.id,
-			lang: e.$.lang,
+			id: e.$?.id,
+			lang: e.$?.lang,
 			value: e._,
 		};
 	});
@@ -333,12 +385,17 @@ function parseRepresentationBase(representationBaseRoot: XmlNode): Representatio
 		return undefined;
 	}
 
+	let label = parseLabel(representationBaseRoot.Label);
+	if(!label && representationBaseRoot.$.Label) {
+		label = [{value: representationBaseRoot.$.Label}];
+	}
+
 	return {
 		profiles: representationBaseRoot.$.profiles,
 		width: representationBaseRoot.$.width,
 		height: representationBaseRoot.$.height,
 		sar: representationBaseRoot.$.sar,
-		frameRate: representationBaseRoot.$.frameRate,
+		frameRate: representationBaseRoot.$.frameRate?.toString(),
 		audioSamplingRate: representationBaseRoot.$.audioSamplingRate,
 		mimeType: representationBaseRoot.$.mimeType,
 		segmentProfiles: representationBaseRoot.$.segmentProfiles,
@@ -351,6 +408,7 @@ function parseRepresentationBase(representationBaseRoot: XmlNode): Representatio
 		scanType: representationBaseRoot.$.scanType,
 		selectionPriority: representationBaseRoot.$.selectionPriority,
 		tag: representationBaseRoot.$.tag,
+		'scte214:supplementalCodecs': representationBaseRoot.$['scte214:supplementalCodecs'],
 		framePacking: parseDescriptor(representationBaseRoot.FramePacking),
 		audioChannelConfiguration: parseDescriptor(representationBaseRoot.AudioChannelConfiguration),
 		contentProtection: parseContentProtection(representationBaseRoot.ContentProtection),
@@ -358,7 +416,7 @@ function parseRepresentationBase(representationBaseRoot: XmlNode): Representatio
 		essentialProperty: parseDescriptor(representationBaseRoot.EssentialProperty),
 		supplementalProperty: parseDescriptor(representationBaseRoot.SupplementalProperty),
 		// inbandEventStream: parseEventStream(representationBaseRoot.InbandEventStream),
-		label: parseLabel(representationBaseRoot.Label),
+		label,
 		groupLabel: parseLabel(representationBaseRoot.GroupLabel),
 		producerReferenceTime: parseProducerReferenceTime(representationBaseRoot.ProducerReferenceTime),
 	};
@@ -447,8 +505,8 @@ function parseAdaptationSet(adaptationSetRoot: XmlNode, period: Period): Adaptat
 			maxWidth: e.$?.maxWidth,
 			minHeight: e.$?.minHeight,
 			maxHeight: e.$?.maxHeight,
-			minFrameRate: e.$?.minFrameRate,
-			maxFrameRate: e.$?.maxFrameRate,
+			minFrameRate: e.$?.minFrameRate?.toString(),
+			maxFrameRate: e.$?.maxFrameRate?.toString(),
 			segmentAlignment: e.$?.segmentAlignment,
 			bitstreamSwitching: e.$?.bitstreamSwitching,
 			subsegmentAlignment: e.$?.subsegmentAlignment,
@@ -467,10 +525,35 @@ function parseAdaptationSet(adaptationSetRoot: XmlNode, period: Period): Adaptat
 	});
 }
 
+function parseEvent(eventRoot: XmlNode): Event[] | undefined {
+	return eventRoot?.map((e: XmlNode) => {
+		return {
+			id: e.$?.id,
+			duration: e.$?.duration,
+			presentationTime: e.$.presentationTime,
+			'scte35:signal': {
+				'scte35:binary': e['scte35:signal']?.[0]?.['scte35:binary']?.[0]?._,
+			}
+		};
+	});
+}
+
+function parseEventStream(eventStreamRoot: XmlNode): EventStream[] | undefined {
+	return eventStreamRoot?.map((e: XmlNode) => {
+		return {
+			timescale: e.$.timescale,
+			presentationTimeOffset: e.$.presentationTimeOffset,
+			event: parseEvent(e.Event),
+			schemeIdUri: e.$.schemeIdUri,
+			value: e.$.value,
+		};
+	});
+}
+
 export function parsePeriods(periodRoot: XmlNode, mpd: MPD): Period[] {
 	return periodRoot.map((e: XmlNode) => {
 		const period: Period = {
-			id: e.$?.id,
+			id: e.$?.id?.toString(),
 			start: optionalDurationToSeconds(e.$?.start),
 			duration: optionalDurationToSeconds(e.$?.duration),
 			startString: e.$?.start,
@@ -479,7 +562,7 @@ export function parsePeriods(periodRoot: XmlNode, mpd: MPD): Period[] {
 			segmentBase: parseSegmentBase(e.SegmentBase?.[0]),
 			segmentList: parseSegmentList(e.SegmentList?.[0]),
 			segmentTemplate: parseSegmentTemplate(e.SegmentTemplate?.[0]),
-			// eventStream: parseEventStream(e.EventStream),
+			eventStream: parseEventStream(e.EventStream),
 			contentProtection: parseContentProtection(e.ContentProtection),
 			manifest: mpd,
 		};
