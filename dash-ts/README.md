@@ -1,82 +1,253 @@
-# CMDT (Common Media Diagnostics Tool)
-CMDT is a CLI tool designed to help video engineers diagnose issues with DASH/HLS manifests and the (mp4) content within! Given a manifest, it will perform the following tasks:
-- Parse the manifest
-- Download all segments for all renditions (audio, video, thumbnails, captions) to filesystem
-- Parse captions from all media files and write to filesystem
-- Parse EMSG boxes from all media files and write to filesystem
-- Check for CEA caption inconsistencies between video renditions
-- Check for gaps between segments
-- Run Apple's Media Stream Validator (optionally for HLS)
+# dash-ts
 
-# Installation
-## Pre-built binaries
-Pre-built binaries for Linux, Windows, and MacOS are built as part of the release process. The latest release can be found [here](https://github.com/NBCUDTC/cmdt/releases/latest).
+A TypeScript library providing comprehensive methods and type definitions for parsing and working with Dynamic Adaptive Streaming over HTTP (DASH) manifests.
 
-## Running from source
-This is a typical node repo, for the most part. Once cloned, run the following:
-```
-nvm use
-npm i -g pnpm
-pnpm i
-```
+## Overview
 
-At this point, you should be able to run `pnpm start -h` and get the help output from the application. 
+**dash-ts** is a robust TypeScript library designed to parse and manipulate DASH (Dynamic Adaptive Streaming over HTTP) manifest files (MPD - Media Presentation Description). It provides full type safety and comprehensive support for the DASH specification, including support for various segment types, content protection schemes, and adaptive streaming features.
 
-# Usage
-```
-Options:
-  -m, --manifest <string>   Manifest URI. Can also be a local path.
-  -o, --output <string>     Output directory (default: "download")
-  -s, --skip-download       Skip download (debug)
-  -v, --verbose             Verbose output
-  --dash-conformance        Run DASH-IF conformance tool (DASH only)
-  -t, --thumbnails          Validate thumbnails (check for duplicates)
-  --media-stream-validator  Run apple's media stream validator (HLS only)
-  -h, --help                display help for command
+## Features
+
+- **Basic DASH Specification Support**: Parse complete DASH manifests with all standard elements and attributes
+- **Type-Safe**: Comprehensive TypeScript type definitions for all DASH elements
+- **Content Protection**: Built-in support for PlayReady and Widevine DRM schemes
+- **Segment Types**: Support for SegmentBase, SegmentList, and SegmentTemplate
+- **Adaptive Streaming**: Full support for periods, adaptation sets, and representations
+- **Duration Parsing**: Automatic conversion of ISO 8601 durations to seconds
+- **Event Streams**: Support for event streams including SCTE-35 signals
+- **Production Ready**: Tested against DASH-IF test vectors
+
+## Installation
+
+```bash
+pnpm add dash-ts
 ```
 
-Typical usage is something like:
+Or with npm:
+
+```bash
+npm install dash-ts
 ```
-pnpm start -m "https://my-site/manifest.mpd" -o output
+
+Or with yarn:
+
+```bash
+yarn add dash-ts
 ```
 
-If you're running a pre-built binary, replace `pnpm start` with `./cmdt`. 
+## Quick Start
 
-After running the tool, all output will be in a directory called `output`, as specified by the `-o` option.
-
-## Report format
 ```typescript
-type RawReport = {
-	missingCues: {
-		[representation: RepresentationId]: {
-			[cue: string]: Array<RepresentationId>;
-		};
-	};
-	duplicateThumbnails: {
-		[representation: RepresentationId]: {
-			[thumbnail: string]: Set<RepresentationId>;
-		};
-	};
-	gaps: {
-		[mediaType: string]: {
-			[representation: string]: Array<{ expectedStartTime: number; previousSegment: Segment; segment: Segment }>;
-		};
-	};
-	emsgs: {
-		[representation: RepresentationId]: {
-			segment: Segment;
-			emsgs: Array<IEmsg>;
-		};
-	};
-	manifest: Manifest;
-};
+import { getRawDashManifest } from 'dash-ts';
 
-export type Manifest = {
-	video: Array<Representation>;
-	audio: Array<Representation>;
-	images: Array<Representation>;
-	captionStreamToLanguage: Record<string, string>;
-};
+// Parse a DASH manifest from a string
+const manifestXml = `<?xml version="1.0"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" ...>
+  <!-- manifest content -->
+</MPD>`;
+
+const manifest = await getRawDashManifest(manifestXml);
+
+// Access manifest properties
+console.log(manifest.type); // 'static' or 'dynamic'
+console.log(manifest.periods); // Array of periods
+console.log(manifest.minBufferTime); // Minimum buffer time in seconds
 ```
 
-For more detailed info on `Manifest` content, see source. 
+## API Reference
+
+### `getRawDashManifest(manifest: string): Promise<MPD>`
+
+Parses a DASH manifest XML string and returns a structured `MPD` object.
+
+**Parameters:**
+- `manifest` (string): The DASH manifest XML content
+
+**Returns:** Promise resolving to an `MPD` object containing the parsed manifest
+
+**Example:**
+```typescript
+const mpd = await getRawDashManifest(manifestXml);
+```
+
+## Type Definitions
+
+### Core Types
+
+#### `MPD`
+The root Media Presentation Description object containing:
+- `type`: 'static' or 'dynamic'
+- `profiles`: Profile string
+- `periods`: Array of Period objects
+- `minBufferTime`: Minimum buffer time in seconds
+- `mediaPresentationDuration`: Total duration in seconds (optional)
+- `availabilityStartTime`: Start time for dynamic streams (optional)
+- `contentProtection`: Array of content protection descriptors (optional)
+
+#### `Period`
+Represents a time period in the manifest:
+- `id`: Period identifier (optional)
+- `duration`: Duration in seconds (optional)
+- `adaptationSet`: Array of AdaptationSet objects
+- `baseUrl`: Array of base URLs (optional)
+- `contentProtection`: Content protection info (optional)
+
+#### `AdaptationSet`
+Groups representations with similar characteristics:
+- `id`: Adaptation set identifier (optional)
+- `contentType`: 'video' | 'audio' | 'image' | 'text' | 'application' | 'font'
+- `representation`: Array of Representation objects
+- `segmentTemplate`: Segment template definition (optional)
+- `segmentList`: Segment list definition (optional)
+- `segmentBase`: Segment base definition (optional)
+
+#### `Representation`
+Individual media stream with specific codec and bitrate:
+- `id`: Representation identifier
+- `bandwidth`: Bitrate in bits per second
+- `mimeType`: MIME type (optional)
+- `codecs`: Codec string (optional)
+- `width`: Video width in pixels (optional)
+- `height`: Video height in pixels (optional)
+- `frameRate`: Frame rate (optional)
+
+#### `ContentProtection`
+DRM/encryption information:
+- `schemeIdUri`: Protection scheme identifier
+- `playready`: PlayReady-specific info (optional)
+- `widevine`: Widevine-specific info (optional)
+
+### Segment Types
+
+#### `SegmentTemplate`
+Template-based segment definition:
+- `media`: Media segment URL template
+- `index`: Index segment URL template (optional)
+- `initialization`: Initialization segment URL (optional)
+- `duration`: Segment duration
+- `timescale`: Timescale for duration
+
+#### `SegmentList`
+Explicit list of segments:
+- `segmentUrl`: Array of segment URLs
+- `duration`: Segment duration
+- `timescale`: Timescale for duration
+
+#### `SegmentBase`
+Base segment information:
+- `timescale`: Timescale for timing information
+- `indexRange`: Byte range for index (optional)
+- `initializationElement`: Initialization segment info (optional)
+
+## Examples
+
+### Parsing a Static Manifest
+
+```typescript
+import { getRawDashManifest } from 'dash-ts';
+
+const manifestXml = await fetch('stream.mpd').then(r => r.text());
+const mpd = await getRawDashManifest(manifestXml);
+
+// Access periods
+mpd.periods.forEach(period => {
+  console.log(`Period: ${period.id}`);
+
+  // Access adaptation sets
+  period.adaptationSet?.forEach(adaptationSet => {
+    console.log(`  Content Type: ${adaptationSet.contentType}`);
+
+    // Access representations
+    adaptationSet.representation?.forEach(rep => {
+      console.log(`    Representation: ${rep.id} (${rep.bandwidth} bps)`);
+    });
+  });
+});
+```
+
+### Working with Content Protection
+
+```typescript
+const mpd = await getRawDashManifest(manifestXml);
+
+// Check for DRM protection
+mpd.contentProtection?.forEach(protection => {
+  if (protection.playready) {
+    console.log('PlayReady protected');
+    console.log('PSSH:', protection.playready.cencPssh);
+  }
+
+  if (protection.widevine) {
+    console.log('Widevine protected');
+    console.log('PSSH:', protection.widevine.cencPssh);
+  }
+});
+```
+
+### Accessing Segment Information
+
+```typescript
+const mpd = await getRawDashManifest(manifestXml);
+
+mpd.periods.forEach(period => {
+  period.adaptationSet?.forEach(adaptationSet => {
+    adaptationSet.representation?.forEach(rep => {
+      if (rep.segmentTemplate) {
+        console.log('Media template:', rep.segmentTemplate.media);
+        console.log('Initialization:', rep.segmentTemplate.initialization);
+        console.log('Duration:', rep.segmentTemplate.duration);
+        console.log('Timescale:', rep.segmentTemplate.timescale);
+      }
+    });
+  });
+});
+```
+
+## Testing
+
+The library includes comprehensive tests using Vitest and is validated against DASH-IF test vectors.
+
+Run tests:
+```bash
+pnpm test
+```
+
+Run linting:
+```bash
+pnpm lint
+```
+
+Run type checking:
+```bash
+pnpm typecheck
+```
+
+## Build
+
+Build the library:
+```bash
+pnpm build
+```
+
+This generates:
+- `dist/index.mjs` - ES module
+- `dist/index.cjs` - CommonJS module
+- `dist/index.d.ts` - TypeScript definitions
+
+## Dependencies
+
+- **xml2js**: XML parsing
+- **iso8601-duration**: ISO 8601 duration parsing
+- **axios**: HTTP client (for testing)
+- **@fast-csv/parse**: CSV parsing (for testing)
+
+## Browser Support
+
+dash-ts works in both Node.js and browser environments. The library exports both ESM and CommonJS formats for maximum compatibility.
+
+## Contributing
+
+Contributions are welcome! Please ensure:
+- Code passes linting: `pnpm lint`
+- Types are correct: `pnpm typecheck`
+- Tests pass: `pnpm test`

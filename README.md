@@ -10,7 +10,7 @@ CMDT is a CLI tool designed to help video engineers diagnose issues with DASH/HL
 
 # Installation
 ## Pre-built binaries
-Pre-built binaries for Linux, Windows, and MacOS are built as part of the release process. The latest release can be found [here](https://github.com/NBCUDTC/cmdt/releases/latest).
+Pre-built binaries for Linux, Windows, and MacOS are built as part of the release process. The latest release can be found [here](https://github.com/nrcrast/cmdt/releases/latest).
 
 ## Running from source
 This is a typical node repo, for the most part. Once cloned, run the following:
