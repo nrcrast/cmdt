@@ -261,6 +261,7 @@ describe("SegmentDownloader", () => {
 				images: new UniqueRepresentationMap(),
 				captionStreamToLanguage: {},
 				periods: [],
+				raw: "",
 			};
 
 			const emptyDownloader = new SegmentDownloader(emptyManifest);

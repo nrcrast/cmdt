@@ -29,6 +29,7 @@ import { wrapUrl } from "../../utils/url.js";
 export class DashManifest implements ManifestParser {
 	private logger: winston.Logger;
 	private manifest: Manifest;
+	private baseUrl?: string;
 	constructor() {
 		this.logger = getLogger();
 		this.manifest = {
@@ -38,11 +39,14 @@ export class DashManifest implements ManifestParser {
 			images: new UniqueRepresentationMap(),
 			periods: [],
 			captionStreamToLanguage: {},
+			raw: '',
 		};
 	}
-	public async parse(manifest: string, manifestUrl: string): Promise<Manifest> {
+	public async parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest> {
+		this.baseUrl = baseUrl;
 		const mpd = await getRawDashManifest(manifest);
 		this.manifest.url = wrapUrl(manifestUrl);
+		this.manifest.raw = manifest;
 		this.manifest = this.parseRawManifest(mpd);
 		return this.manifest;
 	}
@@ -118,30 +122,25 @@ export class DashManifest implements ManifestParser {
 	}
 
 	private getBaseUrl(representation: RawRepresentation): string {
-		let baseUrls: Array<string> = [];
-
-		if (representation.adaptationSet.period.manifest.baseUrl?.[0]) {
-			baseUrls.push(representation.adaptationSet.period.manifest.baseUrl[0].url);
-		}
-
-		if (representation.adaptationSet.period.baseUrl?.[0]) {
-			baseUrls.push(representation.adaptationSet.period.baseUrl[0].url);
-		}
-
-		if (representation.adaptationSet.baseUrl?.[0]) {
-			baseUrls.push(representation.adaptationSet.baseUrl[0].url);
-		}
-
-		if (representation.baseUrl?.[0]) {
-			baseUrls.push(representation.baseUrl[0].url);
-		}
+		let baseUrls: Array<string> = [
+			representation.adaptationSet.period.manifest,
+			representation.adaptationSet.period,
+			representation.adaptationSet,
+			representation,
+		].map((e) => e.baseUrl?.[0]?.url).filter((e) => e) as Array<string>;
 
 		const firstAbsolute = baseUrls.findIndex((url) => url.startsWith("http"));
 
 		if (firstAbsolute >= 0) {
 			baseUrls = baseUrls.slice(firstAbsolute);
 		} else {
-			baseUrls = [this.manifest.url.href, ...baseUrls];
+			if(this.manifest.url.href.startsWith("http")) {
+				baseUrls = [this.manifest.url.href, ...baseUrls];
+			}
+
+			if(this.baseUrl) {
+				baseUrls = [this.baseUrl, ...baseUrls];
+			}
 		}
 
 		let absoluteBase = wrapUrl(this.manifest.url.href);
@@ -334,7 +333,7 @@ export class DashManifest implements ManifestParser {
 		p.baseUrl = period.baseUrl?.map((u) => u.url) ?? [];
 		p.startString = period.startString;
 		p.segmentsAvailable = segments.length;
-		p.duration = segments.slice(i).reduce((sum, seg) => sum + seg.duration, 0) / 1000;
+		p.duration = segments.slice(i).reduce((sum: number, seg: Segment) => sum + seg.duration, 0) / 1000;
 		p.end = p.start + p.duration;
 		if (this.manifest.periods.length > 0) {
 			const previousPeriod = this.manifest.periods[this.manifest.periods.length - 1];

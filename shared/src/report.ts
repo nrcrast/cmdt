@@ -41,7 +41,7 @@ export type Report = {
 	mediaStreamValidator?: Object;
 	// biome-ignore lint/complexity/noBannedTypes: The type is passthrough
 	dashConformance?: Object;
-	manifest: Omit<Manifest, "video" | "audio" | "images"> & {
+	manifest: Omit<Manifest, "video" | "audio" | "images"| "raw"> & {
 		video: Array<Representation>;
 		audio: Array<Representation>;
 		images: Array<Representation>;

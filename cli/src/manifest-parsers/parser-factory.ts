@@ -1,0 +1,7 @@
+import { ManifestParser } from "cmdt-shared";
+import { DashManifest } from "./dash/dash.js";
+import { HlsManifest } from "./hls.js";
+
+export function getManifestParser(manifestUri: string): ManifestParser {
+	return manifestUri.toLocaleLowerCase().includes(".mpd") ? new DashManifest() : new HlsManifest();
+}

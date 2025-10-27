@@ -3,7 +3,7 @@
  */
 
 export abstract class ManifestParser {
-	abstract parse(manifest: string, manifestUrl: string): Promise<Manifest>;
+	abstract parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest>;
 }
 
 export type Segment = {
@@ -107,6 +107,7 @@ export type Manifest = {
 	images: UniqueRepresentationMap;
 	captionStreamToLanguage: Record<string, string>;
 	periods: Array<Period>;
+	raw: string;
 };
 
 export function getMediaTypeFromMimeType(mimeType: string): MediaType {

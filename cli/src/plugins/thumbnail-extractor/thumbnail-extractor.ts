@@ -5,10 +5,10 @@ import cliProgress from "cli-progress";
 import { type ImageRepresentation, MediaType } from "cmdt-shared";
 import { Jimp } from "jimp";
 import type winston from "winston";
-import { getOpts } from "./cli-opts.js";
-import type { DownloadEntry } from "./downloader.js";
-import { getInstance as getLogger } from "./logger.js";
-import type { Report } from "./report.js";
+import { getOpts } from "../../cli-opts.js";
+import type { DownloadEntry } from "../../downloader.js";
+import { getInstance as getLogger } from "../../logger.js";
+import type { Report } from "../../report.js";
 
 type ThumbnailBuffer = { buffer: Buffer; filePath: string; hash: string };
 

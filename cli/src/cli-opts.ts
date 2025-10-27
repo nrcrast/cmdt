@@ -2,6 +2,7 @@ import { Command, Option } from "@commander-js/extra-typings";
 
 const program = new Command()
 	.requiredOption("-m, --manifest <string>", "Manifest URI. Can also be a local path.")
+	.option("-b, --base-url <string>", "Base URL for relative URIs in manifest, if using local manifest.")
 	.option("-o, --output <string>", "Output directory", "download")
 	.option("-s, --skip-download", "Skip download (debug)")
 	.addOption(

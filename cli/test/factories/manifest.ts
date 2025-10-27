@@ -23,6 +23,7 @@ export const manifestFactory = Factory.define<Manifest, TransientParams>(({ tran
 		images: new UniqueRepresentationMap(),
 		captionStreamToLanguage: {},
 		periods: [],
+		raw: "",
 	};
 
 	if (transientParams.numVideoRepresentations) {

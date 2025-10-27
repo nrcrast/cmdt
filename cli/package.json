@@ -43,9 +43,11 @@
 		"axios": "^1.8.3",
 		"cli-progress": "^3.12.0",
 		"cmdt-shared": "workspace:cmdt-shared",
-		"dash-ts": "workspace:dash-ts",
 		"commander": "^13.1.0",
+		"dash-ts": "workspace:dash-ts",
 		"deepmerge-ts": "^7.1.5",
+		"fishery": "^2.3.1",
+		"glob": "^11.0.3",
 		"iso8601-duration": "^2.1.2",
 		"jimp": "^1.6.0",
 		"json-diff-ts": "^4.2.0",
@@ -61,7 +63,6 @@
 		"vitest": "^3.1.1",
 		"winston": "^3.17.0",
 		"xml2js": "^0.6.2",
-		"zx": "^8.4.1",
-		"fishery": "^2.3.1"
+		"zx": "^8.4.1"
 	}
 }

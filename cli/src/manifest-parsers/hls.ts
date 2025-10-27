@@ -16,7 +16,7 @@ export class HlsManifest implements ManifestParser {
 	constructor() {
 		this.logger = getLogger();
 	}
-	public async parse(manifest: string, manifestUrl: string): Promise<Manifest> {
+	public async parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest> {
 		const parser = new HlsParser();
 		const master = await parser.parseMasterPlaylist(manifest, manifestUrl);
 
@@ -27,6 +27,7 @@ export class HlsManifest implements ManifestParser {
 			images: new UniqueRepresentationMap(),
 			captionStreamToLanguage: {},
 			periods: [],
+			raw: manifest,
 		};
 
 		for (const rendition of master.mediaTags) {

@@ -3,19 +3,13 @@ import path from "node:path";
 import axios from "axios";
 import { mkdirp } from "mkdirp";
 import { rimraf } from "rimraf";
-import { CaptionExtractor } from "./caption-extractor.js";
 import { getOpts } from "./cli-opts.js";
-import { DashIfConformance } from "./dash-if-conformance/dash-if-conformance.js";
 import { SegmentDownloader } from "./downloader.js";
-import { EmsgExtractor } from "./emsg-extractor.js";
-import { GapChecker } from "./gap-checker.js";
 import { getInstance as getLogger } from "./logger.js";
-import { DashManifest } from "./manifest-parsers/dash/dash.js";
-import { HlsManifest } from "./manifest-parsers/hls.js";
-import { MediaStreamValidator } from "./media-stream-validator/media-stream-validator.js";
 import { Report } from "./report.js";
-import { ThumbnailExtractor } from "./thumbnail-extractor.js";
-import { wrapUrl } from "./utils/url.js";
+import { getExtensionFromUrl, wrapUrl } from "./utils/url.js";
+import { getManifestParser } from "./manifest-parsers/parser-factory.js";
+import {loadPlugins, runPlugins } from "./plugins/plugin.js";
 
 const options = getOpts();
 const logger = getLogger();
@@ -39,7 +33,7 @@ async function fetchAndWriteManifest(uri: string): Promise<string> {
 	try {
 		const response = await axios.get(uri);
 		const parsedUrl = wrapUrl(uri);
-		const existingExtension = parsedUrl.pathname.split(".").pop() ?? "mpd";
+		const existingExtension = getExtensionFromUrl(parsedUrl) ?? "mpd";
 		await fs.writeFile(path.resolve(options.output, `manifest.${existingExtension}`), response.data);
 		return response.data;
 	} catch (e) {
@@ -56,50 +50,42 @@ async function cleanupOutputDirectory() {
 	}
 }
 
-function isDash(manifestUri: string): boolean {
-	return manifestUri.includes(".mpd");
+/**
+ * Normalizes a custom base URL by wrapping it and removing any file extensions from the path.
+ * @param baseUrl - The base URL to normalize (optional)
+ * @returns The normalized URL as a string, or undefined if no baseUrl is provided
+ */
+function normalizeCustomBaseUrl(baseUrl?: string): string | undefined {
+	// Return early if no baseUrl is provided
+	if(!baseUrl) {
+		return;
+	}
+	// Wrap the URL to ensure it's a valid URL object
+	const wrapped = wrapUrl(baseUrl);
+	// Split the pathname by "/" to get individual path segments
+	const splitPath = wrapped.pathname.split("/");
+	// Remove the last path segment if it contains a file extension (indicated by a ".")
+	if(splitPath[splitPath.length - 1]?.includes(".")) {
+		splitPath.pop();
+	}
+	wrapped.pathname = splitPath.join("/");
+	return wrapped.href;
 }
 
 async function processManifest(uri: string) {
 	await cleanupOutputDirectory();
 	const sanitizedUri = sanitizeUri(uri);
-	const dash = isDash(sanitizedUri);
 	const manifestText = await fetchAndWriteManifest(sanitizedUri);
-	const parser = dash ? new DashManifest() : new HlsManifest();
-	const manifest = await parser.parse(manifestText, sanitizedUri);
+	const parser = getManifestParser(sanitizedUri);
+	const baseUrl = normalizeCustomBaseUrl(options.baseUrl);
+	const manifest = await parser.parse(manifestText, sanitizedUri, baseUrl);
 	await fs.writeFile(path.resolve(options.output, "manifest.json"), JSON.stringify(manifest, null, 2));
 	logger.info("Manifest parsed successfully!");
 	const downloader = new SegmentDownloader(manifest);
 	const downloads = await downloader.download();
 
-	if (dash && options.dashConformance) {
-		const conformance = new DashIfConformance(manifestText);
-		await conformance.run(report);
-	}
-
-	const captionExtractor = new CaptionExtractor(manifest, report);
-	await captionExtractor.extractFromDownloadedSegments();
-	await captionExtractor.validate();
-
-	const gapChecker = new GapChecker(manifest);
-	await gapChecker.analyzeGaps(report);
-
-	const emsgExtractor = new EmsgExtractor();
-	await emsgExtractor.extractEmsgFromDownloadedSegments(downloads, report);
-
-	const thumbnailExtractor = new ThumbnailExtractor();
-	await thumbnailExtractor.extractFromDownloadedSegments(downloads, report);
-
-	if (options.mediaStreamValidator && !dash) {
-		const mediaStreamValidator = new MediaStreamValidator();
-		const isFound = await mediaStreamValidator.checkForValidator();
-		if (isFound) {
-			logger.info("Running media stream validator...");
-			await mediaStreamValidator.validate(sanitizedUri, report);
-		} else {
-			logger.error("Media stream validator not found. Please install it and try again.");
-		}
-	}
+	await loadPlugins(manifest, report, downloads);
+	await runPlugins();
 
 	report.ingestManifest(manifest);
 	await report.write(path.resolve(options.output, "report.cmdt"));
