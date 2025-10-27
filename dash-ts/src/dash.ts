@@ -39,7 +39,7 @@ export type MultipleSegmentBaseInformation = {
 } & SegmentBase;
 
 export type SegmentBase = {
-	timescale: number;
+	timescale?: number;
 	presentationTimeOffset?: number;
 	presentationDuration?: number;
 	timeShiftBufferDepth?: Seconds;
