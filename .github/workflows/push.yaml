@@ -29,6 +29,11 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
+        # To avoid setup-node cache failure.
+        # ref. https://github.com/actions/setup-node/issues/1137
+      - name: create pnpm cache directory
+        shell: bash
+        run: mkdir -vp $(pnpm store path --silent)
       - name: Check Version
         id: check-version
         uses: EndBug/version-check@v2
@@ -56,6 +61,11 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
+        # To avoid setup-node cache failure.
+        # ref. https://github.com/actions/setup-node/issues/1137
+      - name: create pnpm cache directory
+        shell: bash
+        run: mkdir -vp $(pnpm store path --silent)
       - run: pnpm i
       - name: Build Viewer
         run: pnpm run build
@@ -76,6 +86,11 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
+        # To avoid setup-node cache failure.
+        # ref. https://github.com/actions/setup-node/issues/1137
+      - name: create pnpm cache directory
+        shell: bash
+        run: mkdir -vp $(pnpm store path --silent)
       - run: pnpm i
       - run: pnpm build
       - run: pnpm test
@@ -102,6 +117,11 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
+        # To avoid setup-node cache failure.
+        # ref. https://github.com/actions/setup-node/issues/1137
+      - name: create pnpm cache directory
+        shell: bash
+        run: mkdir -vp $(pnpm store path --silent)
       - run: pnpm i
       - name: Build Viewer
         run: pnpm run build
