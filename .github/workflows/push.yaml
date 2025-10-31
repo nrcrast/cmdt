@@ -105,6 +105,8 @@ jobs:
       - run: pnpm i
       - name: Build Viewer
         run: pnpm run build
+        env:
+          NEXT_PUBLIC_CMDT_VERSION: ${{ needs.check-version.outputs.version }}
       - name: Build Pages Artifact
         uses: actions/upload-pages-artifact@v3.0.1
         with:

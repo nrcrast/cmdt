@@ -22,7 +22,7 @@ export default function Home() {
 	return (
 		<div className="p-2 font-[family-name:var(--font-geist-sans)] prose">
 			<main className="flex flex-col items-center sm:items-start">
-				<H1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">CMDT Report Viewer</H1>
+				<H1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">CMDT Report Viewer v{process.env.NEXT_PUBLIC_CMDT_VERSION}</H1>
 				<Button className="mt-2" onClick={() => openFilePicker()}>
 					Select report
 				</Button>
