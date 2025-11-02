@@ -1,35 +1,34 @@
-import { Manifest } from "cmdt-shared";
-import { Report } from "../report.js";
-import {glob } from "glob";
-import type { DownloadEntry } from "../downloader.js";
+import type { Manifest } from "cmdt-shared";
+import type { Report } from "../report.js";
+import { glob } from "glob";
+import { getInstance as getLogger } from "../logger.js";
+import type { DownloadQueue } from "../download-queue.js";
 
 const pluginRegistry: Record<string, Plugin> = {};
+const logger = getLogger();
 
 export abstract class Plugin {
-    constructor(protected manifest: Manifest, protected report: Report, name: string) {
-        registerPlugin(name, this);
-    }
+	constructor(
+		protected manifest: Manifest,
+		protected report: Report,
+		protected downloads: DownloadQueue,
+		name: string,
+	) {
+		registerPlugin(name, this);
+	}
 	abstract run(): Promise<void>;
 }
 
-export async function loadPlugins(manifest: Manifest, report: Report, downloads: Array<DownloadEntry>) {
-    const pluginFiles = glob.sync("./**/plugin-loader.ts", { absolute: true });
+export async function loadPlugins(manifest: Manifest, report: Report, downloads: DownloadQueue) {
+	const pluginFiles = glob.sync("./**/plugin-loader.ts", { absolute: true });
 	for (const pluginFile of pluginFiles) {
 		const mod = await import(pluginFile);
-        const plugin = mod.default(manifest, report);
-		// Set downloads for plugins that need it
-		if (typeof (plugin as any).setDownloads === "function") {
-			(plugin as any).setDownloads(downloads);
-		}
-		// Set URI for plugins that need it
-		if (typeof (plugin as any).setUri === "function") {
-			(plugin as any).setUri(manifest.url.href);
-		}
+		mod.default(manifest, report, downloads);
 	}
 }
 
 export function registerPlugin(name: string, plugin: Plugin) {
-    console.log(`Registering plugin ${name}`);
+	logger.info(`Registering plugin ${name}`);
 	pluginRegistry[name] = plugin;
 }
 

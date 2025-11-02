@@ -1,4 +1,4 @@
-import { ManifestParser } from "cmdt-shared";
+import type { ManifestParser } from "cmdt-shared";
 import { DashManifest } from "./dash/dash.js";
 import { HlsManifest } from "./hls.js";
 

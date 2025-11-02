@@ -127,8 +127,8 @@ export abstract class HydratablePlaylist {
 		const segment: Segment = {
 			duration: secondsToMilliseconds(Number.parseFloat(duration)),
 			startTime: secondsToMilliseconds(this.currentStartTime),
-			url,
-			initSegmentUrl: this.currentInitSegmentUri,
+			url: new URL(url),
+			initSegmentUrl: this.currentInitSegmentUri ? new URL(this.currentInitSegmentUri) : undefined,
 		};
 		return segment;
 	}

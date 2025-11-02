@@ -29,3 +29,34 @@ export function getExtensionFromUrl(url: URL): string {
 	const lastSegment = url.pathname.split("/").pop();
 	return lastSegment?.split(".").pop() ?? "";
 }
+
+/**
+ * Determines if the URL points to a file (as opposed to a directory).
+ * @param url - The URL object to check
+ * @returns True if the URL points to a file, false otherwise
+ */
+export function isFileUrl(url: URL): boolean {
+	return !!url.pathname.split("/").pop()?.includes(".");
+}
+
+/**
+ * Returns the href of the URL without the file path.
+ * @param url - The URL object to extract the href from
+ * @returns The href of the URL without the file path
+ */
+export function getUrlFilePathHref(url: URL): string {
+	return url.href.split("/").slice(0, -1).join("/");
+}
+
+/**
+ * Returns the href of the URL without the file path.
+ * @param url - The URL object to extract the href from
+ * @returns The href of the URL without the file path
+ */
+export function getUrlFilePath(url: URL): string {
+	let path = url.pathname.split("/").slice(0, -1).join("/");
+	if (path.startsWith("/")) {
+		path = path.substring(1);
+	}
+	return path;
+}

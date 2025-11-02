@@ -5,7 +5,8 @@ export const segmentFactory = Factory.define<Segment>(({ sequence }) => {
 	return {
 		startTime: sequence * 1000,
 		duration: 1000,
-		url: `segment-${sequence}.mp4`,
-		initSegmentUrl: "init.mp4",
+		url: new URL(`https://example.com/segment-${sequence}.mp4`),
+		rawSegmentTime: sequence * 1000,
+		initSegmentUrl: new URL("https://example.com/init.mp4"),
 	};
 });

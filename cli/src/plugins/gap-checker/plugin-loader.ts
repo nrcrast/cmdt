@@ -1,15 +1,16 @@
-import { Manifest } from "cmdt-shared";
+import type { Manifest } from "cmdt-shared";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import { Plugin } from "../plugin.js";
 import { GapChecker } from "./gap-checker.js";
+import type { DownloadQueue } from "../../download-queue.js";
 
 class GapCheckerPlugin extends Plugin {
 	private logger = getLogger();
 	private gapChecker: GapChecker;
 
-	constructor(manifest: Manifest, report: Report) {
-		super(manifest, report, "gap-checker");
+	constructor(manifest: Manifest, report: Report, downloads: DownloadQueue) {
+		super(manifest, report, downloads, "gap-checker");
 		this.gapChecker = new GapChecker(manifest);
 	}
 
@@ -20,7 +21,6 @@ class GapCheckerPlugin extends Plugin {
 	}
 }
 
-export default function load(manifest: Manifest, report: Report): Plugin {
-	return new GapCheckerPlugin(manifest, report);
+export default function load(manifest: Manifest, report: Report, downloads: DownloadQueue): Plugin {
+	return new GapCheckerPlugin(manifest, report, downloads);
 }
-

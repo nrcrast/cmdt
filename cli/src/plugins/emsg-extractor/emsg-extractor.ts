@@ -4,26 +4,26 @@ import cliProgress from "cli-progress";
 import { MediaType } from "cmdt-shared";
 import type winston from "winston";
 import { getOpts } from "../../cli-opts.js";
-import type { DownloadEntry } from "../../downloader.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import type { Emsg, ParsedBox } from "../../utils/mp4/types.js";
 import Mp4Parser from "../../utils/mp4/parser.js";
+import type { DownloadQueue } from "../../download-queue.js";
 
 export class EmsgExtractor {
 	private logger: winston.Logger;
 	constructor() {
 		this.logger = getLogger();
 	}
-	public async extractEmsgFromDownloadedSegments(downloads: Array<DownloadEntry>, report: Report): Promise<void> {
+	public async extractEmsgFromDownloadedSegments(downloads: DownloadQueue, report: Report): Promise<void> {
 		const mp4Parser = new Mp4Parser();
 		this.logger.info("Extracting emsgs...");
 		const showProgress = ["info", "debug"].includes(getOpts().logLevel);
 		const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 		if (showProgress) {
-			progress.start(downloads.length, 0);
+			progress.start(downloads.getEntries().length, 0);
 		}
-		for (const download of downloads) {
+		for (const download of downloads.getEntries()) {
 			const segmentMetadata = download.segment;
 			if (download.representation.type !== MediaType.Video || !segmentMetadata) {
 				if (showProgress) {

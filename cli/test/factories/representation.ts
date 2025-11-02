@@ -1,5 +1,5 @@
 import { Factory } from "fishery";
-import { type Representation, MediaType } from "cmdt-shared";
+import { type Representation, MediaType, type Segment } from "cmdt-shared";
 import { segmentFactory } from "./segment.js";
 
 type TransientParams = {
@@ -63,7 +63,7 @@ export const representationFactory = Factory.define<Representation, TransientPar
 			} as Representation;
 		}
 		if (transientParams.numSegments) {
-			representation.segments = segmentFactory.buildList(transientParams.numSegments);
+			representation.segments = segmentFactory.buildList(transientParams.numSegments) as Segment[];
 		}
 		return representation;
 	},

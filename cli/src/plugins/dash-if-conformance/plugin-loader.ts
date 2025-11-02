@@ -5,17 +5,18 @@ import { getOpts } from "../../cli-opts.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import { Plugin } from "../plugin.js";
-import { Manifest } from "cmdt-shared";
+import type { Manifest } from "cmdt-shared";
+import type { DownloadQueue } from "../../download-queue.js";
 class DashIfConformance extends Plugin {
 	private logger = getLogger();
-	constructor(manifest: Manifest, report: Report) {
-        super(manifest, report, "dash-if-conformance");
-    }
+	constructor(manifest: Manifest, report: Report, downloads: DownloadQueue) {
+		super(manifest, report, downloads, "dash-if-conformance");
+	}
 	public async run(): Promise<void> {
-        if(!getOpts().dashConformance) {
-            this.logger.warn("Skipping DASH-IF conformance");
-            return;
-        }
+		if (!getOpts().dashConformance) {
+			this.logger.warn("Skipping DASH-IF conformance");
+			return;
+		}
 		this.logger.info("Running DASH-IF conformance tool...");
 		var bodyFormData = new FormData();
 		bodyFormData.append("mpd", this.manifest.raw);
@@ -56,6 +57,6 @@ class DashIfConformance extends Plugin {
 	}
 }
 
-export default function load(manifest: Manifest, report: Report): Plugin {
-    return new DashIfConformance(manifest, report);
+export default function load(manifest: Manifest, report: Report, downloads: DownloadQueue): Plugin {
+	return new DashIfConformance(manifest, report, downloads);
 }

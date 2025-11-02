@@ -9,7 +9,7 @@ import { getInstance as getLogger } from "./logger.js";
 import { Report } from "./report.js";
 import { getExtensionFromUrl, wrapUrl } from "./utils/url.js";
 import { getManifestParser } from "./manifest-parsers/parser-factory.js";
-import {loadPlugins, runPlugins } from "./plugins/plugin.js";
+import { loadPlugins, runPlugins } from "./plugins/plugin.js";
 
 const options = getOpts();
 const logger = getLogger();
@@ -57,7 +57,7 @@ async function cleanupOutputDirectory() {
  */
 function normalizeCustomBaseUrl(baseUrl?: string): string | undefined {
 	// Return early if no baseUrl is provided
-	if(!baseUrl) {
+	if (!baseUrl) {
 		return;
 	}
 	// Wrap the URL to ensure it's a valid URL object
@@ -65,7 +65,7 @@ function normalizeCustomBaseUrl(baseUrl?: string): string | undefined {
 	// Split the pathname by "/" to get individual path segments
 	const splitPath = wrapped.pathname.split("/");
 	// Remove the last path segment if it contains a file extension (indicated by a ".")
-	if(splitPath[splitPath.length - 1]?.includes(".")) {
+	if (splitPath[splitPath.length - 1]?.includes(".")) {
 		splitPath.pop();
 	}
 	wrapped.pathname = splitPath.join("/");

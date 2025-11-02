@@ -16,7 +16,7 @@ export class HlsManifest implements ManifestParser {
 	constructor() {
 		this.logger = getLogger();
 	}
-	public async parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest> {
+	public async parse(manifest: string, manifestUrl: string, _baseUrl?: string): Promise<Manifest> {
 		const parser = new HlsParser();
 		const master = await parser.parseMasterPlaylist(manifest, manifestUrl);
 

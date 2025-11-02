@@ -1,22 +1,17 @@
-import { Manifest } from "cmdt-shared";
+import type { Manifest } from "cmdt-shared";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import { Plugin } from "../plugin.js";
 import { ThumbnailExtractor } from "./thumbnail-extractor.js";
-import type { DownloadEntry } from "../../downloader.js";
+import type { DownloadQueue } from "../../download-queue.js";
 
 class ThumbnailExtractorPlugin extends Plugin {
 	private logger = getLogger();
 	private thumbnailExtractor: ThumbnailExtractor;
-	private downloads: Array<DownloadEntry> = [];
 
-	constructor(manifest: Manifest, report: Report) {
-		super(manifest, report, "thumbnail-extractor");
+	constructor(manifest: Manifest, report: Report, downloads: DownloadQueue) {
+		super(manifest, report, downloads, "thumbnail-extractor");
 		this.thumbnailExtractor = new ThumbnailExtractor();
-	}
-
-	public setDownloads(downloads: Array<DownloadEntry>): void {
-		this.downloads = downloads;
 	}
 
 	public async run(): Promise<void> {
@@ -26,7 +21,6 @@ class ThumbnailExtractorPlugin extends Plugin {
 	}
 }
 
-export default function load(manifest: Manifest, report: Report): Plugin {
-	return new ThumbnailExtractorPlugin(manifest, report);
+export default function load(manifest: Manifest, report: Report, downloads: DownloadQueue): Plugin {
+	return new ThumbnailExtractorPlugin(manifest, report, downloads);
 }
-

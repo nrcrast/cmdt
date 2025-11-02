@@ -11,8 +11,8 @@ export type Segment = {
 	startTime: number;
 	/* Duration in milliseconds */
 	duration: number;
-	url: string;
-	initSegmentUrl?: string;
+	url: URL;
+	initSegmentUrl?: URL;
 	fileSystemPath?: string;
 	initSegmentFilesystemPath?: string;
 	/* Base media decode time in milliseconds */

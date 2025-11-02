@@ -1,17 +1,18 @@
-import { Manifest } from "cmdt-shared";
+import type { Manifest } from "cmdt-shared";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import { Plugin } from "../plugin.js";
 import { MediaStreamValidator } from "../../media-stream-validator/media-stream-validator.js";
 import { getOpts } from "../../cli-opts.js";
+import type { DownloadQueue } from "../../download-queue.js";
 
 class MediaStreamValidatorPlugin extends Plugin {
 	private logger = getLogger();
 	private mediaStreamValidator: MediaStreamValidator;
 	private uri: string = "";
 
-	constructor(manifest: Manifest, report: Report) {
-		super(manifest, report, "media-stream-validator");
+	constructor(manifest: Manifest, report: Report, downloads: DownloadQueue) {
+		super(manifest, report, downloads, "media-stream-validator");
 		this.mediaStreamValidator = new MediaStreamValidator();
 	}
 
@@ -36,7 +37,6 @@ class MediaStreamValidatorPlugin extends Plugin {
 	}
 }
 
-export default function load(manifest: Manifest, report: Report): Plugin {
-	return new MediaStreamValidatorPlugin(manifest, report);
+export default function load(manifest: Manifest, report: Report, downloads: DownloadQueue): Plugin {
+	return new MediaStreamValidatorPlugin(manifest, report, downloads);
 }
-

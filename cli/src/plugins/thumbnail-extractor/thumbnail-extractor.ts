@@ -6,9 +6,9 @@ import { type ImageRepresentation, MediaType } from "cmdt-shared";
 import { Jimp } from "jimp";
 import type winston from "winston";
 import { getOpts } from "../../cli-opts.js";
-import type { DownloadEntry } from "../../downloader.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
+import type { DownloadEntry, DownloadQueue } from "../../download-queue.js";
 
 type ThumbnailBuffer = { buffer: Buffer; filePath: string; hash: string };
 
@@ -17,7 +17,7 @@ export class ThumbnailExtractor {
 	constructor() {
 		this.logger = getLogger();
 	}
-	public async extractFromDownloadedSegments(downloads: Array<DownloadEntry>, report: Report): Promise<void> {
+	public async extractFromDownloadedSegments(downloads: DownloadQueue, report: Report): Promise<void> {
 		if (!getOpts().thumbnails) {
 			this.logger.warn("Skipping thumbnail extraction");
 			return;
@@ -25,7 +25,7 @@ export class ThumbnailExtractor {
 		this.logger.info("Processing thumbnails...");
 		const showProgress = ["info", "debug"].includes(getOpts().logLevel);
 		const thumbnailProgressBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-		const imageDownloads = downloads.filter((d) => d.representation.type === MediaType.Image);
+		const imageDownloads = downloads.getEntries().filter((d) => d.representation.type === MediaType.Image);
 		if (showProgress) {
 			thumbnailProgressBar.start(imageDownloads.length, 0);
 		}
