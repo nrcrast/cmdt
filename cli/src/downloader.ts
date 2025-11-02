@@ -56,7 +56,8 @@ export class SegmentDownloader {
 				this.logger.error(`Error downloading segment: ${download.url}`, error);
 			})
 			.process(async (download: DownloadEntry) => {
-				await mkdirp(download.destDir);
+				const dir = path.dirname(path.resolve(download.destDir, download.destFile));
+				await mkdirp(dir);
 
 				const exists = await fs
 					.access(path.resolve(download.destDir, download.destFile), fs.constants.R_OK | fs.constants.W_OK)
@@ -64,7 +65,7 @@ export class SegmentDownloader {
 					.catch(() => false);
 
 				if (exists) {
-					this.logger.warn(`File already exists: ${download.destFile}. Skipping download.`);
+					this.logger.warn(`File already exists: ${path.resolve(download.destDir, download.destFile)}. Skipping download.`);
 					if (showProgress) {
 						downloadProgressBar.increment();
 					}
@@ -74,6 +75,7 @@ export class SegmentDownloader {
 				const response = await axios.get(download.url, {
 					responseType: "arraybuffer",
 				});
+
 
 				await fs.writeFile(path.resolve(download.destDir, download.destFile), response.data);
 
@@ -102,27 +104,29 @@ export class SegmentDownloader {
 		const mediaTypes = [manifest.audio, manifest.images, manifest.video].map((r) => r.toArray());
 		const initSegments = new Map<string, string>();
 		for (const mediaType of mediaTypes) {
-			for (const representation of mediaType) {
-				let representationDir = `representation-${representation.id.replaceAll("/", "-")}`;
-				if (representation.width && representation.height) {
-					representationDir += `-${representation.width}x${representation.height}`;
-				}
-				const dlDir = `${representation.type}/${representationDir}`;
+			for (const representation of mediaType) {			
 				for (const segment of representation.segments) {
-					const destDir = path.resolve(dlDirBase, dlDir);
+					let uriPath = new URL(segment.url).pathname;
+					if(uriPath.startsWith('/')) {
+						uriPath = uriPath.substring(1);
+					}
+					let destDir = path.resolve(dlDirBase, uriPath.split("/").slice(0, -1).join("/"));
+					const destFile = uriPath.split("/").pop() ?? "";
 					if (segment.initSegmentUrl && !initSegments.has(segment.initSegmentUrl)) {
-						const initSegmentFile = segment.initSegmentUrl.split("/").pop() ?? "";
-						const destFile = `${segment.startTime}-init-${initSegmentFile}`;
-						initSegments.set(segment.initSegmentUrl, path.resolve(destDir, destFile));
+						let initSegmentUriPath = new URL(segment.initSegmentUrl).pathname;
+						if(initSegmentUriPath.startsWith('/')) {
+							initSegmentUriPath = initSegmentUriPath.substring(1);
+						}
+						destDir = path.resolve(dlDirBase, initSegmentUriPath.split("/").slice(0, -1).join("/"));
+						const initSegmentFile = initSegmentUriPath.split("/").pop() ?? "";
+						initSegments.set(segment.initSegmentUrl, path.resolve(destDir, initSegmentFile));
 						downloads.push({
 							url: this.resolveUrl(manifest, segment.initSegmentUrl),
 							destDir,
-							destFile,
+							destFile: initSegmentFile,
 							representation,
 						});
 					}
-					const uriFile = segment.url.split("/").pop() ?? "";
-					const destFile = `${segment.startTime}-${uriFile}`;
 					downloads.push({
 						url: this.resolveUrl(manifest, segment.url),
 						destDir,
@@ -131,7 +135,7 @@ export class SegmentDownloader {
 						segment,
 					});
 					segment.fileSystemPath = path.resolve(destDir, destFile);
-					if (segment.initSegmentUrl && initSegments.has(segment.initSegmentUrl)) {
+					if (segment.initSegmentUrl) {
 						segment.initSegmentFilesystemPath = initSegments.get(segment.initSegmentUrl);
 					}
 				}
