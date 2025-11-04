@@ -6,7 +6,7 @@
 	"scripts": {
 		"build": "pkgroll",
 		"lint": "biome lint && pnpm typecheck",
-		"lint:fix": "biome lint --write",
+		"lint:fix": "biome check --write",
 		"format": "biome format",
 		"typecheck": "tsc --noEmit",
 		"package": "rm -rf bin && mkdir bin && pkg dist/index.cjs --output bin/cmdt --target node22-linux-arm64,node22-macos-arm64,node22-win-arm64",

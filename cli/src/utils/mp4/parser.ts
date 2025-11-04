@@ -3,7 +3,6 @@ import hexToUint8 from "../hexToUint8.js";
 import type { SchemeUri } from "../manifest/types.js";
 
 import DataViewReader from "./dataViewReader.js";
-import { BoxFormat, Endian, Size } from "./types.js";
 import type {
 	Elst,
 	Emsg,
@@ -20,6 +19,7 @@ import type {
 	Trex,
 	Trun,
 } from "./types.js";
+import { BoxFormat, Endian, Size } from "./types.js";
 
 type CallbackType = (box: ParsedBox) => void;
 

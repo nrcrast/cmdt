@@ -4,11 +4,11 @@ import cliProgress from "cli-progress";
 import { MediaType } from "cmdt-shared";
 import type winston from "winston";
 import { getOpts } from "../../cli-opts.js";
+import type { DownloadQueue } from "../../download-queue.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
-import type { Emsg, ParsedBox } from "../../utils/mp4/types.js";
 import Mp4Parser from "../../utils/mp4/parser.js";
-import type { DownloadQueue } from "../../download-queue.js";
+import type { Emsg, ParsedBox } from "../../utils/mp4/types.js";
 
 export class EmsgExtractor {
 	private logger: winston.Logger;

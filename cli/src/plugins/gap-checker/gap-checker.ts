@@ -5,8 +5,8 @@ import type winston from "winston";
 import { getOpts } from "../../cli-opts.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
-import type { Mdhd, ParsedBox, Tfdt, Tfhd, Tkhd } from "../../utils/mp4/types.js";
 import Mp4Parser from "../../utils/mp4/parser.js";
+import type { Mdhd, ParsedBox, Tfdt, Tfhd, Tkhd } from "../../utils/mp4/types.js";
 import { secondsToMilliseconds } from "../../utils/time-utils.js";
 
 const GAP_TOLERANCE_MS = 100;

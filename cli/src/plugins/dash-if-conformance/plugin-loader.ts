@@ -1,12 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import axios from "axios";
+import type { Manifest } from "cmdt-shared";
 import { getOpts } from "../../cli-opts.js";
+import type { DownloadQueue } from "../../download-queue.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import { Plugin } from "../plugin.js";
-import type { Manifest } from "cmdt-shared";
-import type { DownloadQueue } from "../../download-queue.js";
+
 class DashIfConformance extends Plugin {
 	private logger = getLogger();
 	constructor(manifest: Manifest, report: Report, downloads: DownloadQueue) {

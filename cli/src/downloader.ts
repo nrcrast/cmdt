@@ -7,8 +7,8 @@ import type { Manifest } from "cmdt-shared";
 import { mkdirp } from "mkdirp";
 import type winston from "winston";
 import { getOpts } from "./cli-opts.js";
-import { getInstance as getLogger } from "./logger.js";
 import { type DownloadEntry, DownloadQueue } from "./download-queue.js";
+import { getInstance as getLogger } from "./logger.js";
 
 export class SegmentDownloader {
 	private queue?: DownloadQueue;

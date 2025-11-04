@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { Cue, Representation, Segment } from "cmdt-shared";
 import { getOpts } from "./cli-opts.js";
 import { getUrlFilePath } from "./utils/url.js";

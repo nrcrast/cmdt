@@ -2,8 +2,8 @@ import type { Cue } from "cmdt-shared";
 import type winston from "winston";
 import { getInstance as getLogger } from "../../../logger.js";
 import { CC_ROWS, DEFAULT_BG_COLOR, DEFAULT_TXT_COLOR } from "../../../utils/textConstants.js";
+import { CaptionType, type Cea608ClosedCaptionPacket, CharSet, CommandCode } from "../../types.js";
 import Cea608Memory from "./cea608Memory.js";
-import { CaptionType, CharSet, CommandCode, type Cea608ClosedCaptionPacket } from "../../types.js";
 
 class Cea608DataChannel {
 	// Current Caption Type

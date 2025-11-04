@@ -1,9 +1,9 @@
 import type { Manifest } from "cmdt-shared";
+import type { DownloadQueue } from "../../download-queue.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import { Plugin } from "../plugin.js";
 import { GapChecker } from "./gap-checker.js";
-import type { DownloadQueue } from "../../download-queue.js";
 
 class GapCheckerPlugin extends Plugin {
 	private logger = getLogger();

@@ -1,5 +1,5 @@
-import { Factory } from "fishery";
 import type { Segment } from "cmdt-shared";
+import { Factory } from "fishery";
 
 export const segmentFactory = Factory.define<Segment>(({ sequence }) => {
 	return {

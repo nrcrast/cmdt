@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { beforeEach, vi } from "vitest";
-import { segmentFactory } from "./factories/segment";
 import { representationFactory } from "./factories/representation";
+import { segmentFactory } from "./factories/segment";
 
 vi.mock("fs");
 vi.mock("fs/promises");

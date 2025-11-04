@@ -12,25 +12,26 @@ import {
 import {
 	type AdaptationSet,
 	type ContentType,
+	type Descriptor,
 	getRawDashManifest,
 	type MPD,
 	type Period,
 	type Representation as RawRepresentation,
 	type SegmentTemplate,
-	type Descriptor,
 } from "dash-ts";
 import { deepmergeCustom } from "deepmerge-ts";
 import type winston from "winston";
 import { getInstance as getLogger } from "../../logger.js";
 import getStreamAndLanguages from "../../utils/cea/getStreamAndLanguages.js";
 import { CeaSchemeUri } from "../../utils/manifest/types.js";
-import { secondsToMilliseconds } from "../../utils/time-utils.js";
 import { getUrlFilePathHref, isFileUrl, wrapUrl } from "../../utils/url.js";
+import { getSegmentsFromSegmentTemplate } from "./segment-list-builder.js";
 
 export class DashManifest implements ManifestParser {
 	private logger: winston.Logger;
 	private manifest: Manifest;
 	private baseUrl?: string;
+	private dashManifest: MPD | undefined;
 	constructor() {
 		this.logger = getLogger();
 		this.manifest = {
@@ -45,10 +46,10 @@ export class DashManifest implements ManifestParser {
 	}
 	public async parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest> {
 		this.baseUrl = baseUrl;
-		const mpd = await getRawDashManifest(manifest);
+		this.dashManifest = await getRawDashManifest(manifest);
 		this.manifest.url = wrapUrl(manifestUrl);
 		this.manifest.raw = manifest;
-		this.manifest = this.parseRawManifest(mpd);
+		this.manifest = this.parseRawManifest(this.dashManifest);
 		return this.manifest;
 	}
 
@@ -105,28 +106,6 @@ export class DashManifest implements ManifestParser {
 		return mediaType;
 	}
 
-	private buildSegmentUrlFromTemplate(
-		baseUrl: string,
-		segmentNumber: number,
-		representation: RawRepresentation,
-		time: number,
-		uriTemplate: string,
-	): URL {
-		const widthStr = uriTemplate.match(/\$Number%?0?([0-9]*)d?\$/)?.[1];
-		const width = widthStr ? Number.parseInt(widthStr, 10) : 0;
-		const paddedNumber = segmentNumber.toString().padStart(width, "0");
-		if (baseUrl.endsWith("/")) {
-			baseUrl = baseUrl.slice(0, -1);
-		}
-		let url = uriTemplate.startsWith("http")
-			? uriTemplate.replace(/\$Number%?0?[0-9]*d?\$/, paddedNumber)
-			: `${baseUrl}/${uriTemplate.replace(/\$Number%?0?[0-9]*d?\$/, paddedNumber)}`;
-		url = url.replace(/\$RepresentationID\$/, representation.id);
-		url = url.replace(/\$Bandwidth\$/, representation.bandwidth.toString());
-		url = url.replace(/\$Time\$/, time.toString());
-		return new URL(url);
-	}
-
 	private getBaseUrl(representation: RawRepresentation): string {
 		let baseUrls: Array<string> = [
 			representation.adaptationSet.period.manifest,
@@ -167,47 +146,23 @@ export class DashManifest implements ManifestParser {
 		return absoluteBase.href;
 	}
 
-	private getSegmentsFromSegmentTemplate(
-		representation: RawRepresentation,
-		segmentTemplate: SegmentTemplate,
-	): Array<Segment> {
-		const segments: Array<Segment> = [];
-
-		let n = segmentTemplate.startNumber ?? 1;
-		const periodStart = representation.adaptationSet.period.start ?? 0;
-		const baseUrl = this.getBaseUrl(representation);
-		const timescale = segmentTemplate.timescale ?? 1;
-
-		if (!segmentTemplate.media) {
-			this.logger.warn(`No media template for representation ${representation.id}`);
-			return [];
+	private getPeriodDurationSeconds(period: Period): number | undefined {
+		if (period.duration) {
+			return period.duration;
 		}
+		const periodIndex = this.dashManifest?.periods.indexOf(period) ?? -1;
+		let nextPeriod: Period | undefined;
 
-		for (const timeline of segmentTemplate.segmentTimeline?.s ?? []) {
-			let numSegments = timeline.r + 1;
-			if (timeline.d && timeline.r < 0 && representation.adaptationSet.period.duration) {
-				const durationInSeconds = timeline.d / timescale;
-				numSegments = Math.ceil(representation.adaptationSet.period.duration / durationInSeconds);
-			}
-			const tWithOffset = (timeline.t ?? 0) - (segmentTemplate.presentationTimeOffset ?? 0);
-			const unscaledDuration = timeline.d ?? 0;
-			let calculatedT = timeline.t ?? 0;
-			for (let i = 0; i < numSegments; i++) {
-				segments.push({
-					initSegmentUrl: segmentTemplate.initialization
-						? this.buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.initialization)
-						: undefined,
-					duration: secondsToMilliseconds(unscaledDuration / timescale),
-					startTime: secondsToMilliseconds(periodStart + (tWithOffset + i * unscaledDuration) / timescale),
-					url: this.buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.media),
-					rawSegmentTime: secondsToMilliseconds(((timeline.t ?? 0) + i * unscaledDuration) / timescale),
-				});
-				calculatedT += unscaledDuration;
-				n++;
-			}
+		if (periodIndex >= 0) {
+			nextPeriod = this.dashManifest?.periods[periodIndex + 1];
 		}
-
-		return segments;
+		if (nextPeriod && period.start !== undefined && nextPeriod.start !== undefined) {
+			return nextPeriod.start - period.start;
+		}
+		if (this.dashManifest?.periods.length === 1 && this.dashManifest.mediaPresentationDuration) {
+			return this.dashManifest.mediaPresentationDuration;
+		}
+		return undefined;
 	}
 
 	private getSegmentsFromRepresentation(representation: RawRepresentation): Array<Segment> {
@@ -216,7 +171,12 @@ export class DashManifest implements ManifestParser {
 				representation.adaptationSet.segmentTemplate ?? {},
 				representation.segmentTemplate,
 			) as SegmentTemplate;
-			return this.getSegmentsFromSegmentTemplate(representation, mergedTemplate);
+			return getSegmentsFromSegmentTemplate(
+				this.getBaseUrl(representation),
+				this.getPeriodDurationSeconds(representation.adaptationSet.period) ?? 0,
+				representation,
+				mergedTemplate,
+			);
 		}
 		this.logger.warn(`No segment template for representation ${representation.id}`);
 		return [];

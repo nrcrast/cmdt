@@ -1,10 +1,10 @@
 import type { Manifest } from "cmdt-shared";
-import { getInstance as getLogger } from "../../logger.js";
-import type { Report } from "../../report.js";
-import { Plugin } from "../plugin.js";
-import { MediaStreamValidator } from "../../media-stream-validator/media-stream-validator.js";
 import { getOpts } from "../../cli-opts.js";
 import type { DownloadQueue } from "../../download-queue.js";
+import { getInstance as getLogger } from "../../logger.js";
+import { MediaStreamValidator } from "../../media-stream-validator/media-stream-validator.js";
+import type { Report } from "../../report.js";
+import { Plugin } from "../plugin.js";
 
 class MediaStreamValidatorPlugin extends Plugin {
 	private logger = getLogger();

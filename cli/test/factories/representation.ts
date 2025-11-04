@@ -1,5 +1,5 @@
+import { MediaType, type Representation, type Segment } from "cmdt-shared";
 import { Factory } from "fishery";
-import { type Representation, MediaType, type Segment } from "cmdt-shared";
 import { segmentFactory } from "./segment.js";
 
 type TransientParams = {

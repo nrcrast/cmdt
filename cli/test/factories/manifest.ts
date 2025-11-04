@@ -1,5 +1,5 @@
-import { Factory } from "fishery";
 import { type Manifest, MediaType, UniqueRepresentationMap } from "cmdt-shared";
+import { Factory } from "fishery";
 import { representationFactory } from "./representation.js";
 
 type TransientParams = {

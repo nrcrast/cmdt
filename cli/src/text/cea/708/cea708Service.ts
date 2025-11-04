@@ -1,7 +1,7 @@
 import type { Cue } from "cmdt-shared";
+import type { Cea708ClosedCaptionByte, TextJustification } from "../../types.js";
 import Cea708Window from "./cea708Window.js";
 import type DtvccPacket from "./dtvccPacket.js";
-import type { TextJustification, Cea708ClosedCaptionByte } from "../../types.js";
 
 // CEA-708 closed captions service as defined by CEA-708-E. A decoder can own up to 63 services. Each service owns eight windows
 class Cea708Service {

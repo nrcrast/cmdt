@@ -4,9 +4,8 @@ import type { Manifest, Representation } from "cmdt-shared";
 import { UniqueRepresentationMap } from "cmdt-shared";
 import { mkdirp } from "mkdirp";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getOpts } from "./cli-opts.js";
-
 import { manifestFactory } from "../test/factories/manifest.js";
+import { getOpts } from "./cli-opts.js";
 
 import { SegmentDownloader } from "./downloader.js";
 

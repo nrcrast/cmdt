@@ -1,8 +1,8 @@
 import type { Manifest } from "cmdt-shared";
-import type { Report } from "../report.js";
 import { glob } from "glob";
-import { getInstance as getLogger } from "../logger.js";
 import type { DownloadQueue } from "../download-queue.js";
+import { getInstance as getLogger } from "../logger.js";
+import type { Report } from "../report.js";
 
 const pluginRegistry: Record<string, Plugin> = {};
 const logger = getLogger();

@@ -2,8 +2,8 @@ import type { Cue } from "cmdt-shared";
 import type winston from "winston";
 import { getInstance as getLogger } from "../../logger.js";
 import type { CeaSchemeUri, DataSegment } from "../../utils/manifest/types.js";
-import type { Frma, Mdhd, ParsedBox, Tfdt, Tfhd, Tkhd, Trex, Trun } from "../../utils/mp4/types.js";
 import Mp4Parser from "../../utils/mp4/parser.js";
+import type { Frma, Mdhd, ParsedBox, Tfdt, Tfhd, Tkhd, Trex, Trun } from "../../utils/mp4/types.js";
 import { BitstreamFormat } from "../types.js";
 import CeaDecoder from "./ceaDecoder.js";
 

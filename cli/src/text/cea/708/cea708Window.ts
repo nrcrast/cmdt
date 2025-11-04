@@ -7,7 +7,7 @@ import {
 	LINE_HEIGHT_MULTIPLIER,
 	LINE_WIDTH_MULTIPLIER_16_9,
 } from "../../../utils/textConstants.js";
-import { AnchorId, TextJustification, type StyledChar } from "../../types.js";
+import { AnchorId, type StyledChar, TextJustification } from "../../types.js";
 
 // CEA-708 Window. Each CEA-708 service owns 8 of these.
 class Cea708Window {

@@ -1,9 +1,9 @@
 import type { Manifest } from "cmdt-shared";
+import type { DownloadQueue } from "../../download-queue.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import { Plugin } from "../plugin.js";
 import { EmsgExtractor } from "./emsg-extractor.js";
-import type { DownloadQueue } from "../../download-queue.js";
 
 class EmsgExtractorPlugin extends Plugin {
 	private logger = getLogger();

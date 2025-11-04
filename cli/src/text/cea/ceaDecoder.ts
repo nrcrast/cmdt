@@ -1,9 +1,9 @@
 import type { Cue } from "cmdt-shared";
+import { CeaSchemeUri } from "../../utils/manifest/types.js";
 import DataViewReader from "../../utils/mp4/dataViewReader.js";
 import { Endian } from "../../utils/mp4/types.js";
-import Cea608DataChannel from "./608/cea608DataChannel.js";
 import { CcType, type Cea608ClosedCaptionPacket, type Cea708ClosedCaptionByte } from "../types.js";
-import { CeaSchemeUri } from "../../utils/manifest/types.js";
+import Cea608DataChannel from "./608/cea608DataChannel.js";
 import Cea708Service from "./708/cea708Service.js";
 import type DtvccPacket from "./708/dtvccPacket.js";
 import DtvccPacketBuilder from "./708/dtvccPacketBuilder.js";

@@ -6,10 +6,10 @@ import { rimraf } from "rimraf";
 import { getOpts } from "./cli-opts.js";
 import { SegmentDownloader } from "./downloader.js";
 import { getInstance as getLogger } from "./logger.js";
-import { Report } from "./report.js";
-import { getExtensionFromUrl, wrapUrl } from "./utils/url.js";
 import { getManifestParser } from "./manifest-parsers/parser-factory.js";
 import { loadPlugins, runPlugins } from "./plugins/plugin.js";
+import { Report } from "./report.js";
+import { getExtensionFromUrl, wrapUrl } from "./utils/url.js";
 
 const options = getOpts();
 const logger = getLogger();
