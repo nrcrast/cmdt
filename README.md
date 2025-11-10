@@ -51,7 +51,7 @@ After running the tool, all output will be in a directory called `output`, as sp
 ## Viewer
 The tool will output a large `.cmdt` file. This is human readable (JSON), but there's a graphical tool that can be helpful for viewing the data. 
 
-This tool lives in the 'viewer' directory, but a hosted version can be found [here](https://probable-umbrella-9j32v2n.pages.github.io/).
+This tool lives in the 'viewer' directory, but a hosted version can be found [here](https://cra.st/cmdt).
 
 ## Report format
 ```typescript
