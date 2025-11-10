@@ -1,6 +1,7 @@
 // biome-ignore-all lint/style/noNonNullAssertion: Typescript's handling of map has/get is insufficient
 
 import fs from "node:fs/promises";
+import path from "node:path";
 import axios from "axios";
 import type { Segment } from "cmdt-shared";
 import { getOpts } from "../../cli-opts.js";

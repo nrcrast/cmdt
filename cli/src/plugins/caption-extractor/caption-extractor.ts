@@ -59,18 +59,29 @@ export class CaptionExtractor {
 
 				if (!parsers.has(segment.initSegmentFilesystemPath)) {
 					parser = new CeaParser();
-					const initSegment = await fs.readFile(path.resolve(segment.initSegmentFilesystemPath));
-					parser.parse({ data: new Uint8Array(initSegment).buffer, id: 0, periodId: "0" }, captionUri);
-					parsers.set(segment.initSegmentFilesystemPath, parser);
+					try {
+						const initSegment = await fs.readFile(path.resolve(segment.initSegmentFilesystemPath));
+						parser.parse({ data: new Uint8Array(initSegment).buffer, id: 0, periodId: "0" }, captionUri);
+						parsers.set(segment.initSegmentFilesystemPath, parser);
+					} catch (e) {
+						parser = new CeaParser();
+						this.logger.warn(`Failed to parse init segment: ${e}`);
+					}
 				}
 
 				parser = parsers.get(segment.initSegmentFilesystemPath);
 				const segmentData = await fs.readFile(path.resolve(segment.fileSystemPath));
 				// biome-ignore lint/style/noNonNullAssertion: TS map has/get
-				const captions = parser!.parse(
-					{ data: new Uint8Array(segmentData).buffer, id: segment.startTime, periodId: "0" },
-					captionUri,
-				);
+				let captions: Array<Cue> = [];
+				try {
+					captions =
+						parser?.parse(
+							{ data: new Uint8Array(segmentData).buffer, id: segment.startTime, periodId: "0" },
+							captionUri,
+						) ?? [];
+				} catch (e) {
+					this.logger.warn(`Failed to parse segment: ${e}`);
+				}
 
 				for (const caption of captions) {
 					const stream = caption.id.split("_").pop() ?? "unknown";
