@@ -54,13 +54,13 @@ describe("SegmentDownloader", () => {
 		it("should build download queue with correct entries", async () => {
 			const queue = await downloader.download();
 
-			expect(queue).toHaveLength(3); // 1 init segment + 2 media segments
+			expect(queue.getEntries()).toHaveLength(3); // 1 init segment + 2 media segments
 
 			// Check init segment entry
 			const initEntry = queue.getEntries().find((entry) => entry.destFile.includes("init"));
 			expect(initEntry).toBeDefined();
 			expect(initEntry?.url).toBe("https://example.com/init.mp4");
-			expect(initEntry?.destDir).toBe("/tmp/download");
+			expect(initEntry?.destDir).toBe("/tmp/download/segments");
 			expect(initEntry?.destFile).toBe("init.mp4");
 			expect(initEntry?.representation).toBe(mockRepresentation);
 
@@ -104,7 +104,7 @@ describe("SegmentDownloader", () => {
 
 			const queue = await downloader.download();
 
-			expect(queue).toHaveLength(3);
+			expect(queue.getEntries()).toHaveLength(3);
 			expect(axiosGetSpy).not.toHaveBeenCalled();
 			expect(mkdirpSpy).not.toHaveBeenCalled();
 			expect(fsWriteSpy).not.toHaveBeenCalled();
@@ -175,7 +175,7 @@ describe("SegmentDownloader", () => {
 
 		it("should return empty queue before download is called", () => {
 			const queue = downloader.getQueue();
-			expect(queue).toHaveLength(0);
+			expect(queue).not.toBeDefined();
 		});
 	});
 
@@ -207,7 +207,7 @@ describe("SegmentDownloader", () => {
 			const emptyDownloader = new SegmentDownloader(emptyManifest);
 			const queue = await emptyDownloader.download();
 
-			expect(queue).toHaveLength(0);
+			expect(queue.getEntries()).toHaveLength(0);
 		});
 
 		it("should handle download errors gracefully", async () => {
