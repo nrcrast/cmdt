@@ -26,6 +26,10 @@ export type Segment = {
 	 * For DASH this is the raw time not adjusted for the presentation time offset in milliseconds
 	 */
 	rawSegmentTime?: number;
+	/**
+	 * Index of the content protection in the manifest
+	 */
+	contentProtectionIds?: Array<number>;
 };
 
 export type Period = {
@@ -100,11 +104,17 @@ export class UniqueRepresentationMap extends Map<string, Representation> {
 	}
 }
 
+type ContentProtection = {
+	systemId: string;
+	pssh?: string;
+};
+
 export type Manifest = {
 	url: URL;
 	video: UniqueRepresentationMap;
 	audio: UniqueRepresentationMap;
 	images: UniqueRepresentationMap;
+	contentProtection: Array<ContentProtection>;
 	captionStreamToLanguage: Record<string, string>;
 	periods: Array<Period>;
 	raw: string;

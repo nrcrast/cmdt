@@ -200,6 +200,7 @@ describe("SegmentDownloader", () => {
 				audio: new UniqueRepresentationMap(),
 				images: new UniqueRepresentationMap(),
 				captionStreamToLanguage: {},
+				contentProtection: [],
 				periods: [],
 				raw: "",
 			};

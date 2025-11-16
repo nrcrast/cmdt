@@ -11,6 +11,7 @@ import {
 } from "cmdt-shared";
 import {
 	type AdaptationSet,
+	type ContentProtection,
 	type ContentType,
 	type Descriptor,
 	getRawDashManifest,
@@ -40,16 +41,40 @@ export class DashManifest implements ManifestParser {
 			audio: new UniqueRepresentationMap(),
 			images: new UniqueRepresentationMap(),
 			periods: [],
+			contentProtection: [],
 			captionStreamToLanguage: {},
 			raw: "",
 		};
 	}
+
+	private getContentProtectionId(contentProtection: ContentProtection): number {
+		this.addContentProtection(contentProtection);
+		return this.manifest.contentProtection.findIndex((e) => e.systemId === contentProtection.schemeIdUri);
+	}
+
+	private addContentProtection(contentProtection: ContentProtection) {
+		const candidateContentProtection = {
+			systemId: contentProtection.schemeIdUri,
+			pssh: contentProtection.widevine?.cencPssh ?? contentProtection.playready?.cencPssh,
+		};
+		const existing = this.manifest.contentProtection.find((e) => e.systemId === candidateContentProtection.systemId);
+		if (existing) {
+			return;
+		}
+		this.manifest.contentProtection.push(candidateContentProtection);
+	}
+
 	public async parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest> {
 		this.baseUrl = baseUrl;
 		this.dashManifest = await getRawDashManifest(manifest);
 		this.manifest.url = wrapUrl(manifestUrl);
 		this.manifest.raw = manifest;
 		this.manifest = this.parseRawManifest(this.dashManifest);
+		if (this.dashManifest?.contentProtection) {
+			for (const contentProtection of this.dashManifest.contentProtection) {
+				this.addContentProtection(contentProtection);
+			}
+		}
 		return this.manifest;
 	}
 
@@ -166,20 +191,33 @@ export class DashManifest implements ManifestParser {
 	}
 
 	private getSegmentsFromRepresentation(representation: RawRepresentation): Array<Segment> {
+		let segments: Array<Segment> = [];
 		if (representation.segmentTemplate || representation.adaptationSet.segmentTemplate) {
 			const mergedTemplate = deepmergeCustom({ mergeArrays: false })(
 				representation.adaptationSet.segmentTemplate ?? {},
 				representation.segmentTemplate,
 			) as SegmentTemplate;
-			return getSegmentsFromSegmentTemplate(
+			segments = getSegmentsFromSegmentTemplate(
 				this.getBaseUrl(representation),
 				this.getPeriodDurationSeconds(representation.adaptationSet.period) ?? 0,
 				representation,
 				mergedTemplate,
 			);
 		}
-		this.logger.warn(`No segment template for representation ${representation.id}`);
-		return [];
+		const contentProtection =
+			representation.contentProtection ??
+			representation.adaptationSet.contentProtection ??
+			this.dashManifest?.contentProtection;
+		if (contentProtection) {
+			for (const protection of contentProtection) {
+				const contentProtectionId = this.getContentProtectionId(protection);
+				for (const segment of segments) {
+					segment.contentProtectionIds ??= [];
+					segment.contentProtectionIds.push(contentProtectionId);
+				}
+			}
+		}
+		return segments;
 	}
 
 	private parseVideoRepresentation(representation: RawRepresentation): void {
@@ -277,6 +315,11 @@ export class DashManifest implements ManifestParser {
 	}
 
 	private parseRepresentation(representation: RawRepresentation): void {
+		if (representation.contentProtection) {
+			for (const contentProtection of representation.contentProtection) {
+				this.addContentProtection(contentProtection);
+			}
+		}
 		const mediaType: MediaType = this.getMediaTypeFromRepresentation(representation);
 		switch (mediaType) {
 			case MediaType.Video:
@@ -295,6 +338,11 @@ export class DashManifest implements ManifestParser {
 	}
 
 	private processAdaptationSet(adaptationSet: AdaptationSet): void {
+		if (adaptationSet.contentProtection) {
+			for (const contentProtection of adaptationSet.contentProtection) {
+				this.addContentProtection(contentProtection);
+			}
+		}
 		for (const representation of adaptationSet.representation ?? []) {
 			this.parseRepresentation(representation);
 		}

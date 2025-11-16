@@ -1,3 +1,4 @@
+import { stringify } from "uuid";
 import createView from "../createView.js";
 import hexToUint8 from "../hexToUint8.js";
 import type { SchemeUri } from "../manifest/types.js";
@@ -11,6 +12,7 @@ import type {
 	Mdhd,
 	Mvhd,
 	ParsedBox,
+	Pssh,
 	Sidx,
 	SidxReference,
 	Tfdt,
@@ -100,6 +102,26 @@ class Mp4Parser {
 			mediaTime,
 			mediaRateInteger,
 			mediaRateFraction,
+		};
+	}
+
+	public static parsePssh(box: ParsedBox): Pssh {
+		const { reader, version } = box;
+		const systemId: string = stringify(reader.readBytes(16));
+		let kids: Array<string> | undefined;
+		if (version > 0) {
+			kids = [];
+			const kidCount = reader.readUint32();
+			for (let i = 0; i < kidCount; i++) {
+				kids.push(stringify(reader.readBytes(16)));
+			}
+		}
+		const dataSize = reader.readUint32();
+		const data: Uint8Array = reader.readBytes(dataSize);
+		return {
+			systemId,
+			kids,
+			data,
 		};
 	}
 

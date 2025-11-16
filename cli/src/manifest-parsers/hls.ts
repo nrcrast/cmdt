@@ -27,6 +27,7 @@ export class HlsManifest implements ManifestParser {
 			images: new UniqueRepresentationMap(),
 			captionStreamToLanguage: {},
 			periods: [],
+			contentProtection: [],
 			raw: manifest,
 		};
 

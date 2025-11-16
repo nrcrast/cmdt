@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "biome check",
     "typecheck": "tsc --noEmit",
-    "lint:fix": "next lint --fix",
+    "lint:fix": "biome check --write",
     "biome": "biome format",
     "biome:fix": "biome format --write",
     "package": "echo 'No package script for viewer'",

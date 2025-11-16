@@ -29,8 +29,8 @@ function Schematron(props: { test: SchematronResults }) {
 export default function DashIfConformance(props: { report: Report }) {
 	// biome-ignore lint/suspicious/noExplicitAny: Data is pass-through
 	const dashReport = props.report.dashConformance as any;
-	if(!dashReport) {
-		return <h2>No DASH-IF conformance report found</h2>
+	if (!dashReport) {
+		return <h2>No DASH-IF conformance report found</h2>;
 	}
 	const schematronTest = dashReport.entries.Schematron;
 	return (

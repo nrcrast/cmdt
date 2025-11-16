@@ -20,6 +20,12 @@ export enum Size {
 	UINT64 = 8,
 }
 
+export type Pssh = {
+	systemId: string;
+	kids?: Array<string>;
+	data: Uint8Array;
+};
+
 export type Emsg = {
 	id: number;
 	eventDuration: number;

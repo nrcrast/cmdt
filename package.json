@@ -14,6 +14,7 @@
   "homepage": "https://github.com/NBCUDTC/cmdt#readme",
   "scripts": {
     "lint": "pnpm -r --parallel run lint",
+    "lint:fix": "pnpm -r --parallel run lint:fix",
     "format": "pnpm -r --parallel run format",
     "package": "pnpm -r --parallel run package",
     "typecheck": "pnpm -r --parallel run typecheck",

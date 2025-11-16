@@ -15,6 +15,7 @@ export class Report {
 				images: [],
 				captionStreamToLanguage: {},
 				periods: [],
+				contentProtection: [],
 			},
 			decodeTimeMismatches: [],
 			durationMismatches: [],

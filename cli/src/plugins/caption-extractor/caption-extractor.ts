@@ -71,7 +71,6 @@ export class CaptionExtractor {
 
 				parser = parsers.get(segment.initSegmentFilesystemPath);
 				const segmentData = await fs.readFile(path.resolve(segment.fileSystemPath));
-				// biome-ignore lint/style/noNonNullAssertion: TS map has/get
 				let captions: Array<Cue> = [];
 				try {
 					captions =

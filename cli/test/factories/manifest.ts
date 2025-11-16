@@ -21,6 +21,7 @@ export const manifestFactory = Factory.define<Manifest, TransientParams>(({ tran
 		video: new UniqueRepresentationMap(),
 		audio: new UniqueRepresentationMap(),
 		images: new UniqueRepresentationMap(),
+		contentProtection: [],
 		captionStreamToLanguage: {},
 		periods: [],
 		raw: "",
