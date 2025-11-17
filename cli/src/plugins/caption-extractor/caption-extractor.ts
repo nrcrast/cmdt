@@ -9,6 +9,7 @@ import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import CeaParser from "../../text/cea/parser.js";
 import { CeaSchemeUri } from "../../utils/manifest/types.js";
+import { canAccessFile } from "../../utils/file.js";
 
 export type Captions = Record<string, { stream: string; cues: Array<Cue> }>;
 
@@ -45,14 +46,11 @@ export class CaptionExtractor {
 				if (!segment.initSegmentFilesystemPath || !segment.fileSystemPath) {
 					continue;
 				}
-				try {
-					await Promise.all([
-						fs.access(segment.initSegmentFilesystemPath, fs.constants.R_OK | fs.constants.W_OK),
-						fs.access(segment.fileSystemPath, fs.constants.R_OK | fs.constants.W_OK),
-					]);
-					// biome-ignore lint/correctness/noUnusedVariables: do not care about the error here
-				} catch (e) {
-					// files don't exist
+				const [initSegmentAccessible, segmentAccessible] = await Promise.all([
+					canAccessFile(segment.initSegmentFilesystemPath),
+					canAccessFile(segment.fileSystemPath),
+				]);
+				if (!initSegmentAccessible || !segmentAccessible) {
 					continue;
 				}
 				let parser: CeaParser | undefined;

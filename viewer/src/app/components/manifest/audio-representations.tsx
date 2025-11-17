@@ -1,9 +1,9 @@
-import type { Representation } from "cmdt-shared";
+import type { Representation, Report } from "cmdt-shared";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SegmentTable } from "./segment-table";
 
-export default function AudioRepresentations(props: { representations: Array<Representation> }) {
+export default function AudioRepresentations(props: { manifest: Report['manifest']; representations: Array<Representation> }) {
 	return (
 		<Tabs>
 			<TabsList>
@@ -26,7 +26,7 @@ export default function AudioRepresentations(props: { representations: Array<Rep
 							<li>Spatial: {`${representation.spatialAudio ?? false}`}</li>
 							{representation.language && <li>Language: {representation.language}</li>}
 						</ul>
-						<SegmentTable segments={representation.segments} />
+						<SegmentTable manifest={props.manifest} segments={representation.segments} />
 					</TabsContent>
 				);
 			})}

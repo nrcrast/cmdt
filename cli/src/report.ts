@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import type { Cue, Manifest, Report as RawReport, Representation, Segment } from "cmdt-shared";
+import type { Cue, Manifest, MismatchedContentProtectionEntry, Report as RawReport, Representation, Segment } from "cmdt-shared";
 import type { Emsg } from "./utils/mp4/types.js";
 
 export class Report {
@@ -17,6 +17,7 @@ export class Report {
 				periods: [],
 				contentProtection: [],
 			},
+			mismatchedContentProtection: [],
 			decodeTimeMismatches: [],
 			durationMismatches: [],
 			gaps: {},
@@ -77,6 +78,9 @@ export class Report {
 			this.raw.duplicateThumbnails[targetRepresentation][thumbnailId] = new Set<string>();
 		}
 		this.raw.duplicateThumbnails[targetRepresentation][thumbnailId].add(candidateThumbnailId);
+	}
+	public addMismatchedContentProtection(entry: MismatchedContentProtectionEntry) {
+		this.raw.mismatchedContentProtection.push(entry);
 	}
 	public addEsmg(representation: Representation, segment: Segment, emsg: Emsg) {
 		let emsgsForRepresentation = this.raw.emsgs[representation.id];

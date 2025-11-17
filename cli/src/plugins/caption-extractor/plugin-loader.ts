@@ -5,6 +5,22 @@ import type { Report } from "../../report.js";
 import { Plugin } from "../plugin.js";
 import { CaptionExtractor } from "./caption-extractor.js";
 
+/**
+ * Plugin for extracting and validating closed captions from downloaded video segments.
+ *
+ * This plugin extracts closed caption data (CEA-608 and CEA-708) embedded in downloaded
+ * video segments. It parses the caption streams from the media segments, decodes the
+ * caption data, and validates that the extracted captions match the manifest's caption
+ * declarations. Extracted captions are saved to files for further processing and analysis.
+ *
+ * @example
+ * // The plugin is automatically loaded and executed as part of the plugin system
+ * // It processes all video segments, extracts captions, and validates them
+ *
+ * @see {@link CaptionExtractor} for the core extraction and validation logic
+ * @see {@link CeaParser} for CEA-608/708 caption parsing
+ * @see {@link Cue} for caption cue structure
+ */
 class CaptionExtractorPlugin extends Plugin {
 	private logger = getLogger();
 	private captionExtractor: CaptionExtractor;
@@ -17,7 +33,7 @@ class CaptionExtractorPlugin extends Plugin {
 	public async run(): Promise<void> {
 		this.logger.info("Running caption extractor plugin...");
 		await this.captionExtractor.extractFromDownloadedSegments();
-		await this.captionExtractor.validate();
+		this.captionExtractor.validate();
 		this.logger.info("Caption extractor plugin finished");
 	}
 }

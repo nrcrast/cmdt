@@ -9,6 +9,8 @@ import ImageRepresentations from "./components/manifest/image-representations";
 import MissingCaptions from "./components/manifest/missing-captions";
 import Periods from "./components/manifest/periods";
 import VideoRepresentations from "./components/manifest/video-representations";
+import ContentProtection from "./components/manifest/content-protection";
+import MismatchedContentProtection from "./components/manifest/mismatched-content-protection";
 
 export default function Report(props: { rawReport: ReportData }) {
 	const { rawReport } = props;
@@ -19,6 +21,7 @@ export default function Report(props: { rawReport: ReportData }) {
 					<TabsTrigger value="manifest">Manifest</TabsTrigger>
 					<TabsTrigger value="missing-captions">Missing Captions</TabsTrigger>
 					<TabsTrigger value="dash-if-conformance">DASH-IF Conformance</TabsTrigger>
+					<TabsTrigger value="mismatched-content-protection">Mismatched Content Protection</TabsTrigger>
 					<TabsTrigger value="captions">Captions</TabsTrigger>
 				</TabsList>
 				<TabsContent value="manifest">
@@ -26,13 +29,13 @@ export default function Report(props: { rawReport: ReportData }) {
 						<AccordionItem value="item-1">
 							<AccordionTrigger>Audio Representations</AccordionTrigger>
 							<AccordionContent>
-								<AudioRepresentations representations={rawReport.manifest.audio} />
+								<AudioRepresentations manifest={rawReport.manifest} representations={rawReport.manifest.audio} />
 							</AccordionContent>
 						</AccordionItem>
 						<AccordionItem value="item-2">
 							<AccordionTrigger>Video Representations</AccordionTrigger>
 							<AccordionContent>
-								<VideoRepresentations representations={rawReport.manifest.video} />
+								<VideoRepresentations manifest={rawReport.manifest} representations={rawReport.manifest.video} />
 							</AccordionContent>
 						</AccordionItem>
 						<AccordionItem value="item-3">
@@ -42,6 +45,12 @@ export default function Report(props: { rawReport: ReportData }) {
 							</AccordionContent>
 						</AccordionItem>
 						<AccordionItem value="item-4">
+							<AccordionTrigger>Content Protection</AccordionTrigger>
+							<AccordionContent>
+								<ContentProtection contentProtection={rawReport.manifest.contentProtection} />
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="item-5">
 							<AccordionTrigger>Periods</AccordionTrigger>
 							<AccordionContent>
 								<Periods periods={rawReport.manifest.periods as Period[]} />
@@ -51,6 +60,9 @@ export default function Report(props: { rawReport: ReportData }) {
 				</TabsContent>
 				<TabsContent value="missing-captions">
 					<MissingCaptions report={rawReport} />
+				</TabsContent>
+				<TabsContent value="mismatched-content-protection">
+					<MismatchedContentProtection report={rawReport} />
 				</TabsContent>
 				<TabsContent value="dash-if-conformance">
 					<DashIfConformance report={rawReport} />

@@ -1,9 +1,9 @@
-import type { Representation } from "cmdt-shared";
+import type { Representation, Report } from "cmdt-shared";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SegmentTable } from "./segment-table";
 
-export default function VideoRepresentations(props: { representations: Array<Representation> }) {
+export default function VideoRepresentations(props: { manifest: Report['manifest']; representations: Array<Representation> }) {
 	return (
 		<Tabs>
 			<TabsList>
@@ -27,7 +27,7 @@ export default function VideoRepresentations(props: { representations: Array<Rep
 							<li>CEA-608: {`${representation.hasCaptions.cea608}`}</li>
 							<li>CEA-708: {`${representation.hasCaptions.cea708}`}</li>
 						</ul>
-						<SegmentTable segments={representation.segments} />
+						<SegmentTable manifest={props.manifest} segments={representation.segments} />
 					</TabsContent>
 				);
 			})}

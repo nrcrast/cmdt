@@ -1,4 +1,5 @@
 import {
+	DrmSystem,
 	getMediaTypeFromMimeType,
 	type ImageRepresentation,
 	type Manifest,
@@ -27,6 +28,8 @@ import getStreamAndLanguages from "../../utils/cea/getStreamAndLanguages.js";
 import { CeaSchemeUri } from "../../utils/manifest/types.js";
 import { getUrlFilePathHref, isFileUrl, wrapUrl } from "../../utils/url.js";
 import { getSegmentsFromSegmentTemplate } from "./segment-list-builder.js";
+import { PsshParser } from "../../drm/pssh.js";
+import { getDrmSystemFromSystemId } from "../../utils/drm.js";
 
 export class DashManifest implements ManifestParser {
 	private logger: winston.Logger;
@@ -53,14 +56,25 @@ export class DashManifest implements ManifestParser {
 	}
 
 	private addContentProtection(contentProtection: ContentProtection) {
-		const candidateContentProtection = {
+		const candidateContentProtection: Manifest["contentProtection"][0] = {
 			systemId: contentProtection.schemeIdUri,
+			type: getDrmSystemFromSystemId(contentProtection.schemeIdUri),
 			pssh: contentProtection.widevine?.cencPssh ?? contentProtection.playready?.cencPssh,
+			cencDefaultKid: contentProtection.cencDefaultKid,
 		};
+
 		const existing = this.manifest.contentProtection.find((e) => e.systemId === candidateContentProtection.systemId);
 		if (existing) {
 			return;
 		}
+		let parsedContentProtection = undefined;
+		if(candidateContentProtection.pssh) {
+			const psshAsBuffer = Buffer.from(candidateContentProtection.pssh, "base64");
+			parsedContentProtection = new PsshParser().parse(new Uint8Array(psshAsBuffer));
+		}
+		candidateContentProtection.parsedPssh = parsedContentProtection;
+		
+
 		this.manifest.contentProtection.push(candidateContentProtection);
 	}
 
@@ -211,6 +225,9 @@ export class DashManifest implements ManifestParser {
 		if (contentProtection) {
 			for (const protection of contentProtection) {
 				const contentProtectionId = this.getContentProtectionId(protection);
+				if(this.manifest.contentProtection[contentProtectionId]!.type === DrmSystem.UNKNOWN) {
+					continue;
+				}
 				for (const segment of segments) {
 					segment.contentProtectionIds ??= [];
 					segment.contentProtectionIds.push(contentProtectionId);

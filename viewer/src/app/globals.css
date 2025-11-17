@@ -3,6 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.text-wrap {
+	max-width: 60vw;
+	overflow-wrap: break-word;
+}
+
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);

@@ -9,6 +9,7 @@ import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import Mp4Parser from "../../utils/mp4/parser.js";
 import type { Emsg, ParsedBox } from "../../utils/mp4/types.js";
+import { canAccessFile } from "../../utils/file.js";
 
 export class EmsgExtractor {
 	private logger: winston.Logger;
@@ -32,11 +33,7 @@ export class EmsgExtractor {
 				continue;
 			}
 			const segmentPath = path.resolve(download.destDir, download.destFile);
-			try {
-				await fs.access(segmentPath, fs.constants.R_OK | fs.constants.W_OK);
-				// biome-ignore lint/correctness/noUnusedVariables: do not care about the error here
-			} catch (e) {
-				// files don't exist
+			if (!(await canAccessFile(segmentPath))) {
 				continue;
 			}
 

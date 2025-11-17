@@ -13,6 +13,27 @@ export type Emsg = {
 	messageData: Uint8Array | string;
 };
 
+export enum MismatchedContentProtectionType {
+	ManifestMissing = "manifestMissing",
+	MediaMissing = "mediaMissing",
+	Mismatch = "mismatch",
+}
+
+export type MismatchedContentProtectionEntry = {
+		type:  MismatchedContentProtectionType.Mismatch;
+		detectedInMedia?: string[]; // Base 64 encoded PSSHs
+		expectedInManifest?: string[]; // Base 64 encoded PSSHs
+		segment: Segment;
+	} | {
+		type: MismatchedContentProtectionType.ManifestMissing;
+		detectedInMedia: string[]; // Base 64 encoded PSSHs
+		segment: Segment;
+	} | {
+		type: MismatchedContentProtectionType.MediaMissing;
+		expectedInManifest: string[]; // Base 64 encoded PSSHs
+		segment: Segment;
+	};
+
 export type Report = {
 	missingCues: {
 		[representation: RepresentationId]: {
@@ -49,4 +70,5 @@ export type Report = {
 	captions?: {
 		[stream: string]: Array<Cue>;
 	};
+	mismatchedContentProtection: Array<MismatchedContentProtectionEntry>
 };

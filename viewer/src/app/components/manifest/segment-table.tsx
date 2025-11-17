@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Segment } from "cmdt-shared";
+import { DrmSystem, type Report, type Segment } from "cmdt-shared";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
 
@@ -16,6 +16,12 @@ export const columns: ColumnDef<Segment>[] = [
 		enableHiding: true,
 		enableSorting: true,
 		sortingFn: "basic",
+	},
+	{
+		accessorKey: "contentProtection",
+		header: "Content Protection",
+		enableHiding: true,
+		enableSorting: true,
 	},
 	{
 		accessorKey: "url",
@@ -68,11 +74,20 @@ const defaultVisibleColumns = {
 	initSegmentUrl: false,
 	fileSystemPath: false,
 	initSegmentFilesystemPath: false,
-	baseMediaDecodeTime: true,
-	mediaDuration: true,
-	rawSegmentTime: true,
+	baseMediaDecodeTime: false,
+	mediaDuration: false,
+	rawSegmentTime: false,
+	contentProtection: true,
 };
 
-export function SegmentTable(props: { segments: Array<Segment> }) {
-	return <DataTable columns={columns} data={props.segments} defaultVisibleColumns={defaultVisibleColumns} />;
+export function SegmentTable(props: { manifest: Report['manifest']; segments: Array<Segment> }) {
+	const hydratedSegments = props.segments.map((segment) => {
+		return {
+			...segment,
+			contentProtection: segment.contentProtectionIds?.map((id) => {
+				return `${props.manifest.contentProtection[id].type}(${id})`;
+		}).join(" | ") ?? 'None'
+		};
+	});
+	return <DataTable columns={columns} data={hydratedSegments} defaultVisibleColumns={defaultVisibleColumns} />;
 }

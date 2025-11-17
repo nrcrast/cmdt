@@ -9,6 +9,7 @@ import type winston from "winston";
 import { getOpts } from "./cli-opts.js";
 import { type DownloadEntry, DownloadQueue } from "./download-queue.js";
 import { getInstance as getLogger } from "./logger.js";
+import { canAccessFile } from "./utils/file.js";
 
 export class SegmentDownloader {
 	private queue?: DownloadQueue;
@@ -51,10 +52,7 @@ export class SegmentDownloader {
 				const dir = path.dirname(path.resolve(download.destDir, download.destFile));
 				await mkdirp(dir);
 
-				const exists = await fs
-					.access(path.resolve(download.destDir, download.destFile), fs.constants.R_OK | fs.constants.W_OK)
-					.then(() => true)
-					.catch(() => false);
+				const exists = await canAccessFile(path.resolve(download.destDir, download.destFile));
 
 				if (exists) {
 					this.logger.warn(

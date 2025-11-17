@@ -8,6 +8,21 @@ import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import { Plugin } from "../plugin.js";
 
+/**
+ * Plugin for validating DASH manifests against DASH-IF (DASH Industry Forum) conformance standards.
+ *
+ * This plugin submits the DASH manifest (MPD) to the official DASH-IF conformance validation service
+ * to verify compliance with DASH and IOP (Interoperability Points) specifications. It validates the
+ * manifest structure, syntax, and adherence to industry standards using Schematron rules and other
+ * validation modules. The conformance results are saved to a JSON file and included in the report.
+ *
+ * @example
+ * // The plugin is automatically loaded and executed when --dashConformance flag is set
+ * // It submits the manifest to https://conformance.dashif.org and reports validation results
+ *
+ * @see {@link https://conformance.dashif.org} DASH-IF Conformance Tool
+ * @see {@link Report.setDashConformanceReport} for how results are stored
+ */
 class DashIfConformance extends Plugin {
 	private logger = getLogger();
 	constructor(manifest: Manifest, report: Report, downloads: DownloadQueue) {

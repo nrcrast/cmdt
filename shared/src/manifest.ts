@@ -104,9 +104,20 @@ export class UniqueRepresentationMap extends Map<string, Representation> {
 	}
 }
 
-type ContentProtection = {
+export enum DrmSystem {
+	WIDEVINE = "widevine",
+	PLAYREADY = "playready",
+	FAIRPLAY = "fairplay",
+	NONE = "none",
+	UNKNOWN = "unknown",
+}
+
+export type ContentProtection = {
 	systemId: string;
+	type: DrmSystem;
 	pssh?: string;
+	parsedPssh?: any;
+	cencDefaultKid?: string;
 };
 
 export type Manifest = {

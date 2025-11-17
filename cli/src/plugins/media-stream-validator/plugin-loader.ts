@@ -6,6 +6,24 @@ import { MediaStreamValidator } from "../../media-stream-validator/media-stream-
 import type { Report } from "../../report.js";
 import { Plugin } from "../plugin.js";
 
+/**
+ * Plugin for validating HLS (HTTP Live Streaming) manifests using Apple's mediastreamvalidator tool.
+ *
+ * This plugin integrates with Apple's official mediastreamvalidator command-line tool to validate
+ * HLS manifests (.m3u8 files) for compliance with the HLS specification. It checks for proper
+ * segment formatting, playlist structure, codec compatibility, and other HLS-specific requirements.
+ * The validation results are saved to a JSON file and included in the report. This plugin only
+ * runs for HLS manifests when the --mediaStreamValidator flag is set and the tool is installed.
+ *
+ * @example
+ * // The plugin is automatically loaded and executed when --mediaStreamValidator flag is set
+ * // and the manifest is an HLS manifest (.m3u8)
+ * // Requires Apple's mediastreamvalidator to be installed on the system
+ *
+ * @see {@link MediaStreamValidator} for the core validation logic
+ * @see {@link https://developer.apple.com/documentation/http_live_streaming} HLS Specification
+ * @see {@link Report.setMediaStreamValidatorReport} for how results are stored
+ */
 class MediaStreamValidatorPlugin extends Plugin {
 	private logger = getLogger();
 	private mediaStreamValidator: MediaStreamValidator;
