@@ -22,6 +22,7 @@ import type {
 	Trun,
 } from "./types.js";
 import { BoxFormat, Endian, Size } from "./types.js";
+import winston from "winston";
 
 type CallbackType = (box: ParsedBox) => void;
 
@@ -29,6 +30,8 @@ type CallbackType = (box: ParsedBox) => void;
 class Mp4Parser {
 	private headers = new Map<string, BoxFormat>();
 	private boxDefinitions = new Map<string, CallbackType>();
+
+	constructor(private logger?: winston.Logger) {}
 
 	private static parseData(box: ParsedBox): Uint8Array {
 		const { reader } = box;
@@ -860,7 +863,7 @@ class Mp4Parser {
 	}
 
 	public parse(data: ArrayBuffer): void {
-		const reader: DataViewReader = new DataViewReader(new Uint8Array(data), Endian.BIG);
+		const reader: DataViewReader = new DataViewReader(new Uint8Array(data), Endian.BIG, this.logger);
 		while (reader.hasMoreData()) {
 			this.parseNext(reader);
 		}

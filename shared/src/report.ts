@@ -21,8 +21,8 @@ export enum MismatchedContentProtectionType {
 
 export type MismatchedContentProtectionEntry = {
 		type:  MismatchedContentProtectionType.Mismatch;
-		detectedInMedia?: string[]; // Base 64 encoded PSSHs
-		expectedInManifest?: string[]; // Base 64 encoded PSSHs
+		detectedInMedia?: {pssh: string, parsedPssh: any}[]; 
+		expectedInManifest?: {pssh: string, parsedPssh: any}[]; 
 		segment: Segment;
 	} | {
 		type: MismatchedContentProtectionType.ManifestMissing;

@@ -9,12 +9,12 @@ export class PsshParser {
 		this.parserConstructors.set(WidevineParser.systemId, WidevineParser);
 		this.parserConstructors.set(PlayreadyParser.systemId, PlayreadyParser);
 	}
-	public parseFromBox(box: Pssh): WidevineData | PlayreadyData | undefined {
-						const parserConstructor = this.parserConstructors.get(box.systemId);
+	public parseFromBox(box: Pssh, rawBox?: ParsedBox): WidevineData | PlayreadyData | undefined {
+			const parserConstructor = this.parserConstructors.get(box.systemId);
 				if (!parserConstructor) {
 					return;
 				}
-				const drmParser = new parserConstructor(box);
+				const drmParser = new parserConstructor(box, rawBox);
 				return drmParser.parse();
 	}
 	parse(data: Uint8Array): WidevineData | PlayreadyData | undefined {
@@ -28,7 +28,7 @@ export class PsshParser {
 				if (!parserConstructor) {
 					return;
 				}
-				const drmParser = new parserConstructor(pssh);
+				const drmParser = new parserConstructor(pssh, box);
 				psshData = drmParser.parse();
 			})
 			.box("moov", Mp4Parser.children)

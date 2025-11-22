@@ -7,6 +7,7 @@ import Cea608DataChannel from "./608/cea608DataChannel.js";
 import Cea708Service from "./708/cea708Service.js";
 import type DtvccPacket from "./708/dtvccPacket.js";
 import DtvccPacketBuilder from "./708/dtvccPacketBuilder.js";
+import { getInstance as getLogger } from "../../logger.js";
 
 class CeaDecoder {
 	// An array of CEA-608 closed caption data extracted for decoding
@@ -204,7 +205,7 @@ class CeaDecoder {
 			this._shouldSetFirstPts = false;
 		}
 
-		const reader: DataViewReader = new DataViewReader(userDataSeiMessage, Endian.BIG);
+		const reader: DataViewReader = new DataViewReader(userDataSeiMessage, Endian.BIG, getLogger());
 
 		if (reader.getLength() < this._MIN_LENGTH) {
 			return;

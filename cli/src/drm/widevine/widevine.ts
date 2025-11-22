@@ -1,11 +1,13 @@
 import { fromBinary } from "@bufbuild/protobuf";
-import { DrmParser } from "../drm-system.js";
+import { DrmParser, PsshBox } from "../drm-system.js";
 import { type WidevinePsshData, WidevinePsshDataSchema } from "./gen/license-protocol_pb.js";
 import { stringify } from "uuid";
 import { DrmSystem } from "cmdt-shared";
+import { Pssh } from "../../utils/mp4/types.js";
 
 export type WidevineData = {
 	type: "widevine";
+    box?: PsshBox;
 	widevinePsshData: Omit<WidevinePsshData, 'keyIds' | 'protectionScheme' | '$typeName'> & {
 		keyIds: Array<string>;
         protectionScheme: string;
@@ -28,8 +30,18 @@ export class WidevineParser extends DrmParser<WidevineData> {
             keyIds: widevinePsshData.keyIds.map((kid) => stringify(kid)),
             protectionScheme,
         }
+        let box: PsshBox | undefined;
+        if(this.box) {
+            box = {
+                version: this.box.version,
+                flags: this.box.flags,
+                size: this.box.size,
+                keyIds: this.psshBox.kids,
+            };
+        }
 		return {
 			type: DrmSystem.WIDEVINE,
+            box,
 			widevinePsshData: friendlyPsshData,
 		};
 	}

@@ -1,5 +1,4 @@
 import type winston from "winston";
-import { getInstance as getLogger } from "../../logger.js";
 import createView from "../createView.js";
 import uint8ToString from "../uint8ToString.js";
 import { Endian, Size } from "./types.js";
@@ -8,12 +7,10 @@ class DataViewReader {
 	private _position = 0;
 	private _dataView: DataView;
 	private _littleEndian: boolean;
-	private logger: winston.Logger;
 
-	constructor(data: Uint8Array, endianess: Endian) {
+	constructor(data: Uint8Array, endianess: Endian, private logger?: winston.Logger) {
 		this._dataView = createView(data, DataView) as DataView;
 		this._littleEndian = endianess === Endian.LITTLE;
-		this.logger = getLogger();
 	}
 
 	private overflowError(): void {
@@ -24,7 +21,7 @@ class DataViewReader {
 	}
 
 	private onError(message: string): void {
-		this.logger.verbose(message);
+		this.logger?.verbose(message);
 	}
 
 	public getLength(): number {

@@ -80,7 +80,7 @@ export class PsshExtractor {
 				box.reader.setPosition(currPos);
 
 				const pssh = Mp4Parser.parsePssh(box);
-				const psshData = psshParser.parseFromBox(pssh);
+				const psshData = psshParser.parseFromBox(pssh, box);
 				if (psshData) {
 					psshDatas.push({raw, parsed: psshData});
 				}
@@ -97,7 +97,7 @@ export class PsshExtractor {
 				const raw = box.reader.readBytes(box.size);
 				box.reader.setPosition(currPos);
 				const pssh = Mp4Parser.parsePssh(box);
-				const psshData = psshParser.parseFromBox(pssh);
+				const psshData = psshParser.parseFromBox(pssh, box);
 				if (psshData) {
 					psshDatas.push({raw, parsed: psshData});
 				}
@@ -145,14 +145,17 @@ export class PsshExtractor {
 			if (candidateFromManifest === -1) {
 				report.addMismatchedContentProtection({
 					type: MismatchedContentProtectionType.Mismatch,
-					detectedInMedia: [psshBase64],
+					detectedInMedia: [{pssh: psshBase64, parsedPssh: fromMp4.parsed}],
 					segment: segmentMetadata,
 				});
 			} else if (manifest.contentProtection[candidateFromManifest]!.pssh !== psshBase64) {
 				report.addMismatchedContentProtection({
 					type: MismatchedContentProtectionType.Mismatch,
-					detectedInMedia: [psshBase64],
-					expectedInManifest: [manifest.contentProtection[candidateFromManifest]!.pssh!],
+					detectedInMedia: [{pssh: psshBase64, parsedPssh: fromMp4.parsed}],
+					expectedInManifest: [{
+						pssh: manifest.contentProtection[candidateFromManifest]!.pssh!,
+						parsedPssh: manifest.contentProtection[candidateFromManifest]!.parsedPssh,
+					}],
 					segment: segmentMetadata,
 				});
 			}

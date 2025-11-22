@@ -4,7 +4,9 @@ import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
 import { JsonEditor } from "json-edit-react";
 
-export const columns: ColumnDef<Report["mismatchedContentProtection"][0]>[] = [
+type MismatchedContentProtectionEntry = Report["mismatchedContentProtection"][0];
+
+export const columns: ColumnDef<MismatchedContentProtectionEntry>[] = [
 	{
 		accessorKey: "type",
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
@@ -16,14 +18,14 @@ export const columns: ColumnDef<Report["mismatchedContentProtection"][0]>[] = [
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Detected in Media" />,
 		enableHiding: true,
 		sortingFn: "basic",
-        cell: ({ row }) => <div className="text-wrap">{row.getValue('detectedInMedia')}</div>
+        cell: ({ row }) => <JsonEditor data={row.getValue('detectedInMedia')} viewOnly={true} />
 	},
 	{
-		accessorKey: "detectedInManifest",
+		accessorKey: "expectedInManifest",
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Expected in Manifest" />,
 		enableHiding: true,
 		sortingFn: "basic",
-		cell: ({ row }) => <div className="text-wrap">{row.getValue('detectedInManifest')}</div>
+		cell: ({ row }) => <JsonEditor data={row.getValue('expectedInManifest')} viewOnly={true} />
 	},
 	{
 		accessorKey: "segment",
