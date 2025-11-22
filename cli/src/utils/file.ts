@@ -13,4 +13,3 @@ export async function canAccessFile(filePath: string): Promise<boolean> {
 		return false;
 	}
 }
-

@@ -40,4 +40,3 @@ class PsshExtractorPlugin extends Plugin {
 export default function load(manifest: Manifest, report: Report, downloads: DownloadQueue): Plugin {
 	return new PsshExtractorPlugin(manifest, report, downloads);
 }
-

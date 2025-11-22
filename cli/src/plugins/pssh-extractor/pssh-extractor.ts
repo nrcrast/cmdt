@@ -1,18 +1,18 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import cliProgress from "cli-progress";
-import { Manifest, MediaType, MismatchedContentProtectionType, type Segment } from "cmdt-shared";
+import { type Manifest, MediaType, MismatchedContentProtectionType, type Segment } from "cmdt-shared";
 import type winston from "winston";
 import { getOpts } from "../../cli-opts.js";
 import type { DownloadEntry, DownloadQueue } from "../../download-queue.js";
+import type { PlayreadyData } from "../../drm/playready/playready.js";
+import { PsshParser } from "../../drm/pssh.js";
+import type { WidevineData } from "../../drm/widevine/widevine.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
+import { canAccessFile } from "../../utils/file.js";
 import Mp4Parser from "../../utils/mp4/parser.js";
 import type { ParsedBox } from "../../utils/mp4/types.js";
-import { PsshParser } from "../../drm/pssh.js";
-import { canAccessFile } from "../../utils/file.js";
-import type { PlayreadyData } from "../../drm/playready/playready.js";
-import type { WidevineData } from "../../drm/widevine/widevine.js";
 
 export class PsshExtractor {
 	private logger: winston.Logger;
@@ -20,7 +20,11 @@ export class PsshExtractor {
 		this.logger = getLogger();
 	}
 
-	public async extractPsshFromDownloadedSegments(manifest: Manifest, downloads: DownloadQueue, report: Report): Promise<void> {
+	public async extractPsshFromDownloadedSegments(
+		manifest: Manifest,
+		downloads: DownloadQueue,
+		report: Report,
+	): Promise<void> {
 		this.logger.info("Extracting pssh boxes...");
 		const showProgress = ["info", "debug"].includes(getOpts().logLevel);
 		const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -64,8 +68,11 @@ export class PsshExtractor {
 		this.validateContentProtection(manifest, psshDatas, segmentMetadata, report);
 	}
 
-	private async extractPsshData(initSegment: Buffer, segment: Buffer): Promise<Array<{raw: Uint8Array; parsed: WidevineData | PlayreadyData}>> {
-		const psshDatas: Array<{raw: Uint8Array; parsed: WidevineData | PlayreadyData}> = [];
+	private async extractPsshData(
+		initSegment: Buffer,
+		segment: Buffer,
+	): Promise<Array<{ raw: Uint8Array; parsed: WidevineData | PlayreadyData }>> {
+		const psshDatas: Array<{ raw: Uint8Array; parsed: WidevineData | PlayreadyData }> = [];
 		const psshParser = new PsshParser();
 		const mp4Parser = new Mp4Parser();
 
@@ -74,7 +81,7 @@ export class PsshExtractor {
 			.fullBox("pssh", (box: ParsedBox) => {
 				// Grab the whole box data
 				const currPos = box.reader.getPosition();
-				
+
 				box.reader.setPosition(box.start);
 				const raw = box.reader.readBytes(box.size);
 				box.reader.setPosition(currPos);
@@ -82,7 +89,7 @@ export class PsshExtractor {
 				const pssh = Mp4Parser.parsePssh(box);
 				const psshData = psshParser.parseFromBox(pssh, box);
 				if (psshData) {
-					psshDatas.push({raw, parsed: psshData});
+					psshDatas.push({ raw, parsed: psshData });
 				}
 			})
 			.box("moov", Mp4Parser.children)
@@ -99,7 +106,7 @@ export class PsshExtractor {
 				const pssh = Mp4Parser.parsePssh(box);
 				const psshData = psshParser.parseFromBox(pssh, box);
 				if (psshData) {
-					psshDatas.push({raw, parsed: psshData});
+					psshDatas.push({ raw, parsed: psshData });
 				}
 			})
 			.box("moov", Mp4Parser.children)
@@ -110,13 +117,15 @@ export class PsshExtractor {
 
 	private validateContentProtection(
 		manifest: Manifest,
-		psshDatas: Array<{raw: Uint8Array; parsed: WidevineData | PlayreadyData}>,
+		psshDatas: Array<{ raw: Uint8Array; parsed: WidevineData | PlayreadyData }>,
 		segmentMetadata: Segment,
 		report: Report,
 	): void {
 		const manifestProtectionIds = segmentMetadata.contentProtectionIds;
 		const psshBase64s = psshDatas.map((e) => Buffer.from(e.raw).toString("base64"));
-		const manifestPsshBase64s = manifestProtectionIds?.map((id) => manifest.contentProtection[id]!.pssh!);
+		const manifestPsshBase64s = manifestProtectionIds
+			?.map((id) => manifest.contentProtection[id]?.pssh)
+			.filter((e) => e !== undefined) as Array<string>;
 
 		// Case 1: PSSH data found in MP4 but no content protection IDs in manifest
 		if (psshDatas.length && !manifestProtectionIds) {
@@ -139,27 +148,28 @@ export class PsshExtractor {
 		}
 
 		// Case 3: Both exist - validate each PSSH from MP4 against manifest
-		psshDatas.forEach((fromMp4, i) => {
+		psshDatas.forEach((fromMp4) => {
 			const psshBase64 = Buffer.from(fromMp4.raw).toString("base64");
-			const candidateFromManifest = manifest.contentProtection.findIndex((e) => e.type === fromMp4.parsed.type);
-			if (candidateFromManifest === -1) {
+			const candidateFromManifest = manifest.contentProtection.find((e) => e.type === fromMp4.parsed.type);
+			if (!candidateFromManifest || !candidateFromManifest.pssh) {
 				report.addMismatchedContentProtection({
 					type: MismatchedContentProtectionType.Mismatch,
-					detectedInMedia: [{pssh: psshBase64, parsedPssh: fromMp4.parsed}],
+					detectedInMedia: [{ pssh: psshBase64, parsedPssh: fromMp4.parsed }],
 					segment: segmentMetadata,
 				});
-			} else if (manifest.contentProtection[candidateFromManifest]!.pssh !== psshBase64) {
+			} else if (candidateFromManifest.pssh !== psshBase64) {
 				report.addMismatchedContentProtection({
 					type: MismatchedContentProtectionType.Mismatch,
-					detectedInMedia: [{pssh: psshBase64, parsedPssh: fromMp4.parsed}],
-					expectedInManifest: [{
-						pssh: manifest.contentProtection[candidateFromManifest]!.pssh!,
-						parsedPssh: manifest.contentProtection[candidateFromManifest]!.parsedPssh,
-					}],
+					detectedInMedia: [{ pssh: psshBase64, parsedPssh: fromMp4.parsed }],
+					expectedInManifest: [
+						{
+							pssh: candidateFromManifest.pssh,
+							parsedPssh: candidateFromManifest.parsedPssh,
+						},
+					],
 					segment: segmentMetadata,
 				});
 			}
 		});
 	}
 }
-

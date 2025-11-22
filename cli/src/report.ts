@@ -1,5 +1,12 @@
 import fs from "node:fs/promises";
-import type { Cue, Manifest, MismatchedContentProtectionEntry, Report as RawReport, Representation, Segment } from "cmdt-shared";
+import type {
+	Cue,
+	Manifest,
+	MismatchedContentProtectionEntry,
+	Report as RawReport,
+	Representation,
+	Segment,
+} from "cmdt-shared";
 import type { Emsg } from "./utils/mp4/types.js";
 
 export class Report {

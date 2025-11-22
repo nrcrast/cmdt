@@ -10,12 +10,12 @@ export class PsshParser {
 		this.parserConstructors.set(PlayreadyParser.systemId, PlayreadyParser);
 	}
 	public parseFromBox(box: Pssh, rawBox?: ParsedBox): WidevineData | PlayreadyData | undefined {
-			const parserConstructor = this.parserConstructors.get(box.systemId);
-				if (!parserConstructor) {
-					return;
-				}
-				const drmParser = new parserConstructor(box, rawBox);
-				return drmParser.parse();
+		const parserConstructor = this.parserConstructors.get(box.systemId);
+		if (!parserConstructor) {
+			return;
+		}
+		const drmParser = new parserConstructor(box, rawBox);
+		return drmParser.parse();
 	}
 	parse(data: Uint8Array): WidevineData | PlayreadyData | undefined {
 		const parser = new Mp4Parser();

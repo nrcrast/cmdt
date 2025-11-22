@@ -5,10 +5,13 @@ export type PsshBox = {
 	flags: ParsedBox["flags"];
 	size: ParsedBox["size"];
 	keyIds?: Array<string>;
-}
+};
 export abstract class DrmParser<T> {
 	public static readonly systemId: string;
-	constructor(protected psshBox: Pssh, protected box?: ParsedBox) {}
+	constructor(
+		protected psshBox: Pssh,
+		protected box?: ParsedBox,
+	) {}
 
 	public abstract parse(): T;
 }

@@ -23,13 +23,15 @@ import {
 } from "dash-ts";
 import { deepmergeCustom } from "deepmerge-ts";
 import type winston from "winston";
+import type { PlayreadyData } from "../../drm/playready/playready.js";
+import { PsshParser } from "../../drm/pssh.js";
+import type { WidevineData } from "../../drm/widevine/widevine.js";
 import { getInstance as getLogger } from "../../logger.js";
 import getStreamAndLanguages from "../../utils/cea/getStreamAndLanguages.js";
+import { getDrmSystemFromSystemId } from "../../utils/drm.js";
 import { CeaSchemeUri } from "../../utils/manifest/types.js";
 import { getUrlFilePathHref, isFileUrl, wrapUrl } from "../../utils/url.js";
 import { getSegmentsFromSegmentTemplate } from "./segment-list-builder.js";
-import { PsshParser } from "../../drm/pssh.js";
-import { getDrmSystemFromSystemId } from "../../utils/drm.js";
 
 export class DashManifest implements ManifestParser {
 	private logger: winston.Logger;
@@ -67,13 +69,12 @@ export class DashManifest implements ManifestParser {
 		if (existing) {
 			return;
 		}
-		let parsedContentProtection = undefined;
-		if(candidateContentProtection.pssh) {
+		let parsedContentProtection: WidevineData | PlayreadyData | undefined;
+		if (candidateContentProtection.pssh) {
 			const psshAsBuffer = Buffer.from(candidateContentProtection.pssh, "base64");
 			parsedContentProtection = new PsshParser().parse(new Uint8Array(psshAsBuffer));
 		}
 		candidateContentProtection.parsedPssh = parsedContentProtection;
-		
 
 		this.manifest.contentProtection.push(candidateContentProtection);
 	}
@@ -225,7 +226,7 @@ export class DashManifest implements ManifestParser {
 		if (contentProtection) {
 			for (const protection of contentProtection) {
 				const contentProtectionId = this.getContentProtectionId(protection);
-				if(this.manifest.contentProtection[contentProtectionId]!.type === DrmSystem.UNKNOWN) {
+				if (this.manifest.contentProtection[contentProtectionId]?.type === DrmSystem.UNKNOWN) {
 					continue;
 				}
 				for (const segment of segments) {

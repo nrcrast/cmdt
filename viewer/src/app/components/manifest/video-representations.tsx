@@ -1,9 +1,12 @@
-import type { Representation, Report } from "cmdt-shared";
+import type { Report, Representation } from "cmdt-shared";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SegmentTable } from "./segment-table";
 
-export default function VideoRepresentations(props: { manifest: Report['manifest']; representations: Array<Representation> }) {
+export default function VideoRepresentations(props: {
+	manifest: Report["manifest"];
+	representations: Array<Representation>;
+}) {
 	return (
 		<Tabs>
 			<TabsList>

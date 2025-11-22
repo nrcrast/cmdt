@@ -1,8 +1,8 @@
+import { DrmSystem } from "cmdt-shared";
+import { getInstance as getLogger } from "../../logger.js";
 import DataViewReader from "../../utils/mp4/dataViewReader.js";
 import { Endian } from "../../utils/mp4/types.js";
-import { DrmParser, PsshBox } from "../drm-system.js";
-import { getInstance as getLogger } from "../../logger.js";
-import { DrmSystem } from "cmdt-shared";
+import { DrmParser, type PsshBox } from "../drm-system.js";
 
 type PlayreadyHeader = PlayreadyObjectRecord[];
 type PlayreadyObjectRecord = {
@@ -35,15 +35,15 @@ export class PlayreadyParser extends DrmParser<PlayreadyData> {
 			const type = reader.readUint16();
 			const length = reader.readUint16();
 			const rawData = reader.readBytes(length);
-			if(type !== PlayreadyHeaderType.PRH) {
+			if (type !== PlayreadyHeaderType.PRH) {
 				this.logger.debug("Skipping non-PRH data");
 				continue;
 			}
-			const data = new TextDecoder('utf-16').decode(rawData);
+			const data = new TextDecoder("utf-16").decode(rawData);
 			header.push({ type, data });
 		}
 		let box: PsshBox | undefined;
-		if(this.box) {
+		if (this.box) {
 			box = {
 				version: this.box.version,
 				flags: this.box.flags,

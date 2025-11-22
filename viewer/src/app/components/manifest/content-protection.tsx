@@ -1,8 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ContentProtection } from "cmdt-shared";
+import { JsonEditor } from "json-edit-react";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
-import { JsonEditor } from "json-edit-react";
 
 export const columns: ColumnDef<ContentProtection>[] = [
 	{
@@ -22,14 +22,14 @@ export const columns: ColumnDef<ContentProtection>[] = [
 		header: ({ column }) => <DataTableColumnHeader column={column} title="PSSH" />,
 		enableHiding: true,
 		sortingFn: "basic",
-		cell: ({ row }) => <div className="text-wrap">{row.getValue('pssh')}</div>
+		cell: ({ row }) => <div className="text-wrap">{row.getValue("pssh")}</div>,
 	},
 	{
 		accessorKey: "parsedPssh",
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Parsed PSSH" />,
 		enableHiding: true,
 		sortingFn: "basic",
-		cell: ({ row }) => <JsonEditor data={row.getValue('parsedPssh')} viewOnly={true} />
+		cell: ({ row }) => <JsonEditor data={row.getValue("parsedPssh")} viewOnly={true} />,
 	},
 ];
 
@@ -40,6 +40,6 @@ const defaultVisibleColumns = {
 	pssh: false,
 };
 
-export default function ContentProtection(props: { contentProtection: Array<ContentProtection> }) {
+export default function ContentProtectionDetails(props: { contentProtection: Array<ContentProtection> }) {
 	return <DataTable columns={columns} data={props.contentProtection} defaultVisibleColumns={defaultVisibleColumns} />;
 }

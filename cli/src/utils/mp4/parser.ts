@@ -1,8 +1,8 @@
 import { stringify } from "uuid";
+import type winston from "winston";
 import createView from "../createView.js";
 import hexToUint8 from "../hexToUint8.js";
 import type { SchemeUri } from "../manifest/types.js";
-
 import DataViewReader from "./dataViewReader.js";
 import type {
 	Elst,
@@ -22,7 +22,6 @@ import type {
 	Trun,
 } from "./types.js";
 import { BoxFormat, Endian, Size } from "./types.js";
-import winston from "winston";
 
 type CallbackType = (box: ParsedBox) => void;
 

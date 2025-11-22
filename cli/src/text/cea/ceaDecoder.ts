@@ -1,4 +1,5 @@
 import type { Cue } from "cmdt-shared";
+import { getInstance as getLogger } from "../../logger.js";
 import { CeaSchemeUri } from "../../utils/manifest/types.js";
 import DataViewReader from "../../utils/mp4/dataViewReader.js";
 import { Endian } from "../../utils/mp4/types.js";
@@ -7,7 +8,6 @@ import Cea608DataChannel from "./608/cea608DataChannel.js";
 import Cea708Service from "./708/cea708Service.js";
 import type DtvccPacket from "./708/dtvccPacket.js";
 import DtvccPacketBuilder from "./708/dtvccPacketBuilder.js";
-import { getInstance as getLogger } from "../../logger.js";
 
 class CeaDecoder {
 	// An array of CEA-608 closed caption data extracted for decoding

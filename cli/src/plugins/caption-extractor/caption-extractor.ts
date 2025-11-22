@@ -8,8 +8,8 @@ import { getOpts } from "../../cli-opts.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import CeaParser from "../../text/cea/parser.js";
-import { CeaSchemeUri } from "../../utils/manifest/types.js";
 import { canAccessFile } from "../../utils/file.js";
+import { CeaSchemeUri } from "../../utils/manifest/types.js";
 
 export type Captions = Record<string, { stream: string; cues: Array<Cue> }>;
 

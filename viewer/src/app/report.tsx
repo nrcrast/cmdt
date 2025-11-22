@@ -4,13 +4,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AudioRepresentations from "./components/manifest/audio-representations";
 import Captions from "./components/manifest/captions";
+import ContentProtection from "./components/manifest/content-protection";
 import DashIfConformance from "./components/manifest/dash-if-conformance";
 import ImageRepresentations from "./components/manifest/image-representations";
+import MismatchedContentProtection from "./components/manifest/mismatched-content-protection";
 import MissingCaptions from "./components/manifest/missing-captions";
 import Periods from "./components/manifest/periods";
 import VideoRepresentations from "./components/manifest/video-representations";
-import ContentProtection from "./components/manifest/content-protection";
-import MismatchedContentProtection from "./components/manifest/mismatched-content-protection";
 
 export default function Report(props: { rawReport: ReportData }) {
 	const { rawReport } = props;

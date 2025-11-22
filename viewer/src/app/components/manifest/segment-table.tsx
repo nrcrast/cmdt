@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { DrmSystem, type Report, type Segment } from "cmdt-shared";
+import type { Report, Segment } from "cmdt-shared";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
 
@@ -80,13 +80,16 @@ const defaultVisibleColumns = {
 	contentProtection: true,
 };
 
-export function SegmentTable(props: { manifest: Report['manifest']; segments: Array<Segment> }) {
+export function SegmentTable(props: { manifest: Report["manifest"]; segments: Array<Segment> }) {
 	const hydratedSegments = props.segments.map((segment) => {
 		return {
 			...segment,
-			contentProtection: segment.contentProtectionIds?.map((id) => {
-				return `${props.manifest.contentProtection[id].type}(${id})`;
-		}).join(" | ") ?? 'None'
+			contentProtection:
+				segment.contentProtectionIds
+					?.map((id) => {
+						return `${props.manifest.contentProtection[id].type}(${id})`;
+					})
+					.join(" | ") ?? "None",
 		};
 	});
 	return <DataTable columns={columns} data={hydratedSegments} defaultVisibleColumns={defaultVisibleColumns} />;
