@@ -15,7 +15,11 @@ export class PsshParser {
 			return;
 		}
 		const drmParser = new parserConstructor(box, rawBox);
-		return drmParser.parse();
+		try {
+			return drmParser.parse();
+		} catch (e) {
+			console.error(e);
+		}
 	}
 	parse(data: Uint8Array): WidevineData | PlayreadyData | undefined {
 		const parser = new Mp4Parser();

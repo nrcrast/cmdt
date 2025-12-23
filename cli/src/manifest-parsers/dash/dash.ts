@@ -72,7 +72,12 @@ export class DashManifest implements ManifestParser {
 		let parsedContentProtection: WidevineData | PlayreadyData | undefined;
 		if (candidateContentProtection.pssh) {
 			const psshAsBuffer = Buffer.from(candidateContentProtection.pssh, "base64");
-			parsedContentProtection = new PsshParser().parse(new Uint8Array(psshAsBuffer));
+			try {
+				parsedContentProtection = new PsshParser().parse(new Uint8Array(psshAsBuffer));
+			} catch(e) {
+				this.logger.warn(`Failed to parse pssh: ${e}`);
+			}
+			
 		}
 		candidateContentProtection.parsedPssh = parsedContentProtection;
 
