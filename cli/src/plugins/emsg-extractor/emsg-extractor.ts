@@ -26,16 +26,13 @@ export class EmsgExtractor {
 		}
 		for (const download of downloads.getEntries()) {
 			const segmentMetadata = download.segment;
-			if (download.representation.type !== MediaType.Video || !segmentMetadata) {
+			if (!segmentMetadata) {
 				if (showProgress) {
 					progress.increment();
 				}
 				continue;
 			}
 			const segmentPath = path.resolve(download.destDir, download.destFile);
-			if (!(await canAccessFile(segmentPath))) {
-				continue;
-			}
 
 			const segment = await fs.readFile(segmentPath);
 

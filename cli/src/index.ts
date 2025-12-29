@@ -31,9 +31,14 @@ async function fetchAndWriteManifest(uri: string): Promise<string> {
 	}
 	logger.info(`Fetching manifest from ${uri}`);
 	try {
-		const response = await axios.get(uri);
 		const parsedUrl = wrapUrl(uri);
 		const existingExtension = getExtensionFromUrl(parsedUrl) ?? "mpd";
+		const manifestPath = path.resolve(options.output, `manifest.${existingExtension}`);
+		if(options.skipDownload) {
+			logger.info(`Skipping download. Using ${manifestPath}`);
+			return fs.readFile(manifestPath, "utf-8");
+		}
+		const response = await axios.get(uri);
 		await fs.writeFile(path.resolve(options.output, `manifest.${existingExtension}`), response.data);
 		return response.data;
 	} catch (e) {
