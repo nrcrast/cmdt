@@ -132,7 +132,8 @@ class Mp4Parser {
 		let id: number;
 		let eventDuration: number;
 		let timescale: number;
-		let presentationTimeDelta: number;
+		let presentationTimeDelta: number | undefined = undefined;
+		let presentationTime: number | undefined = undefined;
 		let schemeIdUri: string;
 		let value: string;
 		if (version === 0) {
@@ -144,7 +145,7 @@ class Mp4Parser {
 			id = reader.readUint32();
 		} else {
 			timescale = reader.readUint32();
-			presentationTimeDelta = reader.readUint64();
+			presentationTime = reader.readUint64();
 			eventDuration = reader.readUint32();
 			id = reader.readUint32();
 			schemeIdUri = reader.readTerminatedString();
@@ -160,6 +161,7 @@ class Mp4Parser {
 			eventDuration,
 			timescale,
 			presentationTimeDelta,
+			presentationTime,
 			schemeIdUri,
 			value,
 			messageData,

@@ -30,7 +30,8 @@ export type Emsg = {
 	id: number;
 	eventDuration: number;
 	timescale: number;
-	presentationTimeDelta: number;
+	presentationTimeDelta?: number;
+	presentationTime?: number;
 	schemeIdUri: string;
 	value: string;
 	messageData: Uint8Array | string;
