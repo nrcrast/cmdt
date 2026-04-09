@@ -74,10 +74,9 @@ export class DashManifest implements ManifestParser {
 			const psshAsBuffer = Buffer.from(candidateContentProtection.pssh, "base64");
 			try {
 				parsedContentProtection = new PsshParser().parse(new Uint8Array(psshAsBuffer));
-			} catch(e) {
+			} catch (e) {
 				this.logger.warn(`Failed to parse pssh: ${e}`);
 			}
-			
 		}
 		candidateContentProtection.parsedPssh = parsedContentProtection;
 

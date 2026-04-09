@@ -54,23 +54,16 @@ export class GapChecker {
 	}
 
 	private async getSegmentInfo(segment: Segment): Promise<{ decodeTime: number; duration: number }> {
-		if (!segment.fileSystemPath || !segment.initSegmentFilesystemPath) {
-			throw new Error("Segment does not have a file system path");
-		}
-		const [initSegmentAccessible, segmentAccessible] = await Promise.all([
-			canAccessFile(segment.initSegmentFilesystemPath),
-			canAccessFile(segment.fileSystemPath),
+		const [initSegmentData, segmentData] = await Promise.all([
+			segment.initSegment?.getData(),
+			segment.media?.getData(),
 		]);
-		if (!initSegmentAccessible || !segmentAccessible) {
-			this.logger.error(
-				`Files do not exist for segment ${segment.url}. Expected ${segment.fileSystemPath} and ${segment.initSegmentFilesystemPath}`,
-			);
+		if (!initSegmentData || !segmentData) {
+			this.logger.error(`Failed to get segment info for ${segment.url}`);
 			return { decodeTime: 0, duration: 0 };
 		}
-		const initSegment = await fs.readFile(segment.initSegmentFilesystemPath);
-		const segmentData = await fs.readFile(segment.fileSystemPath);
 
-		const timescalesPerTrack = this.getTimescaleForTracks(initSegment);
+		const timescalesPerTrack = this.getTimescaleForTracks(Buffer.from(initSegmentData));
 
 		let timescale = 1000; // Default
 		let baseMediaDecodeTime = 0;

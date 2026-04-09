@@ -8,7 +8,6 @@ import { getOpts } from "../../cli-opts.js";
 import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import CeaParser from "../../text/cea/parser.js";
-import { canAccessFile } from "../../utils/file.js";
 import { CeaSchemeUri } from "../../utils/manifest/types.js";
 
 export type Captions = Record<string, { stream: string; cues: Array<Cue> }>;
@@ -43,32 +42,31 @@ export class CaptionExtractor {
 				if (showProgress) {
 					captionsProgress.increment();
 				}
-				if (!segment.initSegmentFilesystemPath || !segment.fileSystemPath) {
+				if (!segment.initSegment || !segment.media) {
 					continue;
 				}
-				const [initSegmentAccessible, segmentAccessible] = await Promise.all([
-					canAccessFile(segment.initSegmentFilesystemPath),
-					canAccessFile(segment.fileSystemPath),
+				const [initSegmentData, segmentData] = await Promise.all([
+					segment.initSegment.getData(),
+					segment.media.getData(),
 				]);
-				if (!initSegmentAccessible || !segmentAccessible) {
+				if (!initSegmentData || !segmentData) {
 					continue;
 				}
 				let parser: CeaParser | undefined;
 
-				if (!parsers.has(segment.initSegmentFilesystemPath)) {
+				if (!parsers.has(segment.initSegment?.url.href)) {
 					parser = new CeaParser();
 					try {
-						const initSegment = await fs.readFile(path.resolve(segment.initSegmentFilesystemPath));
+						const initSegment = initSegmentData;
 						parser.parse({ data: new Uint8Array(initSegment).buffer, id: 0, periodId: "0" }, captionUri);
-						parsers.set(segment.initSegmentFilesystemPath, parser);
+						parsers.set(segment.initSegment.url.href, parser);
 					} catch (e) {
 						parser = new CeaParser();
 						this.logger.warn(`Failed to parse init segment: ${e}`);
 					}
 				}
 
-				parser = parsers.get(segment.initSegmentFilesystemPath);
-				const segmentData = await fs.readFile(path.resolve(segment.fileSystemPath));
+				parser = parsers.get(segment.initSegment.url.href);
 				let captions: Array<Cue> = [];
 				try {
 					captions =

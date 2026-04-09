@@ -34,7 +34,7 @@ async function fetchAndWriteManifest(uri: string): Promise<string> {
 		const parsedUrl = wrapUrl(uri);
 		const existingExtension = getExtensionFromUrl(parsedUrl) ?? "mpd";
 		const manifestPath = path.resolve(options.output, `manifest.${existingExtension}`);
-		if(options.skipDownload) {
+		if (options.skipDownload) {
 			logger.info(`Skipping download. Using ${manifestPath}`);
 			return fs.readFile(manifestPath, "utf-8");
 		}

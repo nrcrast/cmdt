@@ -10,6 +10,7 @@ import { secondsToMilliseconds } from "../../utils/time-utils.js";
 import { wrapUrl } from "../../utils/url.js";
 import type { MediaPlaylist } from "./types.js";
 import { parseAttributes, parseBooleanAttribute } from "./utils.js";
+import { FilesystemDownloadableChunk } from "../../downloader.js";
 export abstract class HydratablePlaylist {
 	public playlist?: MediaPlaylist;
 	private currentStartTime = 0;
@@ -129,7 +130,10 @@ export abstract class HydratablePlaylist {
 			duration: secondsToMilliseconds(Number.parseFloat(duration)),
 			startTime: secondsToMilliseconds(this.currentStartTime),
 			url: new URL(url),
-			initSegmentUrl: this.currentInitSegmentUri ? new URL(this.currentInitSegmentUri) : undefined,
+			initSegment: this.currentInitSegmentUri
+				? new FilesystemDownloadableChunk(new URL(this.currentInitSegmentUri))
+				: undefined,
+			media: new FilesystemDownloadableChunk(new URL(url)),
 		};
 		return segment;
 	}

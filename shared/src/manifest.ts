@@ -6,15 +6,20 @@ export abstract class ManifestParser {
 	abstract parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest>;
 }
 
+export abstract class DownloadableChunk {
+	constructor(public url: URL) {}
+	abstract download(): Promise<void>;
+	abstract getData(): Promise<ArrayBuffer>;
+}
+
 export type Segment = {
 	/* Start time in milliseconds */
 	startTime: number;
 	/* Duration in milliseconds */
 	duration: number;
 	url: URL;
-	initSegmentUrl?: URL;
-	fileSystemPath?: string;
-	initSegmentFilesystemPath?: string;
+	initSegment?: DownloadableChunk;
+	media?: DownloadableChunk;
 	/* Base media decode time in milliseconds */
 	baseMediaDecodeTime?: number;
 	/**

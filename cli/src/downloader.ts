@@ -1,15 +1,48 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { PromisePool } from "@supercharge/promise-pool";
-import axios from "axios";
 import cliProgress from "cli-progress";
-import type { Manifest } from "cmdt-shared";
-import { mkdirp } from "mkdirp";
+import { DownloadableChunk, type Manifest } from "cmdt-shared";
 import type winston from "winston";
 import { getOpts } from "./cli-opts.js";
 import { type DownloadEntry, DownloadQueue } from "./download-queue.js";
 import { getInstance as getLogger } from "./logger.js";
 import { canAccessFile } from "./utils/file.js";
+import { mkdirp } from "mkdirp";
+import axios from "axios";
+import { getUrlFilePath } from "./utils/url.js";
+
+export class FilesystemDownloadableChunk extends DownloadableChunk {
+	public destPath: string;
+	public destFile: string;
+	constructor(url: URL) {
+		super(url);
+		let uriPath = url.pathname;
+		if (uriPath.startsWith("/")) {
+			uriPath = uriPath.substring(1);
+		}
+		const dlDirBase = path.resolve(getOpts().output, "segments");
+		this.destPath = path.resolve(dlDirBase, getUrlFilePath(url));
+		this.destFile = uriPath.split("/").pop() ?? "";
+	}
+	public async download(): Promise<void> {
+		const destPath = path.resolve(this.destPath, this.destFile);
+		const dir = path.dirname(destPath);
+		await mkdirp(dir);
+		const exists = await canAccessFile(destPath);
+		if (exists) {
+			return;
+		}
+		const response = await axios.get(this.url.href, {
+			responseType: "arraybuffer",
+		});
+
+		await fs.writeFile(destPath, response.data);
+	}
+	public async getData(): Promise<ArrayBuffer> {
+		return (await fs.readFile(this.destPath)).buffer.slice(0);
+	}
+}
 
 export class SegmentDownloader {
 	private queue?: DownloadQueue;
@@ -46,30 +79,11 @@ export class SegmentDownloader {
 			.for(this.queue?.getEntries() ?? [])
 			// biome-ignore lint/suspicious/noExplicitAny: error type
 			.handleError(async (error: any, download: DownloadEntry) => {
-				this.logger.error(`Error downloading segment: ${download.url}`, error);
+				this.logger.error(`Error downloading segment: ${download.segment}`, error);
 			})
-			.process(async (download: DownloadEntry) => {
-				const dir = path.dirname(path.resolve(download.destDir, download.destFile));
-				await mkdirp(dir);
-
-				const exists = await canAccessFile(path.resolve(download.destDir, download.destFile));
-
-				if (exists) {
-					this.logger.warn(
-						`File already exists: ${path.resolve(download.destDir, download.destFile)}. Skipping download.`,
-					);
-					if (showProgress) {
-						downloadProgressBar.increment();
-					}
-					return;
-				}
-
-				const response = await axios.get(download.url, {
-					responseType: "arraybuffer",
-				});
-
-				await fs.writeFile(path.resolve(download.destDir, download.destFile), response.data);
-
+			.process(async (entry: DownloadEntry) => {
+				await entry.segment.initSegment?.download();
+				await entry.segment.media?.download();
 				if (showProgress) {
 					downloadProgressBar.increment();
 				}

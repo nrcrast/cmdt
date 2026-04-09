@@ -32,9 +32,13 @@ export class EmsgExtractor {
 				}
 				continue;
 			}
-			const segmentPath = path.resolve(download.destDir, download.destFile);
-
-			const segment = await fs.readFile(segmentPath);
+			const segment = await segmentMetadata.media?.getData();
+			if (!segment) {
+				if (showProgress) {
+					progress.increment();
+				}
+				continue;
+			}
 
 			mp4Parser
 				.fullBox("emsg", (box: ParsedBox) => {

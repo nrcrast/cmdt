@@ -2,6 +2,7 @@ import type { Segment } from "cmdt-shared";
 import type { Representation as RawRepresentation, SegmentTemplate } from "dash-ts";
 import { secondsToMilliseconds } from "../../utils/time-utils.js";
 import { buildSegmentUrlFromTemplate } from "./utils.js";
+import { FilesystemDownloadableChunk } from "../../downloader.js";
 
 function getSegmentsFromSegmentTimeline(
 	segmentTemplate: SegmentTemplate,
@@ -25,14 +26,18 @@ function getSegmentsFromSegmentTimeline(
 		const unscaledDuration = entry.d ?? 0;
 		let calculatedT = entry.t ?? 0;
 		for (let i = 0; i < numSegments; i++) {
+			const url = buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.media);
 			segments.push({
-				initSegmentUrl: segmentTemplate.initialization
-					? buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.initialization)
+				initSegment: segmentTemplate.initialization
+					? new FilesystemDownloadableChunk(
+							buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.initialization),
+						)
 					: undefined,
 				duration: secondsToMilliseconds(unscaledDuration / timescale),
 				startTime: secondsToMilliseconds(periodStart + (tWithOffset + i * unscaledDuration) / timescale),
-				url: buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.media),
+				url,
 				rawSegmentTime: secondsToMilliseconds(((entry.t ?? 0) + i * unscaledDuration) / timescale),
+				media: new FilesystemDownloadableChunk(url),
 			});
 			calculatedT += unscaledDuration;
 			n++;
@@ -64,14 +69,18 @@ function getSegmentsWithoutTimeline(
 	let calculatedT = 0;
 
 	for (let i = 0; i < numSegments; i++) {
+		const url = buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.media);
 		segments.push({
-			initSegmentUrl: segmentTemplate.initialization
-				? buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.initialization)
+			initSegment: segmentTemplate.initialization
+				? new FilesystemDownloadableChunk(
+						buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.initialization),
+					)
 				: undefined,
 			duration: secondsToMilliseconds(durationSeconds),
 			startTime: secondsToMilliseconds(periodStart + (tWithOffset + i * unscaledDuration) / timescale),
-			url: buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.media),
+			url,
 			rawSegmentTime: secondsToMilliseconds((i * unscaledDuration) / timescale),
+			media: new FilesystemDownloadableChunk(url),
 		});
 		calculatedT += unscaledDuration;
 		n++;

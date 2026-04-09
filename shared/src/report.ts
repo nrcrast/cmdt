@@ -19,20 +19,23 @@ export enum MismatchedContentProtectionType {
 	Mismatch = "mismatch",
 }
 
-export type MismatchedContentProtectionEntry = {
-		type:  MismatchedContentProtectionType.Mismatch;
-		detectedInMedia?: {pssh: string, parsedPssh: any}[]; 
-		expectedInManifest?: {pssh: string, parsedPssh: any}[]; 
-		segment: Segment;
-	} | {
-		type: MismatchedContentProtectionType.ManifestMissing;
-		detectedInMedia: string[]; // Base 64 encoded PSSHs
-		segment: Segment;
-	} | {
-		type: MismatchedContentProtectionType.MediaMissing;
-		expectedInManifest: string[]; // Base 64 encoded PSSHs
-		segment: Segment;
-	};
+export type MismatchedContentProtectionEntry =
+	| {
+			type: MismatchedContentProtectionType.Mismatch;
+			detectedInMedia?: { pssh: string; parsedPssh: any }[];
+			expectedInManifest?: { pssh: string; parsedPssh: any }[];
+			segment: Segment;
+	  }
+	| {
+			type: MismatchedContentProtectionType.ManifestMissing;
+			detectedInMedia: string[]; // Base 64 encoded PSSHs
+			segment: Segment;
+	  }
+	| {
+			type: MismatchedContentProtectionType.MediaMissing;
+			expectedInManifest: string[]; // Base 64 encoded PSSHs
+			segment: Segment;
+	  };
 
 export type Report = {
 	missingCues: {
@@ -62,7 +65,7 @@ export type Report = {
 	mediaStreamValidator?: Object;
 	// biome-ignore lint/complexity/noBannedTypes: The type is passthrough
 	dashConformance?: Object;
-	manifest: Omit<Manifest, "video" | "audio" | "images"| "raw"> & {
+	manifest: Omit<Manifest, "video" | "audio" | "images" | "raw"> & {
 		video: Array<Representation>;
 		audio: Array<Representation>;
 		images: Array<Representation>;
@@ -70,5 +73,5 @@ export type Report = {
 	captions?: {
 		[stream: string]: Array<Cue>;
 	};
-	mismatchedContentProtection: Array<MismatchedContentProtectionEntry>
+	mismatchedContentProtection: Array<MismatchedContentProtectionEntry>;
 };
