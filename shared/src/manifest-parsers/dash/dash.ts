@@ -33,7 +33,7 @@ import { getSegmentsFromSegmentTemplate } from "./segment-list-builder.js";
 import { ILogObj, Logger } from "tslog";
 
 export class DashManifest implements ManifestParser {
-	private logger: Logger<ILogObj>
+	private logger: Logger<ILogObj>;
 	private manifest: Manifest;
 	private baseUrl?: string;
 	private dashManifest: MPD | undefined;

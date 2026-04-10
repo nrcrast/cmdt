@@ -4,7 +4,7 @@ import {
 	MediaType,
 	type Representation,
 	UniqueRepresentationMap,
-} from "../manifest.js"
+} from "../manifest.js";
 import { wrapUrl } from "../utils/url.js";
 import { HlsParser } from "./hls/parser.js";
 import { type ExtXMedia, type ExtXStreamInf, HlsMediaType } from "./hls/types.js";

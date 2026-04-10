@@ -1,4 +1,4 @@
-import type { ImageRepresentation, Period, Report as ReportData } from "cmdt-shared";
+import type { ImageRepresentation, Period, RawReport as ReportData } from "cmdt-shared";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +6,7 @@ import AudioRepresentations from "./components/manifest/audio-representations";
 import Captions from "./components/manifest/captions";
 import ContentProtection from "./components/manifest/content-protection";
 import DashIfConformance from "./components/manifest/dash-if-conformance";
+import Emsgs from "./components/manifest/emsgs";
 import ImageRepresentations from "./components/manifest/image-representations";
 import MismatchedContentProtection from "./components/manifest/mismatched-content-protection";
 import MissingCaptions from "./components/manifest/missing-captions";
@@ -23,6 +24,7 @@ export default function Report(props: { rawReport: ReportData }) {
 					<TabsTrigger value="dash-if-conformance">DASH-IF Conformance</TabsTrigger>
 					<TabsTrigger value="mismatched-content-protection">Mismatched Content Protection</TabsTrigger>
 					<TabsTrigger value="captions">Captions</TabsTrigger>
+					<TabsTrigger value="emsgs">EMSGs</TabsTrigger>
 				</TabsList>
 				<TabsContent value="manifest">
 					<Accordion type="single" collapsible className="w-full">
@@ -69,6 +71,9 @@ export default function Report(props: { rawReport: ReportData }) {
 				</TabsContent>
 				<TabsContent value="captions">
 					<Captions report={rawReport} />
+				</TabsContent>
+				<TabsContent value="emsgs">
+					<Emsgs report={rawReport} />
 				</TabsContent>
 			</Tabs>
 		</div>

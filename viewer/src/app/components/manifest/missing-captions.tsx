@@ -1,4 +1,4 @@
-import type { Cue, Report } from "cmdt-shared";
+import type { Cue, RawReport as Report } from "cmdt-shared";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { H4 } from "@/components/ui/typography";

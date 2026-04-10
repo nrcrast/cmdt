@@ -1,6 +1,11 @@
 import getParsedCaption from "../../../../utils/cea/getParsedCaption.js";
 import createEmptyRegion from "../../../../utils/createEmptyRegion.js";
-import { DEFAULT_BG_COLOR, DEFAULT_TXT_COLOR, LINE_HEIGHT_MULTIPLIER, LINE_WIDTH_MULTIPLIER_16_9 } from "../../../../utils/textConstants.js";
+import {
+	DEFAULT_BG_COLOR,
+	DEFAULT_TXT_COLOR,
+	LINE_HEIGHT_MULTIPLIER,
+	LINE_WIDTH_MULTIPLIER_16_9,
+} from "../../../../utils/textConstants.js";
 import { AnchorId, type StyledChar, TextJustification } from "../../../../utils/text/types.js";
 import { Cue, Region } from "../../../../cue.js";
 

@@ -1,33 +1,42 @@
 import type { ImageRepresentation } from "cmdt-shared";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ImageSegmentTable } from "./image-segment-table";
 
 export default function ImageRepresentations(props: { representations: Array<ImageRepresentation> }) {
-	const reps = props.representations.map((representation) => {
+	// Handle empty state
+	if (!props.representations || props.representations.length === 0) {
 		return (
-			<TableRow key={representation.id}>
-				<TableCell className="font-medium">{representation.id}</TableCell>
-				<TableCell>{representation.bandwidth}</TableCell>
-				<TableCell>
-					{representation.width}x{representation.height}
-				</TableCell>
-				<TableCell>
-					{representation.imageRows}x{representation.imageCols}
-				</TableCell>
-			</TableRow>
+			<div className="flex items-center justify-center p-8 text-muted-foreground">No image representations found</div>
 		);
-	});
+	}
+
 	return (
-		<Table>
-			<TableHeader>
-				<TableRow>
-					<TableHead className="w-[100px]">ID</TableHead>
-					<TableHead>Bandwidth</TableHead>
-					<TableHead>Resolution</TableHead>
-					<TableHead>Grid Dimensions</TableHead>
-				</TableRow>
-			</TableHeader>
-			<TableBody>{reps}</TableBody>
-		</Table>
+		<Tabs defaultValue={props.representations[0]?.id}>
+			<TabsList>
+				{props.representations.map((representation) => (
+					<TabsTrigger value={representation.id} key={`trigger-${representation.id}`}>
+						{representation.id}
+					</TabsTrigger>
+				))}
+			</TabsList>
+			{props.representations.map((representation) => (
+				<TabsContent value={representation.id} key={`content-${representation.id}`}>
+					<ul className="mb-4">
+						<li>Type: {representation.type}</li>
+						<li>Bandwidth: {representation.bandwidth}</li>
+						<li>
+							Resolution: {representation.width}x{representation.height}
+						</li>
+						<li>
+							Grid: {representation.imageRows}x{representation.imageCols} (
+							{representation.imageRows * representation.imageCols} thumbnails per sheet)
+						</li>
+						<li>Segments: {representation.segments.length}</li>
+					</ul>
+					<ImageSegmentTable segments={representation.segments} />
+				</TabsContent>
+			))}
+		</Tabs>
 	);
 }

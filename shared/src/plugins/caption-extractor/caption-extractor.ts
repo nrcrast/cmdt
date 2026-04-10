@@ -9,66 +9,56 @@ export type Captions = Record<string, { stream: string; cues: Array<Cue> }>;
 
 export class CaptionExtractor extends Plugin {
 	private captions: Captions = {};
-	constructor(
-		manifest: Manifest,
-		report: Report,
-	) {
+	constructor(manifest: Manifest, report: Report) {
 		super(manifest, report, "caption-extractor");
 	}
 	public override async processSegment(segment: Segment, representation: Representation): Promise<void> {
-		
-		if(!representation.hasCaptions.cea608 && !representation.hasCaptions.cea708) {
+		if (!representation.hasCaptions.cea608 && !representation.hasCaptions.cea708) {
 			return;
 		}
 
-			const captionUri = representation.hasCaptions.cea608 ? CeaSchemeUri.CEA608 : CeaSchemeUri.CEA708;
-			const parsers = new Map<string, CeaParser>();
-	
-				if (!segment.initSegment || !segment.media) {
-					return;
-				}
-				const [initSegmentData, segmentData] = await Promise.all([
-					segment.initSegment.getData(),
-					segment.media.getData(),
-				]);
-				if (!initSegmentData || !segmentData) {
-					return;
-				}
-				let parser: CeaParser | undefined;
+		const captionUri = representation.hasCaptions.cea608 ? CeaSchemeUri.CEA608 : CeaSchemeUri.CEA708;
+		const parsers = new Map<string, CeaParser>();
 
-				if (!parsers.has(segment.initSegment?.url.href)) {
-					parser = new CeaParser();
-					try {
-						const initSegment = initSegmentData;
-						parser.parse({ data: new Uint8Array(initSegment).buffer, id: 0, periodId: "0" }, captionUri);
-						parsers.set(segment.initSegment.url.href, parser);
-					} catch (e) {
-						parser = new CeaParser();
-						this.logger.warn(`Failed to parse init segment: ${e}`);
-					}
-				}
+		if (!segment.initSegment || !segment.media) {
+			return;
+		}
+		const [initSegmentData, segmentData] = await Promise.all([segment.initSegment.getData(), segment.media.getData()]);
+		if (!initSegmentData || !segmentData) {
+			return;
+		}
+		let parser: CeaParser | undefined;
 
-				parser = parsers.get(segment.initSegment.url.href);
-				let captions: Array<Cue> = [];
-				try {
-					captions =
-						parser?.parse(
-							{ data: new Uint8Array(segmentData).buffer, id: segment.startTime, periodId: "0" },
-							captionUri,
-						) ?? [];
-				} catch (e) {
-					this.logger.warn(`Failed to parse segment: ${e}`);
-				}
+		if (!parsers.has(segment.initSegment?.url.href)) {
+			parser = new CeaParser();
+			try {
+				const initSegment = initSegmentData;
+				parser.parse({ data: new Uint8Array(initSegment).buffer, id: 0, periodId: "0" }, captionUri);
+				parsers.set(segment.initSegment.url.href, parser);
+			} catch (e) {
+				parser = new CeaParser();
+				this.logger.warn(`Failed to parse init segment: ${e}`);
+			}
+		}
 
-				for (const caption of captions) {
-					const stream = caption.id.split("_").pop() ?? "unknown";
-					const key = `${stream}_${representation.id.replaceAll("/", "-")}`;
-					if (!this.captions[key]) {
-						this.captions[key] = { stream, cues: [] };
-					}
-					this.captions[key]?.cues.push(caption);
-				}
-			
+		parser = parsers.get(segment.initSegment.url.href);
+		let captions: Array<Cue> = [];
+		try {
+			captions =
+				parser?.parse({ data: new Uint8Array(segmentData).buffer, id: segment.startTime, periodId: "0" }, captionUri) ??
+				[];
+		} catch (e) {
+			this.logger.warn(`Failed to parse segment: ${e}`);
+		}
+
+		for (const caption of captions) {
+			const stream = caption.id.split("_").pop() ?? "unknown";
+			const key = `${stream}_${representation.id.replaceAll("/", "-")}`;
+			if (!this.captions[key]) {
+				this.captions[key] = { stream, cues: [] };
+			}
+			this.captions[key]?.cues.push(caption);
+		}
 	}
 
 	public override async finalize() {

@@ -4,7 +4,6 @@ import { Emsg } from "./utils/mp4/types.js";
 
 export type RepresentationId = string;
 
-
 export enum MismatchedContentProtectionType {
 	ManifestMissing = "manifestMissing",
 	MediaMissing = "mediaMissing",
@@ -67,7 +66,6 @@ export type RawReport = {
 	};
 	mismatchedContentProtection: Array<MismatchedContentProtectionEntry>;
 };
-
 
 export class Report {
 	private raw: RawReport;

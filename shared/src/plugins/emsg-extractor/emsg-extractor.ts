@@ -11,26 +11,25 @@ export class EmsgExtractor extends Plugin {
 	public override async processSegment(segmentMetadata: Segment, representation: Representation): Promise<void> {
 		const mp4Parser = new Mp4Parser();
 
-			const segment = await segmentMetadata.media?.getData();
-			if (!segment) {
-				return;
-			}
-
-			mp4Parser
-				.fullBox("emsg", (box: ParsedBox) => {
-					const parsedEmsgBox: Emsg = Mp4Parser.parseEmsg(box);
-					try {
-						const strData = new TextDecoder("utf-8").decode(parsedEmsgBox.messageData as Uint8Array);
-						parsedEmsgBox.messageData = strData;
-					} catch (e) {
-						this.logger.error(`Failed to decode emsg message data: ${e}`);
-					}
-					this.report.addEsmg(representation, segmentMetadata, parsedEmsgBox);
-				})
-				.box("moov", (box: ParsedBox) => {
-					Mp4Parser.children(box);
-				})
-				.parse(new Uint8Array(segment).buffer);
-
+		const segment = await segmentMetadata.media?.getData();
+		if (!segment) {
+			return;
 		}
+
+		mp4Parser
+			.fullBox("emsg", (box: ParsedBox) => {
+				const parsedEmsgBox: Emsg = Mp4Parser.parseEmsg(box);
+				try {
+					const strData = new TextDecoder("utf-8").decode(parsedEmsgBox.messageData as Uint8Array);
+					parsedEmsgBox.messageData = strData;
+				} catch (e) {
+					this.logger.error(`Failed to decode emsg message data: ${e}`);
+				}
+				this.report.addEsmg(representation, segmentMetadata, parsedEmsgBox);
+			})
+			.box("moov", (box: ParsedBox) => {
+				Mp4Parser.children(box);
+			})
+			.parse(new Uint8Array(segment).buffer);
+	}
 }

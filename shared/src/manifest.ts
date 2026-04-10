@@ -17,7 +17,7 @@ export abstract class DownloadableChunk {
 
 export class MemoryCachedChunk extends DownloadableChunk {
 	public async download(): Promise<void> {
-		if(SegmentCache.getInstance().get(this.url)) {
+		if (SegmentCache.getInstance().get(this.url)) {
 			return;
 		}
 		const resp = await fetch(this.url.href);
@@ -110,7 +110,7 @@ export type Representation = BaseRepresentation | ImageRepresentation;
 export class UniqueRepresentationMap extends Map<string, Representation> {
 	public add(representation: Representation) {
 		const newSegments = representation.segments.sort((a, b) => a.startTime - b.startTime);
-		if(newSegments.length > 0) {
+		if (newSegments.length > 0) {
 			newSegments[0]!.isFirstInPeriod = true;
 			newSegments[newSegments.length - 1]!.isLastInPeriod = true;
 		}

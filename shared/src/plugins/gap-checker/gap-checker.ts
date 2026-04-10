@@ -10,7 +10,7 @@ const GAP_TOLERANCE_MS = 100;
 type ParsedSegmentInfo = {
 	decodeTime: number;
 	duration: number;
-}
+};
 export class GapChecker extends Plugin {
 	private segmentInfo: Map<Segment, ParsedSegmentInfo>;
 	constructor(manifest: Manifest, report: Report) {
@@ -54,7 +54,7 @@ export class GapChecker extends Plugin {
 	}
 
 	public override async processSegment(segment: Segment, representation: Representation): Promise<void> {
-		if(![MediaType.Audio, MediaType.Video].includes(representation.type)) {
+		if (![MediaType.Audio, MediaType.Video].includes(representation.type)) {
 			return;
 		}
 		const info = await this.getSegmentInfo(segment);
@@ -136,7 +136,7 @@ export class GapChecker extends Plugin {
 		representation: Representation,
 	) {
 		const segmentInfo = this.segmentInfo.get(segment);
-		if(!segmentInfo) {
+		if (!segmentInfo) {
 			this.logger.warn(`No segment info for ${segment}`);
 			return;
 		}
@@ -156,7 +156,9 @@ export class GapChecker extends Plugin {
 		// TODO -- be smarter about this. Check for compatible segments across periods
 		if (!previousSegment.isLastInPeriod && !segment.isFirstInPeriod && this.isGap(expectedStart, segment.startTime)) {
 			report.addGap(representation, expectedStart, previousSegment, segment);
-			this.logger.warn(`Gap detected in representation ${representation.id}. Expected start: ${expectedStart} Start: ${segment.startTime}`);
+			this.logger.warn(
+				`Gap detected in representation ${representation.id}. Expected start: ${expectedStart} Start: ${segment.startTime}`,
+			);
 			this.logger.warn(JSON.stringify(previousSegment, null, 2));
 			this.logger.warn(JSON.stringify(segment, null, 2));
 		}

@@ -5,7 +5,7 @@ import { ILogObj, Logger } from "tslog";
 export type PluginArtifact = {
 	name: string;
 	content: string | ArrayBuffer;
-}
+};
 
 /**
  * Abstract base class for all CMDT plugins.
@@ -44,13 +44,11 @@ export abstract class Plugin {
 		public name: string,
 	) {
 		this.logger = new Logger<ILogObj>({
-			prefix: [name]
+			prefix: [name],
 		});
 	}
 
-	public async processSegment(segment: Segment, representation: Representation): Promise<void> {
-
-	}
+	public async processSegment(segment: Segment, representation: Representation): Promise<void> {}
 	public async finalize(): Promise<Array<PluginArtifact>> {
 		return [];
 	}

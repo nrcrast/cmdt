@@ -121,9 +121,7 @@ export abstract class HydratablePlaylist {
 			duration: secondsToMilliseconds(Number.parseFloat(duration)),
 			startTime: secondsToMilliseconds(this.currentStartTime),
 			url: new URL(url),
-			initSegment: this.currentInitSegmentUri
-				? new MemoryCachedChunk(new URL(this.currentInitSegmentUri))
-				: undefined,
+			initSegment: this.currentInitSegmentUri ? new MemoryCachedChunk(new URL(this.currentInitSegmentUri)) : undefined,
 			media: new MemoryCachedChunk(new URL(url)),
 		};
 		return segment;

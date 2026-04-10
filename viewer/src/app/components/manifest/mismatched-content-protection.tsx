@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Report } from "cmdt-shared";
+import type { RawReport as Report } from "cmdt-shared";
 import { JsonEditor } from "json-edit-react";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";

@@ -1,5 +1,3 @@
-
-
 /**
  * Converts a URI string to a URL object, handling both absolute and relative URLs.
  * @param uri - The URI string to convert

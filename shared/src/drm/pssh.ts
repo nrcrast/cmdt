@@ -1,9 +1,11 @@
+import { ILogObj, Logger } from "tslog";
 import Mp4Parser from "../utils/mp4/parser.js";
 import type { ParsedBox, Pssh } from "../utils/mp4/types.js";
 import { type PlayreadyData, PlayreadyParser } from "./playready/playready.js";
 import { type WidevineData, WidevineParser } from "./widevine/widevine.js";
 
 export class PsshParser {
+	private logger = new Logger<ILogObj>();
 	private parserConstructors = new Map<string, typeof WidevineParser | typeof PlayreadyParser>();
 	constructor() {
 		this.parserConstructors.set(WidevineParser.systemId, WidevineParser);
@@ -18,7 +20,7 @@ export class PsshParser {
 		try {
 			return drmParser.parse();
 		} catch (e) {
-			console.error(e);
+			this.logger.error(e);
 		}
 	}
 	parse(data: Uint8Array): WidevineData | PlayreadyData | undefined {

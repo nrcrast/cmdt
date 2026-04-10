@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import axios from "axios";
+import { getExtensionFromUrl, getManifestParser, Report, SegmentDownloader, wrapUrl } from "cmdt-shared";
 import { mkdirp } from "mkdirp";
 import { rimraf } from "rimraf";
 import { getOpts } from "./cli-opts.js";
-import { SegmentDownloader, Report, getManifestParser, getExtensionFromUrl, wrapUrl} from "cmdt-shared";
 import { getInstance as getLogger } from "./logger.js";
 import { loadPlugins } from "./plugins/loadPlugins.js";
 
@@ -85,29 +85,31 @@ async function processManifest(uri: string) {
 	logger.info("Manifest parsed successfully!");
 	const plugins = await loadPlugins(manifest, report);
 	const downloader = new SegmentDownloader(manifest);
-	
 
 	await downloader.start({
-		batchSize: 5, 
+		batchSize: 5,
 		onSegmentAvailable: async (segment, representation) => {
-		for (const plugin of plugins) {
-			await plugin.processSegment(segment, representation);
-		}
-		segment.media?.free();
-	},
-	onProgress: (nSegment, totalSegments) => {
-		logger.info(`Downloading segment ${nSegment} of ${totalSegments}`);
-	},
-});
+			for (const plugin of plugins) {
+				await plugin.processSegment(segment, representation);
+			}
+			segment.media?.free();
+		},
+		onProgress: (nSegment, totalSegments) => {
+			logger.info(`Downloading segment ${nSegment} of ${totalSegments}`);
+		},
+	});
 
 	logger.info("Finalizing plugins...");
 
-	for(const plugin of plugins) {
+	for (const plugin of plugins) {
 		const artifacts = await plugin.finalize();
 		for (const artifact of artifacts) {
 			const artifactPath = path.resolve(options.output, plugin.name, artifact.name);
 			await mkdirp(path.dirname(artifactPath));
-			await fs.writeFile(artifactPath, typeof(artifact.content) === "string" ? artifact.content : Buffer.from(artifact.content));
+			await fs.writeFile(
+				artifactPath,
+				typeof artifact.content === "string" ? artifact.content : Buffer.from(artifact.content),
+			);
 			logger.info(`Wrote ${artifact.name} to ${artifactPath}`);
 		}
 	}

@@ -12,13 +12,15 @@ export class PsshExtractor extends Plugin {
 		super(manifest, report, "pssh-extractor");
 	}
 	public override async processSegment(segmentMetadata: Segment, representation: Representation): Promise<void> {
-
 		// Skip non-video segments or segments without metadata
 		if (representation.type !== MediaType.Video || !segmentMetadata) {
 			return;
 		}
 
-		const [initSegment, segment] = await Promise.all([segmentMetadata.initSegment?.getData(), segmentMetadata.media?.getData()]);
+		const [initSegment, segment] = await Promise.all([
+			segmentMetadata.initSegment?.getData(),
+			segmentMetadata.media?.getData(),
+		]);
 
 		if (!initSegment || !segment) {
 			return;
