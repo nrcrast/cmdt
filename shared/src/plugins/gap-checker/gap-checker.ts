@@ -1,9 +1,9 @@
-import { MediaType, type Manifest, type Representation, type Segment } from "../../manifest.js";
+import { type Manifest, MediaType, type Representation, type Segment } from "../../manifest.js";
 import type { Report } from "../../report.js";
 import Mp4Parser from "../../utils/mp4/parser.js";
 import type { Mdhd, ParsedBox, Tfdt, Tfhd, Tkhd } from "../../utils/mp4/types.js";
 import { secondsToMilliseconds } from "../../utils/time-utils.js";
-import { Plugin, PluginArtifact } from "../plugin.js";
+import { Plugin, type PluginArtifact } from "../plugin.js";
 
 const GAP_TOLERANCE_MS = 100;
 

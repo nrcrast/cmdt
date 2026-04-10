@@ -10,10 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint:fix": "biome check --write",
     "biome": "biome format",
-    "biome:fix": "biome format --write",
-    "package": "echo 'No package script for viewer'",
-    "test": "echo 'No tests for viewer'",
-    "test:nocoverage": "echo 'No tests for viewer'"
+    "biome:fix": "biome format --write"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.7",

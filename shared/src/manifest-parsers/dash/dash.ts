@@ -1,16 +1,4 @@
 import {
-	DrmSystem,
-	getMediaTypeFromMimeType,
-	type ImageRepresentation,
-	type Manifest,
-	type ManifestParser,
-	MediaType,
-	type Period as ParsedPeriod,
-	type Representation,
-	type Segment,
-	UniqueRepresentationMap,
-} from "../../manifest.js";
-import {
 	type AdaptationSet,
 	type ContentProtection,
 	type ContentType,
@@ -22,15 +10,27 @@ import {
 	type SegmentTemplate,
 } from "dash-ts";
 import { deepmergeCustom } from "deepmerge-ts";
+import { type ILogObj, Logger } from "tslog";
 import type { PlayreadyData } from "../../drm/playready/playready.js";
 import { PsshParser } from "../../drm/pssh.js";
 import type { WidevineData } from "../../drm/widevine/widevine.js";
+import {
+	DrmSystem,
+	getMediaTypeFromMimeType,
+	type ImageRepresentation,
+	type Manifest,
+	type ManifestParser,
+	MediaType,
+	type Period as ParsedPeriod,
+	type Representation,
+	type Segment,
+	UniqueRepresentationMap,
+} from "../../manifest.js";
 import getStreamAndLanguages from "../../utils/cea/getStreamAndLanguages.js";
 import { getDrmSystemFromSystemId } from "../../utils/drm.js";
 import { CeaSchemeUri } from "../../utils/types.js";
 import { getUrlFilePathHref, isFileUrl, wrapUrl } from "../../utils/url.js";
 import { getSegmentsFromSegmentTemplate } from "./segment-list-builder.js";
-import { ILogObj, Logger } from "tslog";
 
 export class DashManifest implements ManifestParser {
 	private logger: Logger<ILogObj>;

@@ -1,13 +1,13 @@
+import type { Cue, Region } from "../../../../cue.js";
 import getParsedCaption from "../../../../utils/cea/getParsedCaption.js";
 import createEmptyRegion from "../../../../utils/createEmptyRegion.js";
+import { AnchorId, type StyledChar, TextJustification } from "../../../../utils/text/types.js";
 import {
 	DEFAULT_BG_COLOR,
 	DEFAULT_TXT_COLOR,
 	LINE_HEIGHT_MULTIPLIER,
 	LINE_WIDTH_MULTIPLIER_16_9,
 } from "../../../../utils/textConstants.js";
-import { AnchorId, type StyledChar, TextJustification } from "../../../../utils/text/types.js";
-import { Cue, Region } from "../../../../cue.js";
 
 // CEA-708 Window. Each CEA-708 service owns 8 of these.
 class Cea708Window {

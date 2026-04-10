@@ -1,7 +1,7 @@
+import type { ILogObj, Logger } from "tslog";
 import createView from "../createView.js";
 import uint8ToString from "../uint8ToString.js";
 import { Endian, Size } from "./types.js";
-import { ILogObj, Logger } from "tslog";
 
 class DataViewReader {
 	private _position = 0;

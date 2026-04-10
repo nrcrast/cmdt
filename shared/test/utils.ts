@@ -1,5 +1,5 @@
+import fs from "node:fs";
 import path from "node:path";
-import { realFs as fs } from "../__mocks__/fs.js";
 
 const __dirname = import.meta.dirname;
 

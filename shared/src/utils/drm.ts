@@ -1,6 +1,6 @@
-import { DrmSystem } from "../manifest.js";
 import { PlayreadyParser } from "../drm/playready/playready.js";
 import { WidevineParser } from "../drm/widevine/widevine.js";
+import { DrmSystem } from "../manifest.js";
 
 export function getDrmSystemFromSystemId(systemId: string): DrmSystem {
 	let cleanedSystemId = systemId;

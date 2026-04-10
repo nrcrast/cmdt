@@ -1,6 +1,6 @@
 import type { Cue } from "./cue.js";
 import type { Manifest, Representation, Segment } from "./manifest.js";
-import { Emsg } from "./utils/mp4/types.js";
+import type { Emsg } from "./utils/mp4/types.js";
 
 export type RepresentationId = string;
 

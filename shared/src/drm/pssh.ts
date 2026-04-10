@@ -1,4 +1,4 @@
-import { ILogObj, Logger } from "tslog";
+import { type ILogObj, Logger } from "tslog";
 import Mp4Parser from "../utils/mp4/parser.js";
 import type { ParsedBox, Pssh } from "../utils/mp4/types.js";
 import { type PlayreadyData, PlayreadyParser } from "./playready/playready.js";

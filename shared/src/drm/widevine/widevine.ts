@@ -1,6 +1,6 @@
 import { fromBinary } from "@bufbuild/protobuf";
-import { DrmSystem } from "../../manifest.js";
 import { stringify } from "uuid";
+import { DrmSystem } from "../../manifest.js";
 import { DrmParser, type PsshBox } from "../drm-system.js";
 import { type WidevinePsshData, WidevinePsshDataSchema } from "./gen/license-protocol_pb.js";
 

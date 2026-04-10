@@ -1,5 +1,5 @@
+import { type ILogObj, Logger } from "tslog";
 import type { Cea708ClosedCaptionByte } from "../../../../utils/text/types.js";
-import { ILogObj, Logger } from "tslog";
 
 class DtvccPacket {
 	private _pos = 0;

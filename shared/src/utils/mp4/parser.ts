@@ -1,3 +1,4 @@
+import type { ILogObj, Logger } from "tslog";
 import { stringify } from "uuid";
 import createView from "../createView.js";
 import hexToUint8 from "../hexToUint8.js";
@@ -21,7 +22,6 @@ import type {
 	Trun,
 } from "./types.js";
 import { BoxFormat, Endian, Size } from "./types.js";
-import { ILogObj, Logger } from "tslog";
 
 type CallbackType = (box: ParsedBox) => void;
 
@@ -132,8 +132,8 @@ class Mp4Parser {
 		let id: number;
 		let eventDuration: number;
 		let timescale: number;
-		let presentationTimeDelta: number | undefined = undefined;
-		let presentationTime: number | undefined = undefined;
+		let presentationTimeDelta: number | undefined;
+		let presentationTime: number | undefined;
 		let schemeIdUri: string;
 		let value: string;
 		if (version === 0) {

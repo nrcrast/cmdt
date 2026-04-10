@@ -1,3 +1,4 @@
+import { type ILogObj, Logger } from "tslog";
 import {
 	type Manifest,
 	type ManifestParser,
@@ -8,7 +9,6 @@ import {
 import { wrapUrl } from "../utils/url.js";
 import { HlsParser } from "./hls/parser.js";
 import { type ExtXMedia, type ExtXStreamInf, HlsMediaType } from "./hls/types.js";
-import { ILogObj, Logger } from "tslog";
 
 export class HlsManifest implements ManifestParser {
 	private logger: Logger<ILogObj>;

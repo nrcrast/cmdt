@@ -1,4 +1,4 @@
-import type { Report, Representation } from "cmdt-shared";
+import type { RawReport as Report, Representation } from "cmdt-shared";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SegmentTable } from "./segment-table";

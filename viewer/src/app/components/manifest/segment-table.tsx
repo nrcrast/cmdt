@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Report, Segment } from "cmdt-shared";
+import type { RawReport as Report, Segment } from "cmdt-shared";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
 import { CopyButton } from "../ui/copy-button";

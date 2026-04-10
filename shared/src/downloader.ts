@@ -1,6 +1,6 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import { Representation, Segment, type Manifest } from "../src/manifest.js";
-import { Logger, ILogObj } from "tslog";
+import { type ILogObj, Logger } from "tslog";
+import type { Manifest, Representation, Segment } from "../src/manifest.js";
 
 export class SegmentDownloader {
 	private logger: Logger<ILogObj>;

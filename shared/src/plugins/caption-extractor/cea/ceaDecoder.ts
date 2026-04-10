@@ -1,13 +1,13 @@
-import { CeaSchemeUri } from "../../../utils/types.js";
+import { type ILogObj, Logger } from "tslog";
+import type { Cue } from "../../../cue.js";
 import DataViewReader from "../../../utils/mp4/dataViewReader.js";
 import { Endian } from "../../../utils/mp4/types.js";
 import { CcType, type Cea608ClosedCaptionPacket, type Cea708ClosedCaptionByte } from "../../../utils/text/types.js";
+import { CeaSchemeUri } from "../../../utils/types.js";
 import Cea608DataChannel from "./608/cea608DataChannel.js";
 import Cea708Service from "./708/cea708Service.js";
 import type DtvccPacket from "./708/dtvccPacket.js";
 import DtvccPacketBuilder from "./708/dtvccPacketBuilder.js";
-import { ILogObj, Logger } from "tslog";
-import { Cue } from "../../../cue.js";
 
 class CeaDecoder {
 	// An array of CEA-608 closed caption data extracted for decoding

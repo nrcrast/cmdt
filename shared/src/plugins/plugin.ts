@@ -1,6 +1,6 @@
+import { type ILogObj, Logger } from "tslog";
 import type { Manifest, Representation, Segment } from "../manifest.js";
 import type { Report } from "../report.js";
-import { ILogObj, Logger } from "tslog";
 
 export type PluginArtifact = {
 	name: string;

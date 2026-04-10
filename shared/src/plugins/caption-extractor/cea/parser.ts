@@ -1,10 +1,10 @@
+import { type ILogObj, Logger } from "tslog";
 import type { Cue } from "../../../cue.js";
-import type { CeaSchemeUri, DataSegment } from "../../../utils/types.js";
 import Mp4Parser from "../../../utils/mp4/parser.js";
 import type { Frma, Mdhd, ParsedBox, Tfdt, Tfhd, Tkhd, Trex, Trun } from "../../../utils/mp4/types.js";
 import { BitstreamFormat } from "../../../utils/text/types.js";
+import type { CeaSchemeUri, DataSegment } from "../../../utils/types.js";
 import CeaDecoder from "./ceaDecoder.js";
-import { ILogObj, Logger } from "tslog";
 
 type CeaSegment = DataSegment & { periodId: string };
 

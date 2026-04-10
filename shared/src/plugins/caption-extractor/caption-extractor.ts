@@ -1,9 +1,9 @@
+import type { Cue } from "../../cue.js";
 import type { Manifest, Representation, Segment } from "../../manifest.js";
 import type { Report } from "../../report.js";
-import CeaParser from "./cea/parser.js";
 import { CeaSchemeUri } from "../../utils/types.js";
-import { Plugin, PluginArtifact } from "../plugin.js";
-import { Cue } from "../../cue.js";
+import { Plugin, type PluginArtifact } from "../plugin.js";
+import CeaParser from "./cea/parser.js";
 
 export type Captions = Record<string, { stream: string; cues: Array<Cue> }>;
 

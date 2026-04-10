@@ -1,8 +1,8 @@
-import type { Segment } from "../../manifest.js";
 import type { Representation as RawRepresentation, SegmentTemplate } from "dash-ts";
+import type { Segment } from "../../manifest.js";
+import { MemoryCachedChunk } from "../../manifest.js";
 import { secondsToMilliseconds } from "../../utils/time-utils.js";
 import { buildSegmentUrlFromTemplate } from "./utils.js";
-import { MemoryCachedChunk } from "../../manifest.js";
 
 function getSegmentsFromSegmentTimeline(
 	segmentTemplate: SegmentTemplate,

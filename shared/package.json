@@ -6,11 +6,12 @@
 	"scripts": {
 		"build": "pkgroll",
 		"lint": "biome lint && pnpm typecheck",
+		"lint:fix": "biome check --write",
 		"format": "biome format",
 		"typecheck": "tsc --noEmit",
 		"package": "echo 'No package script for shared'",
-		"test": "echo 'No tests for shared'",
-		"test:nocoverage": "echo 'No tests for shared'"
+		"test": "vitest --run",
+		"test:nocoverage": "vitest --run"
 	},
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.mjs",
@@ -30,8 +31,11 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@biomejs/biome": "2.2.4",
+		"@types/node": "^25.6.0",
+		"@vitest/coverage-v8": "^3.2.4",
 		"pkgroll": "^2.11.2",
-		"typescript": "^5.8.2"
+		"typescript": "^5.8.2",
+		"vitest": "^3.2.4"
 	},
 	"dependencies": {
 		"@bufbuild/buf": "^1.59.0",

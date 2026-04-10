@@ -1,6 +1,6 @@
 import type { Cue, Style, Text } from "../../cue.js";
-import type { StyledChar } from "../text/types.js";
 import buildRawText from "../buildRawText.js";
+import type { StyledChar } from "../text/types.js";
 
 import { DEFAULT_BG_COLOR, DEFAULT_TXT_COLOR } from "../textConstants.js";
 

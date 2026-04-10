@@ -1,11 +1,11 @@
 // biome-ignore-all lint/style/noNonNullAssertion: Typescript's handling of map has/get is insufficient
 import axios from "axios";
 import type { Segment } from "../../manifest.js";
+import { MemoryCachedChunk } from "../../manifest.js";
 import { secondsToMilliseconds } from "../../utils/time-utils.js";
 import { wrapUrl } from "../../utils/url.js";
 import type { MediaPlaylist } from "./types.js";
 import { parseAttributes, parseBooleanAttribute } from "./utils.js";
-import { MemoryCachedChunk } from "../../manifest.js";
 
 export abstract class HydratablePlaylist {
 	public playlist?: MediaPlaylist;
