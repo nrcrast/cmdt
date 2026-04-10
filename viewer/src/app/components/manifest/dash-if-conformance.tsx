@@ -1,4 +1,4 @@
-import type { Report } from "cmdt-shared";
+import type { RawReport as Report } from "cmdt-shared";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { H4 } from "@/components/ui/typography";

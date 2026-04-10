@@ -10,8 +10,7 @@
 		"format": "biome format",
 		"typecheck": "tsc --noEmit",
 		"package": "rm -rf bin && mkdir bin && pkg dist/index.cjs --output bin/cmdt --target node22-linux-arm64,node22-macos-arm64,node22-win-arm64",
-		"start": "tsx src/index.ts",
-		"test": "vitest --run"
+		"start": "tsx src/index.ts"
 	},
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.mjs",
@@ -31,9 +30,6 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@biomejs/biome": "2.2.4",
-		"@bufbuild/buf": "^1.59.0",
-		"@bufbuild/protobuf": "^2.10.1",
-		"@bufbuild/protoc-gen-es": "^2.10.1",
 		"@commander-js/extra-typings": "^14.0.0",
 		"@fast-csv/parse": "^5.0.5",
 		"@supercharge/promise-pool": "^3.2.0",
