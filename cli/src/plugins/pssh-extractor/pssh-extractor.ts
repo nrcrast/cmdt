@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import cliProgress from "cli-progress";
-import { type Manifest, MediaType, MismatchedContentProtectionType, type Segment } from "cmdt-shared";
+import { type Manifest, MediaType, MismatchedContentProtectionType, Representation, type Segment } from "cmdt-shared";
 import type winston from "winston";
 import { getOpts } from "../../cli-opts.js";
 import type { DownloadEntry, DownloadQueue } from "../../download-queue.js";
@@ -22,47 +22,49 @@ export class PsshExtractor {
 
 	public async extractPsshFromDownloadedSegments(
 		manifest: Manifest,
-		downloads: DownloadQueue,
 		report: Report,
 	): Promise<void> {
 		this.logger.info("Extracting pssh boxes...");
 		const showProgress = ["info", "debug"].includes(getOpts().logLevel);
 		const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+		const nSegments = manifest.video.toArray().reduce((acc, representation) => {
+			return acc + representation.segments.length;
+		}, 0) + manifest.audio.toArray().reduce((acc, representation) => {
+			return acc + representation.segments.length;
+		}, 0);
 
 		if (showProgress) {
-			progress.start(downloads.getEntries().length, 0);
+			progress.start(nSegments, 0);
 		}
+		const representations = [...manifest.video.toArray(), ...manifest.audio.toArray()];
 
-		for (const download of downloads.getEntries()) {
-			await this.processDownload(manifest, download, report);
+		for (const representation of representations) {
+		for (const segmentMetadata of representation.segments) {
+			await this.processSegment(manifest, representation, segmentMetadata, report);
 			if (showProgress) {
 				progress.increment();
 			}
+		}
 		}
 
 		progress.stop();
 	}
 
-	private async processDownload(manifest: Manifest, download: DownloadEntry, report: Report): Promise<void> {
-		const segmentMetadata = download.segment;
+	private async processSegment(manifest: Manifest, representation: Representation, segmentMetadata: Segment, report: Report): Promise<void> {
 
 		// Skip non-video segments or segments without metadata
-		if (download.representation.type !== MediaType.Video || !segmentMetadata) {
+		if (representation.type !== MediaType.Video || !segmentMetadata) {
 			return;
 		}
 
-		// Validate file paths exist and are accessible
-		const segmentPath = path.resolve(download.destDir, download.destFile);
-		const segmentInitPath = segmentMetadata.initSegmentFilesystemPath;
+		const [initSegment, segment] = await Promise.all([segmentMetadata.initSegment?.getData(), segmentMetadata.media?.getData()]);
 
-		if (!segmentInitPath || !(await canAccessFile(segmentPath)) || !(await canAccessFile(segmentInitPath))) {
+		if (!initSegment || !segment) {
 			return;
 		}
 
 		// Read and parse PSSH data from both segments
-		const initSegment = await fs.readFile(segmentInitPath);
-		const segment = await fs.readFile(segmentPath);
-		const psshDatas = await this.extractPsshData(initSegment, segment);
+		const psshDatas = await this.extractPsshData(Buffer.from(initSegment), Buffer.from(segment));
 
 		// Validate and report content protection mismatches
 		this.validateContentProtection(manifest, psshDatas, segmentMetadata, report);

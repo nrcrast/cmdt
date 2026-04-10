@@ -7,7 +7,7 @@ import { getOpts } from "./cli-opts.js";
 import { SegmentDownloader } from "./downloader.js";
 import { getInstance as getLogger } from "./logger.js";
 import { getManifestParser } from "./manifest-parsers/parser-factory.js";
-import { loadPlugins, runPlugins } from "./plugins/plugin.js";
+import { loadPlugins } from "./plugins/loadPlugins.js";
 import { Report } from "./report.js";
 import { getExtensionFromUrl, wrapUrl } from "./utils/url.js";
 
@@ -86,11 +86,26 @@ async function processManifest(uri: string) {
 	const manifest = await parser.parse(manifestText, sanitizedUri, baseUrl);
 	await fs.writeFile(path.resolve(options.output, "manifest.json"), JSON.stringify(manifest, null, 2));
 	logger.info("Manifest parsed successfully!");
+	const plugins = await loadPlugins(manifest, report);
 	const downloader = new SegmentDownloader(manifest);
-	const downloads = await downloader.download();
 
-	await loadPlugins(manifest, report, downloads);
-	await runPlugins();
+	await downloader.start({batchSize: 5, onSegmentAvailable: async (segment, representation) => {
+		for (const plugin of plugins) {
+			await plugin.processSegment(segment, representation);
+		}
+	}});
+
+	logger.info("Finalizing plugins...");
+
+	for(const plugin of plugins) {
+		const artifacts = await plugin.finalize();
+		for (const artifact of artifacts) {
+			const artifactPath = path.resolve(options.output, plugin.name, artifact.name);
+			await mkdirp(path.dirname(artifactPath));
+			await fs.writeFile(artifactPath, artifact.content);
+			logger.info(`Wrote ${artifact.name} to ${artifactPath}`);
+		}
+	}
 
 	report.ingestManifest(manifest);
 	await report.write(path.resolve(options.output, "report.cmdt"));

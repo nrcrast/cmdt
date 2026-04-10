@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { PromisePool } from "@supercharge/promise-pool";
 import cliProgress from "cli-progress";
-import { DownloadableChunk, type Manifest } from "cmdt-shared";
+import { DownloadableChunk, Representation, Segment, type Manifest } from "cmdt-shared";
 import type winston from "winston";
 import { getOpts } from "./cli-opts.js";
 import { type DownloadEntry, DownloadQueue } from "./download-queue.js";
@@ -31,6 +31,7 @@ export class FilesystemDownloadableChunk extends DownloadableChunk {
 		await mkdirp(dir);
 		const exists = await canAccessFile(destPath);
 		if (exists) {
+			getLogger().debug(`File already exists: ${destPath}. Skipping download.`);
 			return;
 		}
 		const response = await axios.get(this.url.href, {
@@ -40,69 +41,42 @@ export class FilesystemDownloadableChunk extends DownloadableChunk {
 		await fs.writeFile(destPath, response.data);
 	}
 	public async getData(): Promise<ArrayBuffer> {
-		return (await fs.readFile(this.destPath)).buffer.slice(0);
+		await this.download();
+		return (await fs.readFile(path.resolve(this.destPath, this.destFile))).buffer.slice(0);
 	}
 }
 
 export class SegmentDownloader {
-	private queue?: DownloadQueue;
 	private logger: winston.Logger;
 	constructor(private manifest: Manifest) {
 		this.logger = getLogger();
 	}
-	public async download(): Promise<DownloadQueue> {
-		this.logger.info("Building download queue...");
-		this.queue = this.buildManifestDownloadQueue();
-		this.logger.info(`Download queue length: ${this.queue.getEntries().length}`);
-		if (!getOpts().skipDownload) {
-			await this.doDownload();
-		} else {
-			this.logger.warn("Skipping download");
-		}
-		return this.queue;
-	}
-	public getQueue(): DownloadQueue | undefined {
-		return this.queue;
-	}
-	private async doDownload(): Promise<void> {
-		this.logger.info("Downloading segments...");
+	public async start(options: {
+		batchSize: number;
+		onSegmentAvailable: (segment: Segment, representation: Representation) => Promise<void>;
+	}): Promise<void> {
+		const representations = [...this.manifest.audio.toArray(), ...this.manifest.video.toArray(), ...this.manifest.images.toArray()];
+		const nSegments = representations.reduce((acc, representation) => {
+			return acc + representation.segments.length;
+		}, 0);
+		this.logger.info(`Downloading ${nSegments} segments...`);
+		const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+		progress.start(nSegments, 0);
 
-		const showProgress = ["info", "debug"].includes(getOpts().logLevel);
-
-		const downloadProgressBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-
-		if (showProgress) {
-			downloadProgressBar.start(this.queue?.getEntries().length ?? 0, 0);
-		}
-
-		await PromisePool.withConcurrency(5)
-			.for(this.queue?.getEntries() ?? [])
+		for (const representation of representations) {
+					await PromisePool.withConcurrency(5)
+			.for(representation.segments)
 			// biome-ignore lint/suspicious/noExplicitAny: error type
-			.handleError(async (error: any, download: DownloadEntry) => {
-				this.logger.error(`Error downloading segment: ${download.segment}`, error);
+			.handleError(async (error: any, segment: Segment) => {
+				this.logger.error(`Error downloading segment: ${segment}`, error);
 			})
-			.process(async (entry: DownloadEntry) => {
-				await entry.segment.initSegment?.download();
-				await entry.segment.media?.download();
-				if (showProgress) {
-					downloadProgressBar.increment();
-				}
+			.process(async (segment: Segment) => {
+				progress.increment();
+				await segment.initSegment?.download();
+				await segment.media?.download();
+				await options.onSegmentAvailable(segment, representation);
 			});
-
-		downloadProgressBar.stop();
-	}
-
-	private buildManifestDownloadQueue(): DownloadQueue {
-		const manifest = this.manifest;
-		const queue = new DownloadQueue();
-		const mediaTypes = [manifest.audio, manifest.images, manifest.video].map((r) => r.toArray());
-		for (const mediaType of mediaTypes) {
-			for (const representation of mediaType) {
-				for (const segment of representation.segments) {
-					queue.addSegment(segment, representation);
-				}
-			}
 		}
-		return queue;
+		progress.stop();
 	}
 }

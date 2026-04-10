@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import cliProgress from "cli-progress";
-import type { Cue, Manifest } from "cmdt-shared";
+import type { Cue, Manifest, Representation, Segment } from "cmdt-shared";
 import { mkdirp } from "mkdirp";
 import type winston from "winston";
 import { getOpts } from "../../cli-opts.js";
@@ -9,48 +9,37 @@ import { getInstance as getLogger } from "../../logger.js";
 import type { Report } from "../../report.js";
 import CeaParser from "../../text/cea/parser.js";
 import { CeaSchemeUri } from "../../utils/manifest/types.js";
+import { Plugin, PluginArtifact } from "../plugin.js";
 
 export type Captions = Record<string, { stream: string; cues: Array<Cue> }>;
 
-export class CaptionExtractor {
+export class CaptionExtractor extends Plugin {
 	private captions: Captions = {};
-	private logger: winston.Logger;
 	constructor(
-		private manifest: Manifest,
-		private report: Report,
+		manifest: Manifest,
+		report: Report,
 	) {
-		this.logger = getLogger();
+		super(manifest, report, "caption-extractor");
 	}
-	public async extractFromDownloadedSegments(): Promise<Captions> {
-		this.captions = {};
-		this.logger.info("Extracting captions...");
-		const showProgress = ["info", "debug"].includes(getOpts().logLevel);
-		const captionsProgress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-
-		const numSegments = this.manifest.video.toArray().reduce((acc, representation) => {
-			return acc + representation.segments.length;
-		}, 0);
-		if (showProgress) {
-			captionsProgress.start(numSegments, 0);
+	public override async processSegment(segment: Segment, representation: Representation): Promise<void> {
+		
+		if(!representation.hasCaptions.cea608 && !representation.hasCaptions.cea708) {
+			return;
 		}
-		await mkdirp(path.resolve(getOpts().output, "captions"));
 
-		for (const representation of this.manifest.video.values()) {
+		await mkdirp(path.resolve(getOpts().output, "captions"));
 			const captionUri = representation.hasCaptions.cea608 ? CeaSchemeUri.CEA608 : CeaSchemeUri.CEA708;
 			const parsers = new Map<string, CeaParser>();
-			for (const segment of representation.segments) {
-				if (showProgress) {
-					captionsProgress.increment();
-				}
+	
 				if (!segment.initSegment || !segment.media) {
-					continue;
+					return;
 				}
 				const [initSegmentData, segmentData] = await Promise.all([
 					segment.initSegment.getData(),
 					segment.media.getData(),
 				]);
 				if (!initSegmentData || !segmentData) {
-					continue;
+					return;
 				}
 				let parser: CeaParser | undefined;
 
@@ -86,14 +75,12 @@ export class CaptionExtractor {
 					}
 					this.captions[key]?.cues.push(caption);
 				}
-			}
-		}
-		await this.write();
-		captionsProgress.stop();
-		return this.captions;
+			
 	}
 
-	private async write() {
+	public override async finalize() {
+		this.validate();
+		const artifacts: Array<PluginArtifact> = [];
 		for (const captionStream of Object.keys(this.captions)) {
 			const rawStream = this.captions[captionStream]?.stream;
 			if (!rawStream) {
@@ -105,13 +92,15 @@ export class CaptionExtractor {
 				filename = `captions-${lang}-${captionStream}.json`;
 			}
 			this.report.addCaptionStream(captionStream, this.captions[captionStream]?.cues ?? []);
-			const capsFile = path.resolve(getOpts().output, "captions", filename);
-			await fs.mkdir(path.dirname(capsFile), { recursive: true });
-			await fs.writeFile(capsFile, JSON.stringify(this.captions[captionStream]?.cues, null, 2));
+			artifacts.push({
+				name: filename,
+				content: JSON.stringify(this.captions[captionStream]?.cues, null, 2),
+			});
 		}
+		return artifacts;
 	}
 
-	public validate() {
+	private validate() {
 		// Group by streams
 		// Key is the stream (or language)
 		// Value is an array of cues for each representation

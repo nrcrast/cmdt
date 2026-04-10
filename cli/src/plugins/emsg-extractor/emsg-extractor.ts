@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import cliProgress from "cli-progress";
-import { MediaType } from "cmdt-shared";
+import { Manifest, MediaType, Segment } from "cmdt-shared";
 import type winston from "winston";
 import { getOpts } from "../../cli-opts.js";
 import type { DownloadQueue } from "../../download-queue.js";
@@ -16,16 +16,23 @@ export class EmsgExtractor {
 	constructor() {
 		this.logger = getLogger();
 	}
-	public async extractEmsgFromDownloadedSegments(downloads: DownloadQueue, report: Report): Promise<void> {
+	public async extractEmsgFromDownloadedSegments(manifest: Manifest, report: Report): Promise<void> {
 		const mp4Parser = new Mp4Parser();
 		this.logger.info("Extracting emsgs...");
 		const showProgress = ["info", "debug"].includes(getOpts().logLevel);
 		const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+	
+		const nSegments = manifest.video.toArray().reduce((acc, representation) => {
+			return acc + representation.segments.length;
+		}, 0) + manifest.audio.toArray().reduce((acc, representation) => {
+			return acc + representation.segments.length;
+		}, 0);
+		const representations = [...manifest.video.toArray(), ...manifest.audio.toArray()];
 		if (showProgress) {
-			progress.start(downloads.getEntries().length, 0);
+			progress.start(nSegments, 0);
 		}
-		for (const download of downloads.getEntries()) {
-			const segmentMetadata = download.segment;
+		for(const representation of representations) {
+		for (const segmentMetadata of representation.segments) {
 			if (!segmentMetadata) {
 				if (showProgress) {
 					progress.increment();
@@ -49,7 +56,7 @@ export class EmsgExtractor {
 					} catch (e) {
 						this.logger.error(`Failed to decode emsg message data: ${e}`);
 					}
-					report.addEsmg(download.representation, segmentMetadata, parsedEmsgBox);
+					report.addEsmg(representation, segmentMetadata, parsedEmsgBox);
 				})
 				.box("moov", (box: ParsedBox) => {
 					Mp4Parser.children(box);
@@ -60,6 +67,8 @@ export class EmsgExtractor {
 				progress.increment();
 			}
 		}
+		}
+
 		progress.stop();
 	}
 }
