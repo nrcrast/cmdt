@@ -1,3 +1,11 @@
 export * from "./cue.js";
 export * from "./manifest.js";
 export * from "./report.js";
+export * from "./plugins/caption-extractor/caption-extractor.js";
+export * from "./plugins/gap-checker/gap-checker.js";
+export * from "./plugins/emsg-extractor/emsg-extractor.js";
+export * from "./plugins/pssh-extractor/pssh-extractor.js";
+export * from "./downloader.js";
+export {Plugin, type PluginArtifact} from "./plugins/plugin.js";
+export {getManifestParser} from "./manifest-parsers/parser-factory.js";
+export * from "./utils/url.js";

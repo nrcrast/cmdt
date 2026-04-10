@@ -2,7 +2,7 @@ import "zx/globals";
 import type winston from "winston";
 import { getOpts } from "../cli-opts.js";
 import { getInstance as getLogger } from "../logger.js";
-import type { Report } from "../report.js";
+import type { Report } from "cmdt-shared";
 
 const $$ = $({
 	quiet: true,

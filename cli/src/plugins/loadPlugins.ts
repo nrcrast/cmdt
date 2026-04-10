@@ -1,7 +1,6 @@
 import { Manifest } from "cmdt-shared";
-import { CaptionExtractor } from "./caption-extractor/caption-extractor.js";
-import type { Report } from "../report.js";
-import type { Plugin } from "./plugin.js";
+import { FilesystemWriter } from "./filesystem-writer/filesystem-writer.js";
+import { CaptionExtractor, EmsgExtractor, PsshExtractor, GapChecker, Plugin, Report } from "cmdt-shared";
 
 /**
  * Discovers and loads all plugins from the plugins directory.
@@ -26,9 +25,10 @@ export async function loadPlugins(manifest: Manifest, report: Report): Promise<P
 	
 	const plugins: Plugin[] = [];
 	plugins.push(new CaptionExtractor(manifest, report));
-	// plugins.push(new EmsgExtractor(manifest, report));
-	// plugins.push(new PsshExtractor(manifest, report));
-	// plugins.push(new GapChecker(manifest, report));
+	plugins.push(new FilesystemWriter(manifest, report));
+	plugins.push(new EmsgExtractor(manifest, report));
+	plugins.push(new PsshExtractor(manifest, report));
+	plugins.push(new GapChecker(manifest, report));
 	return plugins;
 }
 

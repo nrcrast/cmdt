@@ -31,9 +31,6 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@biomejs/biome": "2.2.4",
-		"@bufbuild/buf": "^1.59.0",
-		"@bufbuild/protobuf": "^2.10.1",
-		"@bufbuild/protoc-gen-es": "^2.10.1",
 		"@commander-js/extra-typings": "^14.0.0",
 		"@fast-csv/parse": "^5.0.5",
 		"@supercharge/promise-pool": "^3.2.0",

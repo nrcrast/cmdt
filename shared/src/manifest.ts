@@ -2,6 +2,8 @@
  * Shared data structures intended to represent a DASH/HLS agnostic manifest interface
  */
 
+import { SegmentCache } from "./segment-cache.js";
+
 export abstract class ManifestParser {
 	abstract parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest>;
 }
@@ -9,7 +11,27 @@ export abstract class ManifestParser {
 export abstract class DownloadableChunk {
 	constructor(public url: URL) {}
 	abstract download(): Promise<void>;
-	abstract getData(): Promise<ArrayBuffer>;
+	abstract getData(): Promise<ArrayBuffer | null>;
+	abstract free(): void;
+}
+
+export class MemoryCachedChunk extends DownloadableChunk {
+	public async download(): Promise<void> {
+		if(SegmentCache.getInstance().get(this.url)) {
+			return;
+		}
+		const resp = await fetch(this.url.href);
+		const data = await resp.arrayBuffer();
+		SegmentCache.getInstance().add(this.url, data);
+	}
+
+	public async getData(): Promise<ArrayBuffer | null> {
+		await this.download();
+		return SegmentCache.getInstance().get(this.url);
+	}
+	public free(): void {
+		SegmentCache.getInstance().remove(this.url);
+	}
 }
 
 export type Segment = {
@@ -35,6 +57,8 @@ export type Segment = {
 	 * Index of the content protection in the manifest
 	 */
 	contentProtectionIds?: Array<number>;
+	isLastInPeriod?: boolean;
+	isFirstInPeriod?: boolean;
 };
 
 export type Period = {
@@ -85,12 +109,18 @@ export type Representation = BaseRepresentation | ImageRepresentation;
 
 export class UniqueRepresentationMap extends Map<string, Representation> {
 	public add(representation: Representation) {
+		const newSegments = representation.segments.sort((a, b) => a.startTime - b.startTime);
+		if(newSegments.length > 0) {
+			newSegments[0]!.isFirstInPeriod = true;
+			newSegments[newSegments.length - 1]!.isLastInPeriod = true;
+		}
+
 		const existing = this.get(representation.id);
 		if (!existing) {
 			this.set(representation.id, representation);
 			return;
 		}
-		existing.segments.push(...representation.segments);
+		existing.segments.push(...newSegments);
 		existing.segments.sort((a, b) => a.startTime - b.startTime);
 		if (representation.hasCaptions.cea608) {
 			existing.hasCaptions.cea608 = true;

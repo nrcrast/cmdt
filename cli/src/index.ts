@@ -4,12 +4,9 @@ import axios from "axios";
 import { mkdirp } from "mkdirp";
 import { rimraf } from "rimraf";
 import { getOpts } from "./cli-opts.js";
-import { SegmentDownloader } from "./downloader.js";
+import { SegmentDownloader, Report, getManifestParser, getExtensionFromUrl, wrapUrl} from "cmdt-shared";
 import { getInstance as getLogger } from "./logger.js";
-import { getManifestParser } from "./manifest-parsers/parser-factory.js";
 import { loadPlugins } from "./plugins/loadPlugins.js";
-import { Report } from "./report.js";
-import { getExtensionFromUrl, wrapUrl } from "./utils/url.js";
 
 const options = getOpts();
 const logger = getLogger();
@@ -88,12 +85,20 @@ async function processManifest(uri: string) {
 	logger.info("Manifest parsed successfully!");
 	const plugins = await loadPlugins(manifest, report);
 	const downloader = new SegmentDownloader(manifest);
+	
 
-	await downloader.start({batchSize: 5, onSegmentAvailable: async (segment, representation) => {
+	await downloader.start({
+		batchSize: 5, 
+		onSegmentAvailable: async (segment, representation) => {
 		for (const plugin of plugins) {
 			await plugin.processSegment(segment, representation);
 		}
-	}});
+		segment.media?.free();
+	},
+	onProgress: (nSegment, totalSegments) => {
+		logger.info(`Downloading segment ${nSegment} of ${totalSegments}`);
+	},
+});
 
 	logger.info("Finalizing plugins...");
 
@@ -102,13 +107,14 @@ async function processManifest(uri: string) {
 		for (const artifact of artifacts) {
 			const artifactPath = path.resolve(options.output, plugin.name, artifact.name);
 			await mkdirp(path.dirname(artifactPath));
-			await fs.writeFile(artifactPath, artifact.content);
+			await fs.writeFile(artifactPath, typeof(artifact.content) === "string" ? artifact.content : Buffer.from(artifact.content));
 			logger.info(`Wrote ${artifact.name} to ${artifactPath}`);
 		}
 	}
 
 	report.ingestManifest(manifest);
-	await report.write(path.resolve(options.output, "report.cmdt"));
+	const reportStr = await report.asString();
+	await fs.writeFile(path.resolve(options.output, "report.json"), reportStr);
 
 	if (options.logPeriods) {
 		// biome-ignore lint/suspicious/noConsole: using console.table to print the data out
