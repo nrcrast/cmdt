@@ -1,5 +1,7 @@
 import type { RawReport } from "cmdt-shared";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmsgTable } from "./emsg-table";
 
@@ -13,9 +15,10 @@ export default function Emsgs({ report }: EmsgsProps) {
 	// Handle empty state
 	if (emsgEntries.length === 0) {
 		return (
-			<div className="flex items-center justify-center p-8 text-muted-foreground">
-				No event messages found in this report
-			</div>
+			<Alert>
+				<AlertTitle>No Event Messages</AlertTitle>
+				<AlertDescription>No event messages were found in this report.</AlertDescription>
+			</Alert>
 		);
 	}
 
@@ -24,9 +27,10 @@ export default function Emsgs({ report }: EmsgsProps) {
 
 	if (representationsWithEmsgs.length === 0) {
 		return (
-			<div className="flex items-center justify-center p-8 text-muted-foreground">
-				No event messages found in this report
-			</div>
+			<Alert>
+				<AlertTitle>No Event Messages</AlertTitle>
+				<AlertDescription>No event messages were found in this report.</AlertDescription>
+			</Alert>
 		);
 	}
 
@@ -46,10 +50,18 @@ export default function Emsgs({ report }: EmsgsProps) {
 				</TabsList>
 				{representationsWithEmsgs.map(([repId, data]) => (
 					<TabsContent value={repId} key={`content-${repId}`}>
-						<ul className="mb-4">
-							<li>Representation: {repId}</li>
-							<li>Total EMSGs: {data.emsgs.length}</li>
-						</ul>
+						<Table className="mb-4">
+							<TableBody>
+								<TableRow>
+									<TableCell className="font-medium">Representation</TableCell>
+									<TableCell>{repId}</TableCell>
+								</TableRow>
+								<TableRow>
+									<TableCell className="font-medium">Total EMSGs</TableCell>
+									<TableCell>{data.emsgs.length}</TableCell>
+								</TableRow>
+							</TableBody>
+						</Table>
 						<EmsgTable emsgs={data.emsgs} />
 					</TabsContent>
 				))}

@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 import type { Cue, RawReport as Report } from "cmdt-shared";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DataTable } from "../data-table/data-table";
 
 export type Caption = {
@@ -159,7 +160,12 @@ export function CaptionTable(props: { cues: Array<Cue> }) {
 export default function Captions(props: { report: Report }) {
 	const { captions } = props.report;
 	if (!captions) {
-		return null;
+		return (
+			<Alert>
+				<AlertTitle>No Captions</AlertTitle>
+				<AlertDescription>No caption data was found in this report.</AlertDescription>
+			</Alert>
+		);
 	}
 	const captionItems = Object.keys(captions).map((key) => {
 		return (

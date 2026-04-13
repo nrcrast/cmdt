@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ContentProtection } from "cmdt-shared";
 import { JsonEditor } from "json-edit-react";
+import { Badge } from "@/components/ui/badge";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
 
@@ -10,6 +11,7 @@ export const columns: ColumnDef<ContentProtection>[] = [
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
 		enableHiding: true,
 		sortingFn: "basic",
+		cell: ({ row }) => <Badge variant="outline">{row.getValue("type")}</Badge>,
 	},
 	{
 		accessorKey: "systemId",

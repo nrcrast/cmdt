@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { RawReport as Report } from "cmdt-shared";
 import { JsonEditor } from "json-edit-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
 
@@ -45,7 +46,12 @@ const defaultVisibleColumns = {
 
 export default function MismatchedContentProtection(props: { report: Report }) {
 	if (!props.report.mismatchedContentProtection.length) {
-		return <h2>No mismatched content protection found</h2>;
+		return (
+			<Alert>
+				<AlertTitle>No Mismatches Found</AlertTitle>
+				<AlertDescription>No mismatched content protection was detected in this report.</AlertDescription>
+			</Alert>
+		);
 	}
 	return (
 		<DataTable

@@ -1,7 +1,8 @@
 import type { RawReport as Report } from "cmdt-shared";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { H4 } from "@/components/ui/typography";
 
 type PassOrFail = "PASS" | "FAIL";
 
@@ -13,14 +14,25 @@ type SchematronResults = {
 	};
 };
 
+function VerdictBadge({ verdict }: { verdict: PassOrFail | string }) {
+	return <Badge variant={verdict === "FAIL" ? "destructive" : "secondary"}>{verdict}</Badge>;
+}
+
 function Schematron(props: { test: SchematronResults }) {
 	return (
-		<div>
-			<H4>Status: {props.test.verdict}</H4>
+		<div className="space-y-3">
+			<div className="flex items-center gap-2">
+				<span className="font-medium">Status:</span>
+				<VerdictBadge verdict={props.test.verdict} />
+			</div>
 			<ScrollArea className="h-72 rounded-md border" key="schematron-scroll">
-				{props.test.MPD.info[0].split("\n").map((line) => {
-					return <pre key={`schematron-result-${crypto.randomUUID()}`}>{line}</pre>;
-				})}
+				<code className="block p-4 text-sm font-[family-name:var(--font-geist-mono)]">
+					{props.test.MPD.info[0].split("\n").map((line, i) => (
+						<span key={`schematron-line-${i}`} className="block">
+							{line}
+						</span>
+					))}
+				</code>
 			</ScrollArea>
 		</div>
 	);
@@ -30,7 +42,12 @@ export default function DashIfConformance(props: { report: Report }) {
 	// biome-ignore lint/suspicious/noExplicitAny: Data is pass-through
 	const dashReport = props.report.dashConformance as any;
 	if (!dashReport) {
-		return <h2>No DASH-IF conformance report found</h2>;
+		return (
+			<Alert>
+				<AlertTitle>No Conformance Report</AlertTitle>
+				<AlertDescription>No DASH-IF conformance report was found in this report data.</AlertDescription>
+			</Alert>
+		);
 	}
 	const schematronTest = dashReport.entries.Schematron;
 	return (
@@ -45,13 +62,19 @@ export default function DashIfConformance(props: { report: Report }) {
 				<AccordionItem value="item-2">
 					<AccordionTrigger>MPEG-DASH Common</AccordionTrigger>
 					<AccordionContent>
-						<H4>Status: {dashReport?.entries["MPEG-DASH Common"]?.verdict ?? "N/A"}</H4>
+						<div className="flex items-center gap-2">
+							<span className="font-medium">Status:</span>
+							<VerdictBadge verdict={dashReport?.entries["MPEG-DASH Common"]?.verdict ?? "N/A"} />
+						</div>
 					</AccordionContent>
 				</AccordionItem>
 				<AccordionItem value="item-3">
 					<AccordionTrigger>DASH-IF IOP Conformance</AccordionTrigger>
 					<AccordionContent>
-						<H4>Status: {dashReport?.entries["DASH-IF IOP Conformance"]?.verdict ?? "N/A"}</H4>
+						<div className="flex items-center gap-2">
+							<span className="font-medium">Status:</span>
+							<VerdictBadge verdict={dashReport?.entries["DASH-IF IOP Conformance"]?.verdict ?? "N/A"} />
+						</div>
 					</AccordionContent>
 				</AccordionItem>
 			</Accordion>

@@ -1,5 +1,7 @@
 import type { ImageRepresentation } from "cmdt-shared";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageSegmentTable } from "./image-segment-table";
 
@@ -7,7 +9,10 @@ export default function ImageRepresentations(props: { representations: Array<Ima
 	// Handle empty state
 	if (!props.representations || props.representations.length === 0) {
 		return (
-			<div className="flex items-center justify-center p-8 text-muted-foreground">No image representations found</div>
+			<Alert>
+				<AlertTitle>No Image Representations</AlertTitle>
+				<AlertDescription>No image representations were found in this manifest.</AlertDescription>
+			</Alert>
 		);
 	}
 
@@ -22,18 +27,35 @@ export default function ImageRepresentations(props: { representations: Array<Ima
 			</TabsList>
 			{props.representations.map((representation) => (
 				<TabsContent value={representation.id} key={`content-${representation.id}`}>
-					<ul className="mb-4">
-						<li>Type: {representation.type}</li>
-						<li>Bandwidth: {representation.bandwidth}</li>
-						<li>
-							Resolution: {representation.width}x{representation.height}
-						</li>
-						<li>
-							Grid: {representation.imageRows}x{representation.imageCols} (
-							{representation.imageRows * representation.imageCols} thumbnails per sheet)
-						</li>
-						<li>Segments: {representation.segments.length}</li>
-					</ul>
+					<Table className="mb-4">
+						<TableBody>
+							<TableRow>
+								<TableCell className="font-medium">Type</TableCell>
+								<TableCell>{representation.type}</TableCell>
+							</TableRow>
+							<TableRow>
+								<TableCell className="font-medium">Bandwidth</TableCell>
+								<TableCell>{representation.bandwidth}</TableCell>
+							</TableRow>
+							<TableRow>
+								<TableCell className="font-medium">Resolution</TableCell>
+								<TableCell>
+									{representation.width} × {representation.height}
+								</TableCell>
+							</TableRow>
+							<TableRow>
+								<TableCell className="font-medium">Grid</TableCell>
+								<TableCell>
+									{representation.imageRows} × {representation.imageCols} (
+									{representation.imageRows * representation.imageCols} thumbnails per sheet)
+								</TableCell>
+							</TableRow>
+							<TableRow>
+								<TableCell className="font-medium">Segments</TableCell>
+								<TableCell>{representation.segments.length}</TableCell>
+							</TableRow>
+						</TableBody>
+					</Table>
 					<ImageSegmentTable segments={representation.segments} />
 				</TabsContent>
 			))}

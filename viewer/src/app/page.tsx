@@ -14,10 +14,14 @@ import { useEffect, useState } from "react";
 import { useFilePicker } from "use-file-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { H1 } from "@/components/ui/typography";
+import { FilesystemWriter } from "./components/plugins/FilesystemWriter";
 import Report from "./report";
 
 /**
@@ -76,6 +80,8 @@ export default function Home() {
 
 	const [report, setReport] = useState<null | RawReport>(null);
 	const [manifest, setManifest] = useState<string>("");
+	const [downloadSegments, setDownloadSegments] = useState(false);
+	const [segmentOutputDir, setSegmentOutputDir] = useState<null | FileSystemDirectoryHandle>(null);
 	const [progress, setProgress] = useState<DownloadProgress>({
 		status: "idle",
 		current: 0,
@@ -123,6 +129,30 @@ export default function Home() {
 								value={manifest}
 								onChange={(e) => setManifest(e.target.value)}
 							/>
+
+							<Field orientation="horizontal">
+								<Checkbox
+									id="download-segments"
+									name="download-segments"
+									checked={downloadSegments}
+									onCheckedChange={(checked) => setDownloadSegments(!!checked)}
+								/>
+								<Label htmlFor="download-segments">Download segments to Filesystem</Label>
+							</Field>
+							{downloadSegments && (
+								<Button
+									className="w-full"
+									variant="outline"
+									onClick={async () => {
+										const dir = await window.showDirectoryPicker();
+										setSegmentOutputDir(dir);
+										await dir.getDirectoryHandle("segments", { create: true });
+									}}
+								>
+									Select segment output directory
+								</Button>
+							)}
+
 							<Button
 								className="w-full"
 								disabled={!manifest || progress.status === "downloading"}
@@ -138,6 +168,10 @@ export default function Home() {
 										new GapChecker(manifestData, report),
 										new PsshExtractor(manifestData, report),
 									];
+
+									if (downloadSegments && segmentOutputDir) {
+										plugins.push(new FilesystemWriter(manifestData, report, segmentOutputDir));
+									}
 
 									const downloader = new SegmentDownloader(manifestData);
 

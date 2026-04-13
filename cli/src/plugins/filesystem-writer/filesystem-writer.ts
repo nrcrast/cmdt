@@ -10,22 +10,30 @@ export class FilesystemWriter extends Plugin {
 	}
 	public override async processSegment(segment: Segment): Promise<void> {
 		if (segment.media?.url) {
+			const filename = segment.media.url.pathname.split("/").pop();
+			if (!filename) {
+				return;
+			}
 			const segmentFilePath = path.resolve(getOpts().output, getUrlFilePath(segment.media.url));
 			const data = await segment.media.getData();
 			if (!data) {
 				return;
 			}
 			await mkdirp(path.dirname(segmentFilePath));
-			await fs.writeFile(segmentFilePath, Buffer.from(data));
+			await fs.writeFile(path.resolve(path.dirname(segmentFilePath), filename), Buffer.from(data));
 		}
 		if (segment.initSegment?.url) {
+			const filename = segment.initSegment.url.pathname.split("/").pop();
+			if (!filename) {
+				return;
+			}
 			const segmentFilePath = path.resolve(getOpts().output, getUrlFilePath(segment.initSegment.url));
 			const data = await segment.initSegment.getData();
 			if (!data) {
 				return;
 			}
 			await mkdirp(path.dirname(segmentFilePath));
-			await fs.writeFile(segmentFilePath, Buffer.from(data));
+			await fs.writeFile(path.resolve(path.dirname(segmentFilePath), filename), Buffer.from(data));
 		}
 	}
 }

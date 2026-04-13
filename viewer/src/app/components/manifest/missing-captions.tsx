@@ -1,7 +1,8 @@
 import type { Cue, RawReport as Report } from "cmdt-shared";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { H4 } from "@/components/ui/typography";
 
 function Caption(props: { cue: Cue }) {
 	const { cue } = props;
@@ -35,23 +36,31 @@ export default function MissingCaptions(props: { report: Report }) {
 		return (
 			<AccordionItem value={`item-${key}`} key={`item-${key}`}>
 				<AccordionTrigger>Stream {key}</AccordionTrigger>
-				<AccordionContent>
+				<AccordionContent className="space-y-4 p-2">
 					{Object.keys(missingCues[key]).map((cueId) => {
 						const cue = captions?.[key]?.find((cue) => cue.id === cueId);
 						if (!cue) {
 							return null;
 						}
 						return (
-							<div className="m-10" key={`missing-${key}-${cueId}`}>
-								<H4>Caption:</H4>
-								<Caption cue={cue}></Caption>
-								<H4>Missing From Representations:</H4>
-								<ul>
-									{missingCues[key][cueId].map((representation) => {
-										return <li key={`${key}-${representation}`}>{representation}</li>;
-									})}
-								</ul>
-							</div>
+							<Card key={`missing-${key}-${cueId}`}>
+								<CardHeader>
+									<CardTitle>Caption</CardTitle>
+								</CardHeader>
+								<CardContent className="space-y-4">
+									<Caption cue={cue} />
+									<div>
+										<p className="font-medium mb-2">Missing From Representations:</p>
+										<div className="flex flex-wrap gap-2">
+											{missingCues[key][cueId].map((representation) => (
+												<Badge key={`${key}-${representation}`} variant="destructive">
+													{representation}
+												</Badge>
+											))}
+										</div>
+									</div>
+								</CardContent>
+							</Card>
 						);
 					})}
 				</AccordionContent>

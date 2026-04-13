@@ -16,7 +16,7 @@ import VideoRepresentations from "./components/manifest/video-representations";
 export default function Report(props: { rawReport: ReportData }) {
 	const { rawReport } = props;
 	return (
-		<div>
+		<div className="space-y-4">
 			<Tabs defaultValue="manifest">
 				<TabsList>
 					<TabsTrigger value="manifest">Manifest</TabsTrigger>
