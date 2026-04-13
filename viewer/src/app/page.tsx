@@ -78,7 +78,10 @@ export default function Home() {
 		accept: ".cmdt",
 	});
 
+	const canSaveToFileSystem = "showDirectoryPicker" in window;
+
 	const [report, setReport] = useState<null | RawReport>(null);
+	const [downloader, setDownloader] = useState<null | SegmentDownloader>(null);
 	const [manifest, setManifest] = useState<string>("");
 	const [downloadSegments, setDownloadSegments] = useState(false);
 	const [segmentOutputDir, setSegmentOutputDir] = useState<null | FileSystemDirectoryHandle>(null);
@@ -139,7 +142,7 @@ export default function Home() {
 								/>
 								<Label htmlFor="download-segments">Download segments to Filesystem</Label>
 							</Field>
-							{downloadSegments && (
+							{downloadSegments && canSaveToFileSystem && (
 								<Button
 									className="w-full"
 									variant="outline"
@@ -169,11 +172,12 @@ export default function Home() {
 										new PsshExtractor(manifestData, report),
 									];
 
-									if (downloadSegments && segmentOutputDir) {
+									if (downloadSegments && segmentOutputDir && canSaveToFileSystem) {
 										plugins.push(new FilesystemWriter(manifestData, report, segmentOutputDir));
 									}
 
 									const downloader = new SegmentDownloader(manifestData);
+									setDownloader(downloader);
 
 									// Set initial progress state with startTime
 									setProgress({
@@ -183,12 +187,15 @@ export default function Home() {
 										startTime: Date.now(),
 									});
 
+									report.ingestManifest(manifestData);
+
 									await downloader.start({
 										batchSize: 5,
 										onSegmentAvailable: async (segment, representation) => {
 											for (const plugin of plugins) {
 												await plugin.processSegment(segment, representation);
 											}
+											setReport(report.getRaw());
 											segment.media?.free();
 										},
 										onProgress: (nSegment, totalSegments) => {
@@ -204,9 +211,7 @@ export default function Home() {
 										await plugin.finalize();
 									}
 
-									report.ingestManifest(manifestData);
-									const reportStr = await report.asString();
-									setReport(JSON.parse(reportStr));
+									setReport(report.getRaw());
 
 									// Reset progress state when done
 									setProgress({
@@ -232,6 +237,7 @@ export default function Home() {
 										{progress.current} / {progress.total} segments
 										{progress.current > 0 && calculateETA(progress) && <> • ETA: {calculateETA(progress)}</>}
 									</div>
+									<Button onClick={() => downloader?.cancel()}>Cancel</Button>
 								</div>
 							)}
 						</CardContent>

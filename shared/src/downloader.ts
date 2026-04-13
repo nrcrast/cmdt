@@ -4,14 +4,21 @@ import type { Manifest, Representation, Segment } from "../src/manifest.js";
 
 export class SegmentDownloader {
 	private logger: Logger<ILogObj>;
+	private cancelled = false;
 	constructor(private manifest: Manifest) {
 		this.logger = new Logger<ILogObj>();
+	}
+	public cancel() {
+		this.cancelled = true;
 	}
 	public async start(options: {
 		batchSize: number;
 		onSegmentAvailable: (segment: Segment, representation: Representation) => Promise<void>;
 		onProgress: (nSegment: number, totalSegments: number) => void;
 	}): Promise<void> {
+		if (this.cancelled) {
+			return;
+		}
 		const representations = [
 			...this.manifest.audio.toArray(),
 			...this.manifest.video.toArray(),
@@ -30,7 +37,11 @@ export class SegmentDownloader {
 				.handleError(async (error: any, segment: Segment) => {
 					this.logger.error(`Error downloading segment: ${segment}`, error);
 				})
-				.process(async (segment: Segment) => {
+				.process(async (segment: Segment, _index, pool) => {
+					if (this.cancelled) {
+						this.logger.info("Download cancelled");
+						return pool.stop();
+					}
 					nSegmentProgress++;
 					await segment.initSegment?.download();
 					await segment.media?.download();

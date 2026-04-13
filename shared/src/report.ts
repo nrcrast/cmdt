@@ -101,8 +101,8 @@ export class Report {
 		}
 		this.raw.missingCues[targetRepresentation][cueId].push(candidateRepresentation);
 	}
-	public async asString() {
-		return JSON.stringify(this.raw, null, 2);
+	public getRaw() {
+		return this.raw;
 	}
 	// biome-ignore lint/complexity/noBannedTypes: The type is passthrough
 	public setMediaStreamValidatorReport(report: Object) {

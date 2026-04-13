@@ -58,6 +58,7 @@ export class CaptionExtractor extends Plugin {
 				this.captions[key] = { stream, cues: [] };
 			}
 			this.captions[key]?.cues.push(caption);
+			this.report.addCaptionStream(key, this.captions[key]?.cues ?? []);
 		}
 	}
 
