@@ -48,7 +48,7 @@ export abstract class Plugin {
 		});
 	}
 
-	public async processSegment(segment: Segment, representation: Representation): Promise<void> {}
+	public async processSegment(_segment: Segment, _representation: Representation): Promise<void> {}
 	public async finalize(): Promise<Array<PluginArtifact>> {
 		return [];
 	}

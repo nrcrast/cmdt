@@ -110,9 +110,11 @@ export type Representation = BaseRepresentation | ImageRepresentation;
 export class UniqueRepresentationMap extends Map<string, Representation> {
 	public add(representation: Representation) {
 		const newSegments = representation.segments.sort((a, b) => a.startTime - b.startTime);
-		if (newSegments.length > 0) {
-			newSegments[0]!.isFirstInPeriod = true;
-			newSegments[newSegments.length - 1]!.isLastInPeriod = true;
+		const first = newSegments[0];
+		const last = newSegments[newSegments.length - 1];
+		if (first && last) {
+			first.isFirstInPeriod = true;
+			last.isLastInPeriod = true;
 		}
 
 		const existing = this.get(representation.id);
@@ -151,6 +153,7 @@ export type ContentProtection = {
 	systemId: string;
 	type: DrmSystem;
 	pssh?: string;
+	// biome-ignore lint/suspicious/noExplicitAny: parsedPssh is a DrmSystem specific object
 	parsedPssh?: any;
 	cencDefaultKid?: string;
 };

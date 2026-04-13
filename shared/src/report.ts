@@ -13,7 +13,9 @@ export enum MismatchedContentProtectionType {
 export type MismatchedContentProtectionEntry =
 	| {
 			type: MismatchedContentProtectionType.Mismatch;
+			// biome-ignore lint/suspicious/noExplicitAny: parsedPssh is a DrmSystem specific object
 			detectedInMedia?: { pssh: string; parsedPssh: any }[];
+			// biome-ignore lint/suspicious/noExplicitAny: parsedPssh is a DrmSystem specific object
 			expectedInManifest?: { pssh: string; parsedPssh: any }[];
 			segment: Segment;
 	  }

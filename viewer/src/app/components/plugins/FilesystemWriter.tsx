@@ -19,7 +19,10 @@ export class FilesystemWriter extends Plugin {
 	}
 	public override async processSegment(segment: Segment): Promise<void> {
 		if (segment.media?.url) {
-			const filename = segment.media.url.pathname.split("/").pop()!;
+			const filename = segment.media.url.pathname.split("/").pop();
+			if (!filename) {
+				return;
+			}
 			const segmentDir = await mkdirp(getUrlFilePath(segment.media.url), this.outputDir);
 			const data = await segment.media.getData();
 			if (!data) {
@@ -31,7 +34,10 @@ export class FilesystemWriter extends Plugin {
 			await writable.close();
 		}
 		if (segment.initSegment?.url) {
-			const filename = segment.initSegment.url.pathname.split("/").pop()!;
+			const filename = segment.initSegment.url.pathname.split("/").pop();
+			if (!filename) {
+				return;
+			}
 			const segmentDir = await mkdirp(getUrlFilePath(segment.initSegment.url), this.outputDir);
 			const data = await segment.initSegment.getData();
 			if (!data) {
