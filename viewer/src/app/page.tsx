@@ -10,7 +10,7 @@ import {
 	Report as ReportData,
 	SegmentDownloader,
 } from "cmdt-shared";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useFilePicker } from "use-file-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -78,19 +78,23 @@ export default function Home() {
 		accept: ".cmdt",
 	});
 
-	const canSaveToFileSystem = "showDirectoryPicker" in window;
-
 	const [report, setReport] = useState<null | RawReport>(null);
 	const [downloader, setDownloader] = useState<null | SegmentDownloader>(null);
 	const [manifest, setManifest] = useState<string>("");
 	const [downloadSegments, setDownloadSegments] = useState(false);
 	const [segmentOutputDir, setSegmentOutputDir] = useState<null | FileSystemDirectoryHandle>(null);
+	const [canSaveToFileSystem, setCanSaveToFileSystem] = useState(false);
+	const downloadCheckboxId = useId();
 	const [progress, setProgress] = useState<DownloadProgress>({
 		status: "idle",
 		current: 0,
 		total: 0,
 		startTime: null,
 	});
+
+	useEffect(() => {
+		setCanSaveToFileSystem("showDirectoryPicker" in window);
+	}, []);
 
 	useEffect(() => {
 		if (!filesContent.length) return;
@@ -133,15 +137,17 @@ export default function Home() {
 								onChange={(e) => setManifest(e.target.value)}
 							/>
 
-							<Field orientation="horizontal">
-								<Checkbox
-									id="download-segments"
-									name="download-segments"
-									checked={downloadSegments}
-									onCheckedChange={(checked) => setDownloadSegments(!!checked)}
-								/>
-								<Label htmlFor="download-segments">Download segments to Filesystem</Label>
-							</Field>
+							{canSaveToFileSystem && (
+								<Field orientation="horizontal">
+									<Checkbox
+										id={downloadCheckboxId}
+										name="download-segments"
+										checked={downloadSegments}
+										onCheckedChange={(checked) => setDownloadSegments(!!checked)}
+									/>
+									<Label htmlFor="download-segments">Download segments to Filesystem</Label>
+								</Field>
+							)}
 							{downloadSegments && canSaveToFileSystem && (
 								<Button
 									className="w-full"

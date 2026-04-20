@@ -115,8 +115,8 @@ async function processManifest(uri: string) {
 	}
 
 	report.ingestManifest(manifest);
-	const reportStr = await report.asString();
-	await fs.writeFile(path.resolve(options.output, "report.json"), reportStr);
+	const reportRaw = await report.getRaw();
+	await fs.writeFile(path.resolve(options.output, "report.json"), JSON.stringify(reportRaw, null, 2));
 
 	if (options.logPeriods) {
 		// biome-ignore lint/suspicious/noConsole: using console.table to print the data out
