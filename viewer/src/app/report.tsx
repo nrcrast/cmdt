@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AudioRepresentations from "./components/manifest/audio-representations";
 import Captions from "./components/manifest/captions";
 import ContentProtection from "./components/manifest/content-protection";
-import DashIfConformance from "./components/manifest/dash-if-conformance";
 import Emsgs from "./components/manifest/emsgs";
 import ImageRepresentations from "./components/manifest/image-representations";
 import MismatchedContentProtection from "./components/manifest/mismatched-content-protection";
@@ -65,9 +64,6 @@ export default function Report(props: { rawReport: ReportData }) {
 				</TabsContent>
 				<TabsContent value="mismatched-content-protection">
 					<MismatchedContentProtection report={rawReport} />
-				</TabsContent>
-				<TabsContent value="dash-if-conformance">
-					<DashIfConformance report={rawReport} />
 				</TabsContent>
 				<TabsContent value="captions">
 					<Captions report={rawReport} />

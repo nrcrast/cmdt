@@ -1,3 +1,4 @@
+import type { SCTE35 } from "scte35";
 import type { Cue } from "./cue.js";
 import type { Manifest, Representation, Segment } from "./manifest.js";
 import type { Emsg } from "./utils/mp4/types.js";
@@ -9,6 +10,11 @@ export enum MismatchedContentProtectionType {
 	MediaMissing = "mediaMissing",
 	Mismatch = "mismatch",
 }
+
+export type Scte35Marker = {
+	presentationTimeS: number;
+	data: ReturnType<typeof SCTE35.prototype.parseFromB64>;
+};
 
 export type MismatchedContentProtectionEntry =
 	| {
@@ -54,10 +60,6 @@ export type RawReport = {
 			emsgs: Array<Emsg>;
 		};
 	};
-	// biome-ignore lint/complexity/noBannedTypes: The type is passthrough
-	mediaStreamValidator?: Object;
-	// biome-ignore lint/complexity/noBannedTypes: The type is passthrough
-	dashConformance?: Object;
 	manifest: Omit<Manifest, "video" | "audio" | "images" | "raw"> & {
 		video: Array<Representation>;
 		audio: Array<Representation>;
@@ -103,14 +105,6 @@ export class Report {
 	}
 	public getRaw() {
 		return this.raw;
-	}
-	// biome-ignore lint/complexity/noBannedTypes: The type is passthrough
-	public setMediaStreamValidatorReport(report: Object) {
-		this.raw.mediaStreamValidator = report;
-	}
-	// biome-ignore lint/complexity/noBannedTypes: The type is passthrough
-	public setDashConformanceReport(report: Object) {
-		this.raw.dashConformance = report;
 	}
 	public addCaptionStream(stream: string, captions: Array<Cue>) {
 		if (!this.raw.captions) {

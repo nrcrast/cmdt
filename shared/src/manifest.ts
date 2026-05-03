@@ -2,6 +2,7 @@
  * Shared data structures intended to represent a DASH/HLS agnostic manifest interface
  */
 
+import type { Scte35Marker } from "./report.js";
 import { SegmentCache } from "./segment-cache.js";
 
 export abstract class ManifestParser {
@@ -163,6 +164,7 @@ export type Manifest = {
 	video: UniqueRepresentationMap;
 	audio: UniqueRepresentationMap;
 	images: UniqueRepresentationMap;
+	scte35?: Array<Scte35Marker>;
 	contentProtection: Array<ContentProtection>;
 	captionStreamToLanguage: Record<string, string>;
 	periods: Array<Period>;

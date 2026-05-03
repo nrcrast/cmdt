@@ -10,6 +10,7 @@ import {
 	type SegmentTemplate,
 } from "dash-ts";
 import { deepmergeCustom } from "deepmerge-ts";
+import { SCTE35 } from "scte35";
 import { type ILogObj, Logger } from "tslog";
 import type { PlayreadyData } from "../../drm/playready/playready.js";
 import { PsshParser } from "../../drm/pssh.js";
@@ -26,6 +27,7 @@ import {
 	type Segment,
 	UniqueRepresentationMap,
 } from "../../manifest.js";
+import type { Scte35Marker } from "../../report.js";
 import getStreamAndLanguages from "../../utils/cea/getStreamAndLanguages.js";
 import { getDrmSystemFromSystemId } from "../../utils/drm.js";
 import { CeaSchemeUri } from "../../utils/types.js";
@@ -369,6 +371,29 @@ export class DashManifest implements ManifestParser {
 		}
 	}
 
+	private extractScte35MarkersFromPeriod(period: Period): Array<Scte35Marker> {
+		const parser = new SCTE35();
+		const markers: Array<Scte35Marker> = [];
+		for (const eStream of period.eventStream ?? []) {
+			if (eStream.schemeIdUri !== "urn:scte:scte35:2014:xml+bin") {
+				continue;
+			}
+			for (const e of eStream.event) {
+				const rawData = e["scte35:signal"]?.["scte35:binary"];
+				if (!rawData) {
+					continue;
+				}
+				const presentationTimeS =
+					((e.presentationTime ?? 0) + (eStream.presentationTimeOffset ?? 0)) / (eStream.timescale ?? 1);
+				markers.push({
+					presentationTimeS: (period.start ?? 0) + presentationTimeS,
+					data: rawData.startsWith("0x") ? parser.parseFromHex(rawData) : parser.parseFromB64(rawData),
+				});
+			}
+		}
+		return markers;
+	}
+
 	private processPeriod(period: Period): void {
 		// store index of current segments so we can only use the newly added segments
 		const i = this.manifest.video.entries().next().value?.[1].segments.length ?? 0;
@@ -378,7 +403,9 @@ export class DashManifest implements ManifestParser {
 		}
 
 		const segments = this.manifest.video.entries().next().value?.[1].segments ?? [];
-
+		const scteMarkers = this.extractScte35MarkersFromPeriod(period);
+		this.manifest.scte35 ||= [];
+		this.manifest.scte35.push(...scteMarkers);
 		const p = <ParsedPeriod>{};
 		p.id = period.id;
 		p.start = period.start ?? 0;
