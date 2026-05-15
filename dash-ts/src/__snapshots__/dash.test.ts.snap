@@ -2766,7 +2766,7 @@ exports[`RawDashManifest > should parse a DASH manifest 1`] = `
       "duration": 87.67,
       "eventStream": [
         {
-          "event": undefined,
+          "event": [],
           "presentationTimeOffset": undefined,
           "schemeIdUri": "urn:scte:scte35:2014:xml+bin",
           "timescale": 90000,
@@ -5650,7 +5650,7 @@ exports[`RawDashManifest > should parse a DASH manifest 1`] = `
       "duration": 377.418,
       "eventStream": [
         {
-          "event": undefined,
+          "event": [],
           "presentationTimeOffset": undefined,
           "schemeIdUri": "urn:scte:scte35:2014:xml+bin",
           "timescale": 90000,
@@ -10434,7 +10434,7 @@ exports[`RawDashManifest > should parse a DASH manifest 1`] = `
       "duration": 326.784,
       "eventStream": [
         {
-          "event": undefined,
+          "event": [],
           "presentationTimeOffset": undefined,
           "schemeIdUri": "urn:scte:scte35:2014:xml+bin",
           "timescale": 90000,
@@ -14265,7 +14265,7 @@ exports[`RawDashManifest > should parse a DASH manifest 1`] = `
       "duration": 507.006,
       "eventStream": [
         {
-          "event": undefined,
+          "event": [],
           "presentationTimeOffset": undefined,
           "schemeIdUri": "urn:scte:scte35:2014:xml+bin",
           "timescale": 90000,
