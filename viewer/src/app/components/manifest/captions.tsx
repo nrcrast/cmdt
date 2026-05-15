@@ -6,6 +6,8 @@ import type { Cue, RawReport as Report } from "cmdt-shared";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DataTable } from "../data-table/data-table";
+import { CopyButton } from "../ui/copy-button";
+import MissingCaptions from "./missing-captions";
 
 export type Caption = {
 	id: string;
@@ -67,6 +69,17 @@ export const columns: ColumnDef<Caption>[] = [
 	{
 		accessorKey: "text",
 		header: "Text",
+		cell: ({ row }) => {
+			const text = row.original.text;
+			return (
+				<div className="flex items-center gap-1">
+					<span className="truncate max-w-md" title={text}>
+						{text}
+					</span>
+					<CopyButton value={text} />
+				</div>
+			);
+		},
 	},
 	{
 		accessorKey: "lang",
@@ -158,8 +171,11 @@ export function CaptionTable(props: { cues: Array<Cue> }) {
 }
 
 export default function Captions(props: { report: Report }) {
-	const { captions } = props.report;
-	if (!captions) {
+	const { captions, missingCues } = props.report;
+	const hasCaptions = captions && Object.keys(captions).length > 0;
+	const hasMissingCues = missingCues && Object.keys(missingCues).length > 0;
+
+	if (!hasCaptions && !hasMissingCues) {
 		return (
 			<Alert>
 				<AlertTitle>No Captions</AlertTitle>
@@ -167,18 +183,30 @@ export default function Captions(props: { report: Report }) {
 			</Alert>
 		);
 	}
-	const captionItems = Object.keys(captions).map((key) => {
-		return (
-			<AccordionItem value={`captions-${key}`} key={`captions-${key}`}>
-				<AccordionTrigger>{key}</AccordionTrigger>
-				<AccordionContent>
-					<CaptionTable cues={captions[key]}></CaptionTable>
-				</AccordionContent>
-			</AccordionItem>
-		);
-	});
+
+	const captionItems = captions
+		? Object.keys(captions).map((key) => {
+				return (
+					<AccordionItem value={`captions-${key}`} key={`captions-${key}`}>
+						<AccordionTrigger>{key}</AccordionTrigger>
+						<AccordionContent>
+							<CaptionTable cues={captions[key]}></CaptionTable>
+						</AccordionContent>
+					</AccordionItem>
+				);
+			})
+		: [];
+
 	return (
 		<Accordion type="single" collapsible className="w-full">
+			{hasMissingCues && (
+				<AccordionItem value="missing-captions">
+					<AccordionTrigger>Missing Captions</AccordionTrigger>
+					<AccordionContent>
+						<MissingCaptions report={props.report} />
+					</AccordionContent>
+				</AccordionItem>
+			)}
 			{captionItems}
 		</Accordion>
 	);

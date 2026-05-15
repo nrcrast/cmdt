@@ -12,13 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { Scte35KVTable, spliceInfoToRows } from "./scte35-kv-table";
 import {
-	SEGMENTATION_TYPE_IDS,
-	SPLICE_COMMAND_TYPES,
+	formatEnumValue,
 	getCommandTypeSummary,
 	getMarkerSummary,
 	getUniqueCommandTypes,
 	getUniqueSegmentationTypes,
-	formatEnumValue,
+	SEGMENTATION_TYPE_IDS,
+	SPLICE_COMMAND_TYPES,
 } from "./scte35-utils";
 
 type Scte35MarkersProps = {
@@ -31,20 +31,11 @@ export default function Scte35Markers({ markers }: Scte35MarkersProps) {
 	const [searchText, setSearchText] = useState("");
 	const [rawJsonExpanded, setRawJsonExpanded] = useState<Set<number>>(new Set());
 
-	// Empty state
-	if (!markers || markers.length === 0) {
-		return (
-			<Alert>
-				<AlertTitle>No SCTE-35 Markers</AlertTitle>
-				<AlertDescription>No SCTE-35 markers were found in this manifest.</AlertDescription>
-			</Alert>
-		);
-	}
-
-	const uniqueCommandTypes = useMemo(() => getUniqueCommandTypes(markers), [markers]);
-	const uniqueSegTypes = useMemo(() => getUniqueSegmentationTypes(markers), [markers]);
+	const uniqueCommandTypes = useMemo(() => getUniqueCommandTypes(markers ?? []), [markers]);
+	const uniqueSegTypes = useMemo(() => getUniqueSegmentationTypes(markers ?? []), [markers]);
 
 	const filteredMarkers = useMemo(() => {
+		if (!markers) return [];
 		return markers.filter((marker, _index) => {
 			// biome-ignore lint/suspicious/noExplicitAny: ISpliceInfoSection is loosely typed
 			const data = marker.data as any;
@@ -76,6 +67,16 @@ export default function Scte35Markers({ markers }: Scte35MarkersProps) {
 			return true;
 		});
 	}, [markers, commandFilter, segmentationFilter, searchText]);
+
+	// Empty state
+	if (!markers || markers.length === 0) {
+		return (
+			<Alert>
+				<AlertTitle>No SCTE-35 Markers</AlertTitle>
+				<AlertDescription>No SCTE-35 markers were found in this manifest.</AlertDescription>
+			</Alert>
+		);
+	}
 
 	const toggleRawJson = (index: number) => {
 		setRawJsonExpanded((prev) => {
@@ -150,7 +151,7 @@ export default function Scte35Markers({ markers }: Scte35MarkersProps) {
 			{/* Accordion marker list */}
 			{filteredMarkers.length > 0 && (
 				<Accordion type="multiple" className="w-full">
-					{filteredMarkers.map((marker, i) => {
+					{filteredMarkers.map((marker) => {
 						const globalIndex = markers.indexOf(marker);
 						const summary = getMarkerSummary(marker);
 						const rows = spliceInfoToRows(marker.data);

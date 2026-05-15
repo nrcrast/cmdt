@@ -298,7 +298,7 @@ export class DashManifest implements ManifestParser {
 	}
 
 	private parseTextRepresentation(representation: RawRepresentation): void {
-				const audioRepresentation: Representation = {
+		const audioRepresentation: Representation = {
 			id: representation.id,
 			type: MediaType.Text,
 			hasCaptions: {

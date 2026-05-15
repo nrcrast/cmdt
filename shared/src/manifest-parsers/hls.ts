@@ -24,6 +24,7 @@ export class HlsManifest implements ManifestParser {
 			video: new UniqueRepresentationMap(),
 			audio: new UniqueRepresentationMap(),
 			images: new UniqueRepresentationMap(),
+			text: new UniqueRepresentationMap(),
 			captionStreamToLanguage: {},
 			periods: [],
 			contentProtection: [],

@@ -2,70 +2,70 @@ import type { Scte35Marker } from "cmdt-shared";
 
 // Splice Command Types (SCTE-35 Table 6)
 export const SPLICE_COMMAND_TYPES: Record<number, string> = {
-	0x00: "Splice Null",
-	0x04: "Splice Schedule",
-	0x05: "Splice Insert",
-	0x06: "Time Signal",
-	0x07: "Bandwidth Reservation",
-	0xff: "Private Command",
+	0: "Splice Null",
+	4: "Splice Schedule",
+	5: "Splice Insert",
+	6: "Time Signal",
+	7: "Bandwidth Reservation",
+	255: "Private Command",
 };
 
 // Segmentation Type IDs (SCTE-35 Table 22)
 export const SEGMENTATION_TYPE_IDS: Record<number, string> = {
-	0x00: "Not Indicated",
-	0x01: "Content Identification",
-	0x10: "Program Start",
-	0x11: "Program End",
-	0x12: "Program Early Termination",
-	0x13: "Program Breakaway",
-	0x14: "Program Resumption",
-	0x15: "Program Runover Planned",
-	0x16: "Program Runover Unplanned",
-	0x17: "Program Overlap Start",
-	0x18: "Program Blackout Override",
-	0x19: "Program Start In Progress",
-	0x20: "Chapter Start",
-	0x21: "Chapter End",
-	0x30: "Provider Ad Start",
-	0x31: "Provider Ad End",
-	0x32: "Distributor Ad Start",
-	0x33: "Distributor Ad End",
-	0x34: "Provider PO Start",
-	0x35: "Provider PO End",
-	0x36: "Distributor PO Start",
-	0x37: "Distributor PO End",
-	0x40: "Unscheduled Event Start",
-	0x41: "Unscheduled Event End",
-	0x50: "Network Start",
-	0x51: "Network End",
+	0: "Not Indicated",
+	1: "Content Identification",
+	16: "Program Start",
+	17: "Program End",
+	18: "Program Early Termination",
+	19: "Program Breakaway",
+	20: "Program Resumption",
+	21: "Program Runover Planned",
+	22: "Program Runover Unplanned",
+	23: "Program Overlap Start",
+	24: "Program Blackout Override",
+	25: "Program Start In Progress",
+	32: "Chapter Start",
+	33: "Chapter End",
+	48: "Provider Ad Start",
+	49: "Provider Ad End",
+	50: "Distributor Ad Start",
+	51: "Distributor Ad End",
+	52: "Provider PO Start",
+	53: "Provider PO End",
+	54: "Distributor PO Start",
+	55: "Distributor PO End",
+	64: "Unscheduled Event Start",
+	65: "Unscheduled Event End",
+	80: "Network Start",
+	81: "Network End",
 };
 
 // Segmentation UPID Types (SCTE-35 Table 21)
 export const SEGMENTATION_UPID_TYPES: Record<number, string> = {
-	0x00: "Not Used",
-	0x01: "User Defined",
-	0x02: "ISCI",
-	0x03: "Ad-ID",
-	0x04: "UMID",
-	0x05: "ISAN (deprecated)",
-	0x06: "V-ISAN",
-	0x07: "TID",
-	0x08: "TI",
-	0x09: "ADI",
-	0x0a: "EIDR",
-	0x0b: "ATSC",
-	0x0c: "MPU",
-	0x0d: "MID",
-	0x0e: "ADS",
-	0x0f: "URI",
+	0: "Not Used",
+	1: "User Defined",
+	2: "ISCI",
+	3: "Ad-ID",
+	4: "UMID",
+	5: "ISAN (deprecated)",
+	6: "V-ISAN",
+	7: "TID",
+	8: "TI",
+	9: "ADI",
+	10: "EIDR",
+	11: "ATSC",
+	12: "MPU",
+	13: "MID",
+	14: "ADS",
+	15: "URI",
 };
 
 // Descriptor Tags (SCTE-35 Section 10.3)
 export const DESCRIPTOR_TAGS: Record<number, string> = {
-	0x00: "Avail Descriptor",
-	0x01: "DTMF Descriptor",
-	0x02: "Segmentation Descriptor",
-	0x03: "Time Descriptor",
+	0: "Avail Descriptor",
+	1: "DTMF Descriptor",
+	2: "Segmentation Descriptor",
+	3: "Time Descriptor",
 };
 
 // String-renderable UPID types (decoded as UTF-8)
@@ -129,8 +129,8 @@ export function isIntegerUpidType(type: number): boolean {
 	return INTEGER_UPID_TYPES.has(type);
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: ISpliceInfoSection fields are loosely typed from scte35 library
 export function getMarkerSummary(marker: Scte35Marker): string {
+	// biome-ignore lint/suspicious/noExplicitAny: ISpliceInfoSection fields are loosely typed from scte35 library
 	const data = marker.data as any;
 	const time = `${marker.presentationTimeS.toFixed(3)}s`;
 	const cmdType = SPLICE_COMMAND_TYPES[data?.spliceCommandType ?? -1] ?? "Unknown";

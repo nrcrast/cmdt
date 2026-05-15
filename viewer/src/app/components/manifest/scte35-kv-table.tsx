@@ -1,6 +1,5 @@
 "use client";
 
-import type { Scte35Marker } from "cmdt-shared";
 import { ChevronDown, ChevronRight, ToggleLeft, ToggleRight } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
@@ -8,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
 	DESCRIPTOR_TAGS,
-	SEGMENTATION_TYPE_IDS,
-	SEGMENTATION_UPID_TYPES,
-	SPLICE_COMMAND_TYPES,
 	formatEnumValue,
 	formatPts,
 	formatUpid,
 	formatUpidAsHex,
+	SEGMENTATION_TYPE_IDS,
+	SEGMENTATION_UPID_TYPES,
+	SPLICE_COMMAND_TYPES,
 	toHex,
 } from "./scte35-utils";
 
@@ -31,10 +30,7 @@ function CollapsibleSection(props: { row: KVRow; depth: number }) {
 
 	return (
 		<>
-			<TableRow
-				className="cursor-pointer hover:bg-muted/50"
-				onClick={() => setOpen(!open)}
-			>
+			<TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => setOpen(!open)}>
 				<TableCell className="font-medium" style={{ paddingLeft: `${depth * 1.5 + 0.5}rem` }}>
 					<span className="inline-flex items-center gap-1">
 						{open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
@@ -43,7 +39,8 @@ function CollapsibleSection(props: { row: KVRow; depth: number }) {
 				</TableCell>
 				<TableCell className="text-muted-foreground">{row.value}</TableCell>
 			</TableRow>
-			{open && row.children?.map((child, i) => <KVRowRenderer key={`${child.key}-${i}`} row={child} depth={depth + 1} />)}
+			{open &&
+				row.children?.map((child, i) => <KVRowRenderer key={`${child.key}-${i}`} row={child} depth={depth + 1} />)}
 		</>
 	);
 }
@@ -86,7 +83,7 @@ function UpidCell(props: { upid: Uint8Array | number[] | undefined; type: number
 	const [showHex, setShowHex] = useState(false);
 	const { upid, type } = props;
 
-	if (!upid) return <>N/A</>;
+	if (!upid) return "N/A";
 
 	const defaultDisplay = formatUpid(upid, type);
 	const hexDisplay = formatUpidAsHex(upid);
@@ -138,11 +135,14 @@ function spliceInsertToRows(cmd: any): KVRow[] {
 		rows.push({ key: "Cancel Indicator", value: cmd.spliceEventCancelIndicator ? "Yes" : "No" });
 	if (cmd.outOfNetworkIndicator !== undefined)
 		rows.push({ key: "Out of Network", value: cmd.outOfNetworkIndicator ? "Yes (OUT)" : "No (IN)" });
-	if (cmd.programSpliceFlag !== undefined) rows.push({ key: "Program Splice", value: cmd.programSpliceFlag ? "Yes" : "No" });
-	if (cmd.spliceImmediateFlag !== undefined) rows.push({ key: "Immediate", value: cmd.spliceImmediateFlag ? "Yes" : "No" });
+	if (cmd.programSpliceFlag !== undefined)
+		rows.push({ key: "Program Splice", value: cmd.programSpliceFlag ? "Yes" : "No" });
+	if (cmd.spliceImmediateFlag !== undefined)
+		rows.push({ key: "Immediate", value: cmd.spliceImmediateFlag ? "Yes" : "No" });
 	if (cmd.durationFlag !== undefined) rows.push({ key: "Duration Flag", value: cmd.durationFlag ? "Yes" : "No" });
 	if (cmd.spliceTime) rows.push({ key: "Splice Time", children: spliceTimeToRows(cmd.spliceTime), defaultOpen: true });
-	if (cmd.breakDuration) rows.push({ key: "Break Duration", children: breakDurationToRows(cmd.breakDuration), defaultOpen: true });
+	if (cmd.breakDuration)
+		rows.push({ key: "Break Duration", children: breakDurationToRows(cmd.breakDuration), defaultOpen: true });
 	if (cmd.uniqueProgramId !== undefined) rows.push({ key: "Unique Program ID", value: String(cmd.uniqueProgramId) });
 	if (cmd.available !== undefined) rows.push({ key: "Available", value: String(cmd.available) });
 	if (cmd.expected !== undefined) rows.push({ key: "Expected", value: String(cmd.expected) });
@@ -196,7 +196,6 @@ function commandToRows(data: any): KVRow | null {
 
 	return { key: "Command", value: cmdLabel, children, defaultOpen: true };
 }
-
 
 // biome-ignore lint/suspicious/noExplicitAny: descriptor types are loosely typed
 function segmentationDescriptorToRows(desc: any): KVRow[] {

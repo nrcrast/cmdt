@@ -1,4 +1,5 @@
 import type { SCTE35 } from "scte35";
+import type { VTTData } from "webvtt-parser";
 import type { Cue } from "./cue.js";
 import type { Manifest, Representation, Segment } from "./manifest.js";
 import type { Emsg } from "./utils/mp4/types.js";
@@ -60,14 +61,16 @@ export type RawReport = {
 			emsgs: Array<Emsg>;
 		};
 	};
-	manifest: Omit<Manifest, "video" | "audio" | "images" | "raw"> & {
+	manifest: Omit<Manifest, "video" | "audio" | "images" | "text" | "raw"> & {
 		video: Array<Representation>;
 		audio: Array<Representation>;
 		images: Array<Representation>;
+		text: Array<Representation>;
 	};
 	captions?: {
 		[stream: string]: Array<Cue>;
 	};
+	textCues: Pick<VTTData, "cues" | "styles">;
 	mismatchedContentProtection: Array<MismatchedContentProtectionEntry>;
 };
 
@@ -82,6 +85,7 @@ export class Report {
 				video: [],
 				audio: [],
 				images: [],
+				text: [],
 				captionStreamToLanguage: {},
 				periods: [],
 				contentProtection: [],
@@ -92,6 +96,10 @@ export class Report {
 			gaps: {},
 			emsgs: {},
 			captions: {},
+			textCues: {
+				cues: [],
+				styles: [],
+			},
 		};
 	}
 	public addMissingCue(targetRepresentation: string, candidateRepresentation: string, cueId: string) {
@@ -104,6 +112,7 @@ export class Report {
 		this.raw.missingCues[targetRepresentation][cueId].push(candidateRepresentation);
 	}
 	public getRaw() {
+		this.raw.textCues.cues.sort((a, b) => a.startTime - b.startTime);
 		return this.raw;
 	}
 	public addCaptionStream(stream: string, captions: Array<Cue>) {
@@ -154,13 +163,18 @@ export class Report {
 		}
 		emsgsForRepresentation.emsgs.push(emsg);
 	}
+	public addVttCues(cues: VTTData) {
+		this.raw.textCues.cues.push(...cues.cues);
+		this.raw.textCues.styles.push(...cues.styles);
+	}
 	public ingestManifest(manifest: Manifest) {
-		const { video, audio, images, ...rest } = manifest;
+		const { video, audio, images, text, ...rest } = manifest;
 		this.raw.manifest = {
 			...rest,
 			video: video.toArray(),
 			audio: audio.toArray(),
 			images: images.toArray(),
+			text: text.toArray(),
 		};
 	}
 }

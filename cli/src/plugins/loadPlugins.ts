@@ -6,6 +6,7 @@ import {
 	type Plugin,
 	PsshExtractor,
 	type Report,
+	WebVttParser,
 } from "cmdt-shared";
 import { FilesystemWriter } from "./filesystem-writer/filesystem-writer.js";
 
@@ -35,5 +36,7 @@ export async function loadPlugins(manifest: Manifest, report: Report): Promise<P
 	plugins.push(new EmsgExtractor(manifest, report));
 	plugins.push(new PsshExtractor(manifest, report));
 	plugins.push(new GapChecker(manifest, report));
+	plugins.push(new WebVttParser(manifest, report));
+
 	return plugins;
 }

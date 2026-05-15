@@ -9,6 +9,7 @@ import {
 	type RawReport,
 	Report as ReportData,
 	SegmentDownloader,
+	WebVttParser,
 } from "cmdt-shared";
 import { useEffect, useId, useState } from "react";
 import { useFilePicker } from "use-file-picker";
@@ -176,6 +177,7 @@ export default function Home() {
 										new EmsgExtractor(manifestData, report),
 										new GapChecker(manifestData, report),
 										new PsshExtractor(manifestData, report),
+										new WebVttParser(manifestData, report),
 									];
 
 									if (downloadSegments && segmentOutputDir && canSaveToFileSystem) {

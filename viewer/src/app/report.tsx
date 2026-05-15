@@ -7,11 +7,12 @@ import Captions from "./components/manifest/captions";
 import ContentProtection from "./components/manifest/content-protection";
 import Emsgs from "./components/manifest/emsgs";
 import ImageRepresentations from "./components/manifest/image-representations";
-import Scte35Markers from "./components/manifest/scte35-markers";
 import MismatchedContentProtection from "./components/manifest/mismatched-content-protection";
-import MissingCaptions from "./components/manifest/missing-captions";
 import Periods from "./components/manifest/periods";
+import Scte35Markers from "./components/manifest/scte35-markers";
+import TextRepresentations from "./components/manifest/text-representations";
 import VideoRepresentations from "./components/manifest/video-representations";
+import WebVttCues from "./components/manifest/webvtt-cues";
 
 export default function Report(props: { rawReport: ReportData }) {
 	const { rawReport } = props;
@@ -20,11 +21,10 @@ export default function Report(props: { rawReport: ReportData }) {
 			<Tabs defaultValue="manifest">
 				<TabsList>
 					<TabsTrigger value="manifest">Manifest</TabsTrigger>
-					<TabsTrigger value="missing-captions">Missing Captions</TabsTrigger>
-					<TabsTrigger value="dash-if-conformance">DASH-IF Conformance</TabsTrigger>
 					<TabsTrigger value="mismatched-content-protection">Mismatched Content Protection</TabsTrigger>
 					<TabsTrigger value="captions">Captions</TabsTrigger>
 					<TabsTrigger value="emsgs">EMSGs</TabsTrigger>
+					<TabsTrigger value="webvtt-cues">WebVTT Cues</TabsTrigger>
 					<TabsTrigger value="scte35">SCTE-35 Markers</TabsTrigger>
 				</TabsList>
 				<TabsContent value="manifest">
@@ -48,21 +48,24 @@ export default function Report(props: { rawReport: ReportData }) {
 							</AccordionContent>
 						</AccordionItem>
 						<AccordionItem value="item-4">
+							<AccordionTrigger>Text Representations</AccordionTrigger>
+							<AccordionContent>
+								<TextRepresentations representations={rawReport.manifest.text} />
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="item-5">
 							<AccordionTrigger>Content Protection</AccordionTrigger>
 							<AccordionContent>
 								<ContentProtection contentProtection={rawReport.manifest.contentProtection} />
 							</AccordionContent>
 						</AccordionItem>
-						<AccordionItem value="item-5">
+						<AccordionItem value="item-6">
 							<AccordionTrigger>Periods</AccordionTrigger>
 							<AccordionContent>
 								<Periods periods={rawReport.manifest.periods as Period[]} />
 							</AccordionContent>
 						</AccordionItem>
 					</Accordion>
-				</TabsContent>
-				<TabsContent value="missing-captions">
-					<MissingCaptions report={rawReport} />
 				</TabsContent>
 				<TabsContent value="mismatched-content-protection">
 					<MismatchedContentProtection report={rawReport} />
@@ -72,6 +75,9 @@ export default function Report(props: { rawReport: ReportData }) {
 				</TabsContent>
 				<TabsContent value="emsgs">
 					<Emsgs report={rawReport} />
+				</TabsContent>
+				<TabsContent value="webvtt-cues">
+					<WebVttCues report={rawReport} />
 				</TabsContent>
 				<TabsContent value="scte35">
 					<Scte35Markers markers={rawReport.manifest.scte35 ?? []} />

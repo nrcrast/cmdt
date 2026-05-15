@@ -7,6 +7,7 @@ export * from "./plugins/emsg-extractor/emsg-extractor.js";
 export * from "./plugins/gap-checker/gap-checker.js";
 export { Plugin, type PluginArtifact } from "./plugins/plugin.js";
 export * from "./plugins/pssh-extractor/pssh-extractor.js";
+export * from "./plugins/webvtt-parser/webvtt-parser.js";
 export * from "./report.js";
 export type { Emsg } from "./utils/mp4/types.js";
 export * from "./utils/url.js";
