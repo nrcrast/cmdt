@@ -37,7 +37,8 @@
 		"pkgroll": "^2.11.2",
 		"typescript": "^5.8.2",
 		"vitest": "^3.2.4",
-		"webvtt-parser": "^2.2.0"
+		"webvtt-parser": "^2.2.0",
+		"scte35": "^0.6.0"
 	},
 	"dependencies": {
 		"@bufbuild/buf": "^1.59.0",
@@ -48,7 +49,6 @@
 		"dash-ts": "workspace:*",
 		"deepmerge-ts": "^7.1.5",
 		"path-unified": "^0.2.0",
-		"scte35": "^0.6.0",
 		"tslog": "^4.10.2",
 		"uuid": "^13.0.0"
 
