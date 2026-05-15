@@ -7,6 +7,7 @@ import Captions from "./components/manifest/captions";
 import ContentProtection from "./components/manifest/content-protection";
 import Emsgs from "./components/manifest/emsgs";
 import ImageRepresentations from "./components/manifest/image-representations";
+import Scte35Markers from "./components/manifest/scte35-markers";
 import MismatchedContentProtection from "./components/manifest/mismatched-content-protection";
 import MissingCaptions from "./components/manifest/missing-captions";
 import Periods from "./components/manifest/periods";
@@ -24,6 +25,7 @@ export default function Report(props: { rawReport: ReportData }) {
 					<TabsTrigger value="mismatched-content-protection">Mismatched Content Protection</TabsTrigger>
 					<TabsTrigger value="captions">Captions</TabsTrigger>
 					<TabsTrigger value="emsgs">EMSGs</TabsTrigger>
+					<TabsTrigger value="scte35">SCTE-35 Markers</TabsTrigger>
 				</TabsList>
 				<TabsContent value="manifest">
 					<Accordion type="single" collapsible className="w-full">
@@ -70,6 +72,9 @@ export default function Report(props: { rawReport: ReportData }) {
 				</TabsContent>
 				<TabsContent value="emsgs">
 					<Emsgs report={rawReport} />
+				</TabsContent>
+				<TabsContent value="scte35">
+					<Scte35Markers markers={rawReport.manifest.scte35 ?? []} />
 				</TabsContent>
 			</Tabs>
 		</div>

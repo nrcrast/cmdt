@@ -23,6 +23,7 @@ export class SegmentDownloader {
 			...this.manifest.audio.toArray(),
 			...this.manifest.video.toArray(),
 			...this.manifest.images.toArray(),
+			...this.manifest.text.toArray(),
 		];
 		const nSegments = representations.reduce((acc, representation) => {
 			return acc + representation.segments.length;

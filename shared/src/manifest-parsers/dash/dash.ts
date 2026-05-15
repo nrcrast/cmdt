@@ -46,6 +46,7 @@ export class DashManifest implements ManifestParser {
 			video: new UniqueRepresentationMap(),
 			audio: new UniqueRepresentationMap(),
 			images: new UniqueRepresentationMap(),
+			text: new UniqueRepresentationMap(),
 			periods: [],
 			contentProtection: [],
 			captionStreamToLanguage: {},
@@ -296,6 +297,21 @@ export class DashManifest implements ManifestParser {
 		this.manifest.audio.add(audioRepresentation);
 	}
 
+	private parseTextRepresentation(representation: RawRepresentation): void {
+				const audioRepresentation: Representation = {
+			id: representation.id,
+			type: MediaType.Text,
+			hasCaptions: {
+				cea608: false,
+				cea708: false,
+			},
+			codecs: representation.codecs ?? representation.adaptationSet.codecs,
+			language: representation.adaptationSet.lang,
+			segments: this.getSegmentsFromRepresentation(representation),
+		};
+		this.manifest.text.add(audioRepresentation);
+	}
+
 	private parseImageRepresentation(representation: RawRepresentation): void {
 		let dashThumbProperty = representation.essentialProperty?.find(
 			(e) => e.schemeIdUri === "http://dashif.org/guidelines/thumbnail_tile",
@@ -354,9 +370,9 @@ export class DashManifest implements ManifestParser {
 			case MediaType.Image:
 				this.parseImageRepresentation(representation);
 				break;
-			// case MediaType.Text:
-			// 	this.parseTextRepresentation(representation);
-			// 	break;
+			case MediaType.Text:
+				this.parseTextRepresentation(representation);
+				break;
 		}
 	}
 

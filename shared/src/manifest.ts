@@ -164,6 +164,7 @@ export type Manifest = {
 	video: UniqueRepresentationMap;
 	audio: UniqueRepresentationMap;
 	images: UniqueRepresentationMap;
+	text: UniqueRepresentationMap;
 	scte35?: Array<Scte35Marker>;
 	contentProtection: Array<ContentProtection>;
 	captionStreamToLanguage: Record<string, string>;
