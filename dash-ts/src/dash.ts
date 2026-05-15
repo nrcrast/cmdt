@@ -543,7 +543,7 @@ function parseEventStream(eventStreamRoot: XmlNode): EventStream[] | undefined {
 		return {
 			timescale: e.$.timescale,
 			presentationTimeOffset: e.$.presentationTimeOffset,
-			event: parseEvent(e.Event),
+			event: parseEvent(e.Event) ?? [],
 			schemeIdUri: e.$.schemeIdUri,
 			value: e.$.value,
 		};

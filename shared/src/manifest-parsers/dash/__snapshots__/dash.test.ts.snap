@@ -16542,6 +16542,8 @@ exports[`DashManifest > should parse a DASH manifest 1`] = `
     </Period>
 </MPD>
 ",
+  "scte35": [],
+  "text": [],
   "url": "http://example.com/manifest.mpd",
   "video": [
     {
