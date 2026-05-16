@@ -9,19 +9,24 @@ export abstract class ManifestParser {
 	abstract parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest>;
 }
 
+export type DownloadableChunkOptions = {
+	partial?: boolean;
+};
+
 export abstract class DownloadableChunk {
 	constructor(public url: URL) {}
-	abstract download(): Promise<void>;
+	abstract download(opts?: DownloadableChunkOptions): Promise<void>;
 	abstract getData(): Promise<ArrayBuffer | null>;
 	abstract free(): void;
 }
 
 export class MemoryCachedChunk extends DownloadableChunk {
-	public async download(): Promise<void> {
+	public async download(opts?: { partial?: boolean }): Promise<void> {
 		if (SegmentCache.getInstance().get(this.url)) {
 			return;
 		}
-		const resp = await fetch(this.url.href);
+		const fetchOpts = opts?.partial ? { headers: { Range: "bytes=0-6480" } } : {};
+		const resp = await fetch(this.url.href, fetchOpts);
 		const data = await resp.arrayBuffer();
 		SegmentCache.getInstance().add(this.url, data);
 	}

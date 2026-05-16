@@ -2,6 +2,8 @@
 import axios from "axios";
 import {
 	CaptionExtractor,
+	DownloadMode,
+	DownloadModeInfo,
 	EmsgExtractor,
 	GapChecker,
 	getManifestParser,
@@ -21,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { H1 } from "@/components/ui/typography";
 import { FilesystemWriter } from "./components/plugins/FilesystemWriter";
 import Report from "./report";
@@ -82,6 +85,7 @@ export default function Home() {
 	const [report, setReport] = useState<null | RawReport>(null);
 	const [downloader, setDownloader] = useState<null | SegmentDownloader>(null);
 	const [manifest, setManifest] = useState<string>("");
+	const [downloadMode, setDownloadMode] = useState<DownloadMode>(DownloadMode.Full);
 	const [downloadSegments, setDownloadSegments] = useState(false);
 	const [segmentOutputDir, setSegmentOutputDir] = useState<null | FileSystemDirectoryHandle>(null);
 	const [canSaveToFileSystem, setCanSaveToFileSystem] = useState(false);
@@ -138,6 +142,32 @@ export default function Home() {
 								onChange={(e) => setManifest(e.target.value)}
 							/>
 
+							<div className="space-y-2">
+								<Label>Download mode</Label>
+								<ToggleGroup
+									type="single"
+									variant="outline"
+									value={downloadMode}
+									onValueChange={(value) => {
+										if (value) setDownloadMode(value as DownloadMode);
+									}}
+									className="w-full"
+								>
+									{Object.values(DownloadMode).map((mode) => (
+										<ToggleGroupItem key={mode} value={mode} className="flex-1">
+											{DownloadModeInfo[mode].label}
+										</ToggleGroupItem>
+									))}
+								</ToggleGroup>
+								<div className="min-h-20 space-y-1">
+									<p className="text-sm text-muted-foreground">{DownloadModeInfo[downloadMode].long}</p>
+									{DownloadModeInfo[downloadMode].degradedPlugins.length > 0 && (
+										<p className="text-sm text-muted-foreground">
+											Incomplete output for: {DownloadModeInfo[downloadMode].degradedPlugins.join(", ")}.
+										</p>
+									)}
+								</div>
+							</div>
 							{canSaveToFileSystem && (
 								<Field orientation="horizontal">
 									<Checkbox
@@ -199,6 +229,7 @@ export default function Home() {
 
 									await downloader.start({
 										batchSize: 5,
+										downloadMode,
 										onSegmentAvailable: async (segment, representation) => {
 											for (const plugin of plugins) {
 												await plugin.processSegment(segment, representation);

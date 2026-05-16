@@ -13,6 +13,7 @@ function getSegmentsFromSegmentTimeline(
 	const timescale = segmentTemplate.timescale ?? 1;
 	const segments: Array<Segment> = [];
 	const periodStart = representation.adaptationSet.period.start ?? 0;
+	let calculatedT = 0;
 	if (!segmentTemplate.media) {
 		throw new Error(`No media template for representation ${representation.id}`);
 	}
@@ -22,9 +23,9 @@ function getSegmentsFromSegmentTimeline(
 			const durationInSeconds = entry.d / timescale;
 			numSegments = Math.ceil(representation.adaptationSet.period.duration / durationInSeconds);
 		}
-		const tWithOffset = (entry.t ?? 0) - (segmentTemplate.presentationTimeOffset ?? 0);
+		calculatedT = entry.t ?? calculatedT ?? 0;
+		const tWithOffset = calculatedT - (segmentTemplate.presentationTimeOffset ?? 0);
 		const unscaledDuration = entry.d ?? 0;
-		let calculatedT = entry.t ?? 0;
 		for (let i = 0; i < numSegments; i++) {
 			const url = buildSegmentUrlFromTemplate(baseUrl, n, representation, calculatedT, segmentTemplate.media);
 			segments.push({

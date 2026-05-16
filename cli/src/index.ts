@@ -1,7 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import axios from "axios";
-import { getExtensionFromUrl, getManifestParser, Report, SegmentDownloader, wrapUrl } from "cmdt-shared";
+import {
+	type DownloadMode,
+	getExtensionFromUrl,
+	getManifestParser,
+	Report,
+	SegmentDownloader,
+	wrapUrl,
+} from "cmdt-shared";
 import { mkdirp } from "mkdirp";
 import { rimraf } from "rimraf";
 import { getOpts } from "./cli-opts.js";
@@ -30,11 +37,6 @@ async function fetchAndWriteManifest(uri: string): Promise<string> {
 	try {
 		const parsedUrl = wrapUrl(uri);
 		const existingExtension = getExtensionFromUrl(parsedUrl) ?? "mpd";
-		const manifestPath = path.resolve(options.output, `manifest.${existingExtension}`);
-		if (options.skipDownload) {
-			logger.info(`Skipping download. Using ${manifestPath}`);
-			return fs.readFile(manifestPath, "utf-8");
-		}
 		const response = await axios.get(uri);
 		await fs.writeFile(path.resolve(options.output, `manifest.${existingExtension}`), response.data);
 		return response.data;
@@ -45,11 +47,9 @@ async function fetchAndWriteManifest(uri: string): Promise<string> {
 }
 
 async function cleanupOutputDirectory() {
-	if (!options.skipDownload) {
-		logger.debug(`Removing ${options.output}`);
-		await rimraf(options.output);
-		await mkdirp(options.output);
-	}
+	logger.debug(`Removing ${options.output}`);
+	await rimraf(options.output);
+	await mkdirp(options.output);
 }
 
 /**
@@ -88,6 +88,7 @@ async function processManifest(uri: string) {
 
 	await downloader.start({
 		batchSize: 5,
+		downloadMode: options.mode as DownloadMode,
 		onSegmentAvailable: async (segment, representation) => {
 			for (const plugin of plugins) {
 				await plugin.processSegment(segment, representation);
