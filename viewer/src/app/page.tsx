@@ -110,7 +110,9 @@ export default function Home() {
 		<div className="min-h-screen bg-background font-[family-name:var(--font-geist-sans)]">
 			<main className="mx-auto max-w-4xl p-6 space-y-6">
 				<div className="text-center sm:text-left">
-					<H1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">CMDT Report Viewer</H1>
+					<H1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+						Common Media Diagnostic Tool (CMDT)
+					</H1>
 					<p className="text-muted-foreground mt-2">v{process.env.NEXT_PUBLIC_CMDT_VERSION}</p>
 				</div>
 
