@@ -11,6 +11,7 @@ export abstract class HydratablePlaylist {
 	public playlist?: MediaPlaylist;
 	private currentStartTime = 0;
 	private currentInitSegmentUri?: string;
+	private rawManifest?: string;
 	constructor(public uri?: string) {}
 	public async hydratePlaylist(): Promise<void> {
 		if (!this.uri) {
@@ -25,6 +26,7 @@ export abstract class HydratablePlaylist {
 			iFramesOnly: false,
 		};
 		const { data } = await axios.get(this.uri);
+		this.rawManifest = data;
 		const lines = data.split("\n").map((line: string) => line.trim());
 		for (let i = 0; i < lines.length; i += 1) {
 			const line = lines[i];
@@ -32,6 +34,10 @@ export abstract class HydratablePlaylist {
 				this.parseTag(lines, line, i);
 			}
 		}
+	}
+
+	public getRawManifest(): string | undefined {
+		return this.rawManifest;
 	}
 
 	private parseTag(lines: Array<string>, line: string, index: number) {

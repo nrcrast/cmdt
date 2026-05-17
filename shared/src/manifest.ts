@@ -2,11 +2,17 @@
  * Shared data structures intended to represent a DASH/HLS agnostic manifest interface
  */
 
+import { PluginArtifact } from "./plugins/plugin.js";
 import type { Scte35Marker } from "./report.js";
 import { SegmentCache } from "./segment-cache.js";
 
+export type ParseResult = {
+	manifest: Manifest;
+	artifacts: Array<PluginArtifact>;
+};
+
 export abstract class ManifestParser {
-	abstract parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest>;
+	abstract parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<ParseResult>;
 }
 
 export type DownloadableChunkOptions = {

@@ -200,7 +200,7 @@ export default function Home() {
 									const sanitizedManifest = sanitizeUri(manifest);
 									const { data: manifestStr } = await axios.get(sanitizedManifest);
 									const parser = getManifestParser(sanitizedManifest);
-									const manifestData = await parser.parse(manifestStr, sanitizedManifest);
+									const { manifest: manifestData } = await parser.parse(manifestStr, sanitizedManifest);
 									const report = new ReportData();
 									const plugins = [
 										new CaptionExtractor(manifestData, report),

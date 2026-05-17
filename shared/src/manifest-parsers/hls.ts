@@ -3,6 +3,7 @@ import {
 	type Manifest,
 	type ManifestParser,
 	MediaType,
+	ParseResult,
 	type Representation,
 	UniqueRepresentationMap,
 } from "../manifest.js";
@@ -15,7 +16,7 @@ export class HlsManifest implements ManifestParser {
 	constructor() {
 		this.logger = new Logger();
 	}
-	public async parse(manifest: string, manifestUrl: string, _baseUrl?: string): Promise<Manifest> {
+	public async parse(manifest: string, manifestUrl: string, _baseUrl?: string): Promise<ParseResult> {
 		const parser = new HlsParser();
 		const master = await parser.parseMasterPlaylist(manifest, manifestUrl);
 
@@ -38,7 +39,7 @@ export class HlsManifest implements ManifestParser {
 				} else if (rendition.type === "AUDIO") {
 					commonManifest.audio.add(this.getRepresentationFromMedia(rendition, master.streamInfTags));
 				} else if (rendition.type === "SUBTITLES") {
-					this.logger.warn("WebVTT subtitles not supported");
+					commonManifest.text.add(this.getRepresentationFromMedia(rendition, master.streamInfTags));
 				}
 			}
 			if (rendition.type === "CLOSED-CAPTIONS") {
@@ -82,7 +83,18 @@ export class HlsManifest implements ManifestParser {
 			});
 		}
 
-		return commonManifest;
+		return {
+			manifest: commonManifest,
+			artifacts: [{
+				name: "master.m3u8",
+				content: manifest,
+			}, ...master.childPlaylists.map((playlist) => {
+				return {
+					name: new URL(playlist.uri).pathname.split("/").pop()!,
+					content: playlist.data,
+				};
+			})],
+		};
 	}
 
 	private isCea608(instreamId: string): boolean {
@@ -135,6 +147,9 @@ export class HlsManifest implements ManifestParser {
 		if (variant?.resolution) {
 			id += `-${variant.resolution.width}x${variant.resolution.height}`;
 		}
+		if(media.type === HlsMediaType.SUBTITLES) {
+			id = `text-${media.language}`;
+		};
 		const representation: Representation = {
 			bandwidth: variant?.bandwidth,
 			width: variant?.resolution?.width,

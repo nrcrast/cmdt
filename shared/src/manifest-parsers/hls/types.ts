@@ -107,4 +107,8 @@ export type MasterPlaylist = {
 	mediaTags: Array<ExtXMedia>;
 	streamInfTags: Array<ExtXStreamInf>;
 	imageStreamInfTags: Array<ExtXImageStreamInf>;
+	childPlaylists: Array<{
+		uri: string;
+		data: string;
+	}>;
 };

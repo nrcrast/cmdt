@@ -1,4 +1,5 @@
 // biome-ignore-all lint/style/noNonNullAssertion: Typescript's handling of map has/get is insufficient
+import { HydratablePlaylist } from "./hydratable-playlist.js";
 import {
 	ExtXImageStreamInf,
 	ExtXMedia,
@@ -17,25 +18,37 @@ export class HlsParser {
 			mediaTags: [],
 			imageStreamInfTags: [],
 			streamInfTags: [],
+			childPlaylists: [],
 		};
 
 		for (let i = 0; i < lines.length; i += 1) {
 			const line = lines[i]!;
+			let hydratablePlaylist: HydratablePlaylist | undefined;
 			if (line.startsWith("#EXT-X-STREAM-INF")) {
-				const streamInf = this.parseStreamInf(lines, line, i, uri);
-				await streamInf.hydratePlaylist();
-				masterPlaylist.streamInfTags.push(streamInf);
+				const playlist = this.parseStreamInf(lines, line, i, uri);
+				hydratablePlaylist = playlist;
+				await playlist.hydratePlaylist();
+				masterPlaylist.streamInfTags.push(playlist);
 			}
 			if (line.startsWith("#EXT-X-IMAGE-STREAM-INF")) {
-				const streamInf = this.parseImageStreamInf(line, uri);
-				await streamInf.hydratePlaylist();
-				masterPlaylist.imageStreamInfTags.push(streamInf);
+				const playlist = this.parseImageStreamInf(line, uri);
+				hydratablePlaylist = playlist;
+				await playlist.hydratePlaylist();
+				masterPlaylist.imageStreamInfTags.push(playlist);
 			}
 			if (line.startsWith("#EXT-X-MEDIA")) {
-				const media = this.parseMedia(line, uri);
-				await media.hydratePlaylist();
-				masterPlaylist.mediaTags.push(media);
+				const playlist = this.parseMedia(line, uri);
+				hydratablePlaylist = playlist;
+				await hydratablePlaylist.hydratePlaylist();
+				masterPlaylist.mediaTags.push(	playlist);
 			}
+							const rawManifest = hydratablePlaylist?.getRawManifest();
+				if(hydratablePlaylist?.uri && rawManifest) {
+					masterPlaylist.childPlaylists.push({
+						uri: hydratablePlaylist.uri,
+						data: rawManifest,
+					});
+				}
 		}
 		return masterPlaylist;
 	}

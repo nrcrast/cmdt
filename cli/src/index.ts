@@ -5,6 +5,7 @@ import {
 	type DownloadMode,
 	getExtensionFromUrl,
 	getManifestParser,
+	PluginArtifact,
 	Report,
 	SegmentDownloader,
 	wrapUrl,
@@ -19,6 +20,10 @@ const options = getOpts();
 const logger = getLogger();
 const report = new Report();
 
+type FilesystemArtifact = {
+	path: string;
+} & PluginArtifact;
+
 /**
  * When pasting a URI from your dev tools, sometimes it seems to jam weird escape characters into the search params
  * @param uri
@@ -28,17 +33,14 @@ function sanitizeUri(uri: string): string {
 	return uri.replaceAll("\\", "");
 }
 
-async function fetchAndWriteManifest(uri: string): Promise<string> {
+async function fetchManifest(uri: string): Promise<string> {
 	if (!uri.startsWith("http")) {
 		logger.info(`Reading manifest from ${path.resolve(uri)}`);
 		return fs.readFile(path.resolve(uri), "utf-8");
 	}
 	logger.info(`Fetching manifest from ${uri}`);
 	try {
-		const parsedUrl = wrapUrl(uri);
-		const existingExtension = getExtensionFromUrl(parsedUrl) ?? "mpd";
 		const response = await axios.get(uri);
-		await fs.writeFile(path.resolve(options.output, `manifest.${existingExtension}`), response.data);
 		return response.data;
 	} catch (e) {
 		logger.error(`Failed to fetch manifest from ${uri}`, e);
@@ -77,14 +79,21 @@ function normalizeCustomBaseUrl(baseUrl?: string): string | undefined {
 async function processManifest(uri: string) {
 	await cleanupOutputDirectory();
 	const sanitizedUri = sanitizeUri(uri);
-	const manifestText = await fetchAndWriteManifest(sanitizedUri);
+	const manifestText = await fetchManifest(sanitizedUri);
 	const parser = getManifestParser(sanitizedUri);
 	const baseUrl = normalizeCustomBaseUrl(options.baseUrl);
-	const manifest = await parser.parse(manifestText, sanitizedUri, baseUrl);
+	const { manifest, artifacts } = await parser.parse(manifestText, sanitizedUri, baseUrl);
 	await fs.writeFile(path.resolve(options.output, "manifest.json"), JSON.stringify(manifest, null, 2));
 	logger.info("Manifest parsed successfully!");
 	const plugins = await loadPlugins(manifest, report);
 	const downloader = new SegmentDownloader(manifest);
+
+	const fsArtifacts: Array<FilesystemArtifact> = artifacts.map((artifact) => {
+		return {
+			...artifact,
+			path: 'manifest-parser'
+		};
+	});
 
 	await downloader.start({
 		batchSize: 5,
@@ -103,9 +112,19 @@ async function processManifest(uri: string) {
 	logger.info("Finalizing plugins...");
 
 	for (const plugin of plugins) {
-		const artifacts = await plugin.finalize();
-		for (const artifact of artifacts) {
-			const artifactPath = path.resolve(options.output, plugin.name, artifact.name);
+		const pluginArtifacts = await plugin.finalize();
+		fsArtifacts.push(
+			...pluginArtifacts.map((artifact) => {
+				return {
+					...artifact,
+					path: plugin.name,
+				};
+			}),
+		);
+	}
+
+			for (const artifact of fsArtifacts) {
+			const artifactPath = path.resolve(options.output, artifact.path, artifact.name);
 			await mkdirp(path.dirname(artifactPath));
 			await fs.writeFile(
 				artifactPath,
@@ -113,11 +132,10 @@ async function processManifest(uri: string) {
 			);
 			logger.info(`Wrote ${artifact.name} to ${artifactPath}`);
 		}
-	}
 
 	report.ingestManifest(manifest);
 	const reportRaw = await report.getRaw();
-	await fs.writeFile(path.resolve(options.output, "report.json"), JSON.stringify(reportRaw, null, 2));
+	await fs.writeFile(path.resolve(options.output, "report.cmdt"), JSON.stringify(reportRaw, null, 2));
 
 	if (options.logPeriods) {
 		// biome-ignore lint/suspicious/noConsole: using console.table to print the data out

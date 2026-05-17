@@ -23,6 +23,7 @@ import {
 	type ManifestParser,
 	MediaType,
 	type Period as ParsedPeriod,
+	ParseResult,
 	type Representation,
 	type Segment,
 	UniqueRepresentationMap,
@@ -85,7 +86,7 @@ export class DashManifest implements ManifestParser {
 		this.manifest.contentProtection.push(candidateContentProtection);
 	}
 
-	public async parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<Manifest> {
+	public async parse(manifest: string, manifestUrl: string, baseUrl?: string): Promise<ParseResult> {
 		this.baseUrl = baseUrl;
 		this.dashManifest = await getRawDashManifest(manifest);
 		this.manifest.url = wrapUrl(manifestUrl);
@@ -96,7 +97,13 @@ export class DashManifest implements ManifestParser {
 				this.addContentProtection(contentProtection);
 			}
 		}
-		return this.manifest;
+		return {
+			manifest: this.manifest,
+			artifacts: [{
+				name: "manifest.mpd",
+				content: manifest,
+			}],
+		};
 	}
 
 	private parseRawManifest(mpd: MPD): Manifest {
