@@ -112,6 +112,7 @@ export class Report {
 		this.raw.missingCues[targetRepresentation][cueId].push(candidateRepresentation);
 	}
 	public getRaw() {
+		this.raw.manifest.scte35?.sort((a, b) => a.presentationTimeS - b.presentationTimeS);
 		this.raw.textCues.cues.sort((a, b) => a.startTime - b.startTime);
 		return this.raw;
 	}

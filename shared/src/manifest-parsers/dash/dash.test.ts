@@ -7,14 +7,14 @@ describe("DashManifest", () => {
 		const manifestUrl = "http://example.com/manifest.mpd";
 		const testManifest = await getTestFile("manifests/dash-multiperiod.mpd");
 		const parser = new DashManifest();
-		const manifest = await parser.parse(testManifest, manifestUrl);
+		const { manifest } = await parser.parse(testManifest, manifestUrl);
 		expect(manifest).toMatchSnapshot();
 	});
 	it("should parse a DASH single period manifest", async () => {
 		const manifestUrl = "http://example.com/manifest.mpd";
 		const testManifest = await getTestFile("manifests/dash-single-period.mpd");
 		const parser = new DashManifest();
-		const manifest = await parser.parse(testManifest, manifestUrl);
+		const { manifest } = await parser.parse(testManifest, manifestUrl);
 		expect(manifest).toMatchSnapshot();
 	});
 	// describe("DASH-IF test vectors", async () => {

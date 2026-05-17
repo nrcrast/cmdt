@@ -23,7 +23,7 @@ import {
 	type ManifestParser,
 	MediaType,
 	type Period as ParsedPeriod,
-	ParseResult,
+	type ParseResult,
 	type Representation,
 	type Segment,
 	UniqueRepresentationMap,
@@ -99,10 +99,12 @@ export class DashManifest implements ManifestParser {
 		}
 		return {
 			manifest: this.manifest,
-			artifacts: [{
-				name: "manifest.mpd",
-				content: manifest,
-			}],
+			artifacts: [
+				{
+					name: "manifest.mpd",
+					content: manifest,
+				},
+			],
 		};
 	}
 

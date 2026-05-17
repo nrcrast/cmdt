@@ -1,19 +1,22 @@
+import { SCTE35 } from "scte35";
 import { type ILogObj, Logger } from "tslog";
 import {
 	type Manifest,
 	type ManifestParser,
 	MediaType,
-	ParseResult,
+	type ParseResult,
 	type Representation,
 	UniqueRepresentationMap,
 } from "../manifest.js";
+import { getCommonEntries } from "../utils/arrayUtils.js";
 import { wrapUrl } from "../utils/url.js";
 import { HlsParser } from "./hls/parser.js";
 import { type ExtXMedia, type ExtXStreamInf, HlsMediaType } from "./hls/types.js";
-
 export class HlsManifest implements ManifestParser {
 	private logger: Logger<ILogObj>;
+	private scteParser: SCTE35;
 	constructor() {
+		this.scteParser = new SCTE35();
 		this.logger = new Logger();
 	}
 	public async parse(manifest: string, manifestUrl: string, _baseUrl?: string): Promise<ParseResult> {
@@ -26,6 +29,14 @@ export class HlsManifest implements ManifestParser {
 			audio: new UniqueRepresentationMap(),
 			images: new UniqueRepresentationMap(),
 			text: new UniqueRepresentationMap(),
+			scte35: Array.from(master.scte35Markers.values()).map((rawScte) => {
+				return {
+					presentationTimeS: rawScte.presentationTimeS,
+					data: rawScte.markerString.startsWith("0x")
+						? this.scteParser.parseFromHex(rawScte.markerString)
+						: this.scteParser.parseFromB64(rawScte.markerString),
+				};
+			}),
 			captionStreamToLanguage: {},
 			periods: [],
 			contentProtection: [],
@@ -83,17 +94,33 @@ export class HlsManifest implements ManifestParser {
 			});
 		}
 
+		let childPlaylists = master.childPlaylists.map((playlist) => {
+			return {
+				name: new URL(playlist.uri).pathname,
+				content: playlist.data,
+			};
+		});
+
+		const splitEntries = childPlaylists.map((p) => p.name.slice(1).split("/"));
+		const commonPrefixIndex = getCommonEntries(splitEntries);
+		if (commonPrefixIndex >= 0) {
+			childPlaylists = childPlaylists.map((p, i) => {
+				return {
+					name: splitEntries[i]?.slice(commonPrefixIndex + 1).join("/") ?? p.name.slice(1),
+					content: p.content,
+				};
+			});
+		}
+
 		return {
 			manifest: commonManifest,
-			artifacts: [{
-				name: "master.m3u8",
-				content: manifest,
-			}, ...master.childPlaylists.map((playlist) => {
-				return {
-					name: new URL(playlist.uri).pathname.split("/").pop()!,
-					content: playlist.data,
-				};
-			})],
+			artifacts: [
+				{
+					name: "master.m3u8",
+					content: manifest,
+				},
+				...childPlaylists,
+			],
 		};
 	}
 
@@ -147,9 +174,9 @@ export class HlsManifest implements ManifestParser {
 		if (variant?.resolution) {
 			id += `-${variant.resolution.width}x${variant.resolution.height}`;
 		}
-		if(media.type === HlsMediaType.SUBTITLES) {
+		if (media.type === HlsMediaType.SUBTITLES) {
 			id = `text-${media.language}`;
-		};
+		}
 		const representation: Representation = {
 			bandwidth: variant?.bandwidth,
 			width: variant?.resolution?.width,

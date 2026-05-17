@@ -101,6 +101,10 @@ export type MediaPlaylist = {
 		canBlockReload?: boolean;
 	};
 	segments: Array<Segment>;
+	scte35Markers: Array<{
+		presentationTimeS: number;
+		markerString: string;
+	}>;
 };
 
 export type MasterPlaylist = {
@@ -111,4 +115,5 @@ export type MasterPlaylist = {
 		uri: string;
 		data: string;
 	}>;
+	scte35Markers: Map<string, MediaPlaylist["scte35Markers"][0]>;
 };

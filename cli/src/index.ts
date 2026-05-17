@@ -3,9 +3,8 @@ import path from "node:path";
 import axios from "axios";
 import {
 	type DownloadMode,
-	getExtensionFromUrl,
 	getManifestParser,
-	PluginArtifact,
+	type PluginArtifact,
 	Report,
 	SegmentDownloader,
 	wrapUrl,
@@ -91,7 +90,7 @@ async function processManifest(uri: string) {
 	const fsArtifacts: Array<FilesystemArtifact> = artifacts.map((artifact) => {
 		return {
 			...artifact,
-			path: 'manifest-parser'
+			path: "manifest-parser",
 		};
 	});
 
@@ -123,15 +122,15 @@ async function processManifest(uri: string) {
 		);
 	}
 
-			for (const artifact of fsArtifacts) {
-			const artifactPath = path.resolve(options.output, artifact.path, artifact.name);
-			await mkdirp(path.dirname(artifactPath));
-			await fs.writeFile(
-				artifactPath,
-				typeof artifact.content === "string" ? artifact.content : Buffer.from(artifact.content),
-			);
-			logger.info(`Wrote ${artifact.name} to ${artifactPath}`);
-		}
+	for (const artifact of fsArtifacts) {
+		const artifactPath = path.resolve(options.output, artifact.path, artifact.name);
+		await mkdirp(path.dirname(artifactPath));
+		await fs.writeFile(
+			artifactPath,
+			typeof artifact.content === "string" ? artifact.content : Buffer.from(artifact.content),
+		);
+		logger.info(`Wrote ${artifact.name} to ${artifactPath}`);
+	}
 
 	report.ingestManifest(manifest);
 	const reportRaw = await report.getRaw();

@@ -1,5 +1,5 @@
 // biome-ignore-all lint/style/noNonNullAssertion: Typescript's handling of map has/get is insufficient
-import { HydratablePlaylist } from "./hydratable-playlist.js";
+import type { HydratablePlaylist } from "./hydratable-playlist.js";
 import {
 	ExtXImageStreamInf,
 	ExtXMedia,
@@ -19,6 +19,7 @@ export class HlsParser {
 			imageStreamInfTags: [],
 			streamInfTags: [],
 			childPlaylists: [],
+			scte35Markers: new Map(),
 		};
 
 		for (let i = 0; i < lines.length; i += 1) {
@@ -40,15 +41,19 @@ export class HlsParser {
 				const playlist = this.parseMedia(line, uri);
 				hydratablePlaylist = playlist;
 				await hydratablePlaylist.hydratePlaylist();
-				masterPlaylist.mediaTags.push(	playlist);
+				masterPlaylist.mediaTags.push(playlist);
 			}
-							const rawManifest = hydratablePlaylist?.getRawManifest();
-				if(hydratablePlaylist?.uri && rawManifest) {
-					masterPlaylist.childPlaylists.push({
-						uri: hydratablePlaylist.uri,
-						data: rawManifest,
-					});
-				}
+			const rawManifest = hydratablePlaylist?.getRawManifest();
+			if (hydratablePlaylist?.uri && rawManifest) {
+				masterPlaylist.childPlaylists.push({
+					uri: hydratablePlaylist.uri,
+					data: rawManifest,
+				});
+			}
+			for (const scteMarker of hydratablePlaylist?.playlist?.scte35Markers ?? []) {
+				const id = `${scteMarker.presentationTimeS} - ${scteMarker.markerString}`;
+				masterPlaylist.scte35Markers.set(id, scteMarker);
+			}
 		}
 		return masterPlaylist;
 	}

@@ -24,6 +24,7 @@ export abstract class HydratablePlaylist {
 			discontinuitySequence: 0,
 			playlistType: "VOD",
 			iFramesOnly: false,
+			scte35Markers: [],
 		};
 		const { data } = await axios.get(this.uri);
 		this.rawManifest = data;
@@ -69,6 +70,18 @@ export abstract class HydratablePlaylist {
 			}
 			case "#EXT-X-I-FRAMES-ONLY": {
 				this.playlist.iFramesOnly = parseBooleanAttribute(restOfLine);
+				break;
+			}
+			case "#EXT-X-SCTE35": {
+				const attributes = parseAttributes(restOfLine);
+				const cue = attributes.get("CUE");
+				if (!cue) {
+					break;
+				}
+				this.playlist?.scte35Markers.push({
+					markerString: cue,
+					presentationTimeS: this.currentStartTime,
+				});
 				break;
 			}
 			case "#EXT-X-TILES": {
