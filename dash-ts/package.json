@@ -1,12 +1,14 @@
 {
 	"name": "dash-ts",
 	"version": "0.0.9",
-	"description": "",
+	"description": "TypeScript MPEG-DASH manifest parser used by cmdt",
 	"type": "module",
 	"scripts": {
 		"build": "tsdown",
-		"lint": "biome lint",
+		"lint": "biome check && pnpm typecheck",
+		"lint:fix": "biome check --write",
 		"format": "biome format",
+		"format:fix": "biome format --write",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest --run"
 	},
@@ -29,8 +31,8 @@
 		}
 	},
 	"keywords": [],
-	"author": "",
-	"license": "ISC",
+	"author": "nrcrast",
+	"license": "MIT",
 	"files": [
 		"dist"
 	],

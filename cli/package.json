@@ -1,13 +1,14 @@
 {
 	"name": "cmdt-cli",
 	"version": "0.1.4",
-	"description": "",
+	"description": "CLI for the Common Media Diagnostic Tool",
 	"type": "module",
 	"scripts": {
 		"build": "tsdown",
-		"lint": "biome lint && pnpm typecheck",
+		"lint": "biome check && pnpm typecheck",
 		"lint:fix": "biome check --write",
 		"format": "biome format",
+		"format:fix": "biome format --write",
 		"typecheck": "tsc --noEmit",
 		"package": "rm -rf bin && mkdir bin && pkg dist/index.cjs --output bin/cmdt --target node22-linux-arm64,node22-macos-arm64,node22-win-arm64",
 		"start": "tsx src/index.ts"
@@ -26,8 +27,8 @@
 		}
 	},
 	"keywords": [],
-	"author": "",
-	"license": "ISC",
+	"author": "nrcrast",
+	"license": "MIT",
 	"dependencies": {
 		"@commander-js/extra-typings": "^14.0.0",
 		"axios": "^1.8.3",

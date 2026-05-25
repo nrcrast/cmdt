@@ -10,12 +10,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "mkdir -p out/cmdt; mv out/* out/cmdt; serve out",
-    "lint": "biome check",
-    "format": "biome format",
-    "typecheck": "tsc --noEmit",
+    "lint": "biome check && pnpm typecheck",
     "lint:fix": "biome check --write",
-    "biome": "biome format",
-    "biome:fix": "biome format --write"
+    "format": "biome format",
+    "format:fix": "biome format --write",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.7",

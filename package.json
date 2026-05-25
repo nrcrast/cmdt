@@ -16,6 +16,7 @@
     "lint": "pnpm -r --parallel run lint",
     "lint:fix": "pnpm -r --parallel run lint:fix",
     "format": "pnpm -r --parallel run format",
+    "format:fix": "pnpm -r --parallel run format:fix",
     "package": "pnpm -r --parallel run package",
     "typecheck": "pnpm -r --parallel run typecheck",
     "test": "pnpm -r run test",
