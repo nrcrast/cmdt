@@ -1,4 +1,5 @@
-import { SCTE35 } from "scte35";
+import type { SCTE35 as SCTE35Type } from "scte35";
+import scte35Pkg from "scte35";
 import { type ILogObj, Logger } from "tslog";
 import {
 	type Manifest,
@@ -12,9 +13,12 @@ import { getCommonEntries } from "../../utils/array-utils.js";
 import { wrapUrl } from "../../utils/url.js";
 import { HlsParser } from "./hls-parser.js";
 import { type ExtXMedia, type ExtXStreamInf, HlsMediaType } from "./types.js";
+
+const { SCTE35 } = scte35Pkg;
+
 export class HlsManifest implements ManifestParser {
 	private logger: Logger<ILogObj>;
-	private scteParser: SCTE35;
+	private scteParser: SCTE35Type;
 	constructor() {
 		this.scteParser = new SCTE35();
 		this.logger = new Logger();

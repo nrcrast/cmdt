@@ -42,6 +42,10 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 - CLI: resolved a Node ESM crash when importing `webvtt-parser` by using a
   default import and destructuring the `WebVTTParser` class, working around
   cjs-module-lexer's inability to detect the package's IIFE-assigned exports.
+- Viewer: applied the same default-import + destructure pattern for
+  `scte35` in `shared`'s HLS and DASH parsers; tsdown's preserved named
+  import resolved to `undefined` once bundled by Next.js webpack, surfacing
+  as a `SCTE35 is not a constructor` runtime error in the browser.
 - dash-ts: corrected the `exports` map to reference the `.d.mts`/`.d.cts`
   declaration files actually emitted by the build, restoring type resolution
   for downstream consumers.
