@@ -29,7 +29,7 @@ import {
 	UniqueRepresentationMap,
 } from "../../manifest.js";
 import type { Scte35Marker } from "../../report.js";
-import getStreamAndLanguages from "../../utils/cea/getStreamAndLanguages.js";
+import getStreamAndLanguages from "../../utils/cea/get-stream-and-languages.js";
 import { getDrmSystemFromSystemId } from "../../utils/drm.js";
 import { CeaSchemeUri } from "../../utils/types.js";
 import { getUrlFilePathHref, isFileUrl, wrapUrl } from "../../utils/url.js";

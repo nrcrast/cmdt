@@ -24,8 +24,8 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { AppHeader } from "./components/AppHeader";
-import { FilesystemWriter } from "./components/plugins/FilesystemWriter";
+import { AppHeader } from "./components/app-header";
+import { FilesystemWriter } from "./components/plugins/filesystem-writer";
 import Report from "./report";
 
 /**

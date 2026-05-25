@@ -25,6 +25,10 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.5.2] - 2026-05-20
+### Changed
+- Refactoring and directory structure cleanup
+
 ## [0.5.1] - 2026-05-20
 
 ### Added

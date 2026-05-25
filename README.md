@@ -110,8 +110,14 @@ User-facing changes are tracked in [`CHANGELOG.md`](./CHANGELOG.md) following th
 bundles this file at build time and surfaces it from the version badge in the
 header and on the `/changelog` route.
 
-When you open a PR that introduces a user-visible change, append a bullet under
-the appropriate subsection of `## [Unreleased]`. The available subsections are:
+Every PR MUST bump the root `package.json` `version` field and add (or finalize)
+a matching `CHANGELOG.md` section. Every merge to `main` triggers a release —
+deploy, package, tag, and GitHub Release — keyed off whatever version is in
+`package.json` at that commit. CI (`scripts/check-changelog.mjs --require-bump`,
+run from `.github/workflows/pr.yaml`) blocks PRs that don't bump.
+
+Append a bullet under the appropriate subsection of `## [Unreleased]`. The
+available subsections are:
 
 ```markdown
 ## [Unreleased]
@@ -135,9 +141,6 @@ the appropriate subsection of `## [Unreleased]`. The available subsections are:
 - Vulnerability fixes worth flagging.
 ```
 
-When you open a PR that bumps the root `package.json` `version` field, rename
-the existing `## [Unreleased]` heading to `## [X.Y.Z] - YYYY-MM-DD` and insert a
-fresh empty `## [Unreleased]` block above it. CI (`scripts/check-changelog.mjs`,
-run from both `.github/workflows/pr.yaml` and the release job in
-`.github/workflows/push.yaml`) enforces that every version bump has a matching
-non-empty changelog section.
+When you bump the version in `package.json`, rename the existing
+`## [Unreleased]` heading to `## [X.Y.Z] - YYYY-MM-DD` and insert a fresh empty
+`## [Unreleased]` block above it.

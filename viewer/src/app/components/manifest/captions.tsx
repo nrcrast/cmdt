@@ -5,8 +5,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { Cue, RawReport as Report } from "cmdt-shared";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CopyButton } from "@/components/ui/copy-button";
 import { DataTable } from "../data-table/data-table";
-import { CopyButton } from "../ui/copy-button";
 import MissingCaptions from "./missing-captions";
 
 export type Caption = {

@@ -9,6 +9,6 @@ export { Plugin, type PluginArtifact } from "./plugins/plugin.js";
 export * from "./plugins/pssh-extractor/pssh-extractor.js";
 export * from "./plugins/webvtt-parser/webvtt-parser.js";
 export * from "./report.js";
-export * from "./utils/arrayUtils.js";
+export * from "./utils/array-utils.js";
 export type { Emsg } from "./utils/mp4/types.js";
 export * from "./utils/url.js";

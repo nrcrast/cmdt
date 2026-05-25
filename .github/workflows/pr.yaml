@@ -17,8 +17,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-      - name: Check changelog
-        run: node scripts/check-changelog.mjs --base=origin/${{ github.base_ref }}
+      - name: Check changelog and version bump
+        run: node scripts/check-changelog.mjs --base=origin/${{ github.base_ref }} --require-bump
       - name: Run changelog parser tests
         run: node --test scripts/check-changelog.test.mjs
 
@@ -41,8 +41,8 @@ jobs:
         run: pnpm i
       - name: Build
         run: pnpm build
-      # - name: Test
-      #   run: pnpm test
+      - name: Test
+        run: pnpm test
       - name: Lint
         run: pnpm lint
       - name: Format

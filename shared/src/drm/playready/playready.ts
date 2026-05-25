@@ -1,6 +1,6 @@
 import { type ILogObj, Logger } from "tslog";
 import { DrmSystem } from "../../manifest.js";
-import DataViewReader from "../../utils/mp4/dataViewReader.js";
+import DataViewReader from "../../utils/mp4/data-view-reader.js";
 import { Endian } from "../../utils/mp4/types.js";
 import { DrmParser, type PsshBox } from "../drm-system.js";
 

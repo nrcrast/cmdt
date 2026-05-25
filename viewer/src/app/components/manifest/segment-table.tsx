@@ -1,8 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { RawReport as Report, Segment } from "cmdt-shared";
+import { CopyButton } from "@/components/ui/copy-button";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
-import { CopyButton } from "../ui/copy-button";
 
 type HydratedSegment = Segment & {
 	contentProtection: string;
