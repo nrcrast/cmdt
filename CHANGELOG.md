@@ -25,6 +25,27 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.5.3] - 2026-05-25
+
+### Changed
+
+- Migrated `cli` and `shared` library builds from pkgroll to tsdown so all
+  three published packages (`cli`, `shared`, `dash-ts`) share a single
+  build pipeline producing dual CJS/ESM output with type declarations.
+- Standardized the toolchain on pnpm 10 via `packageManager`, `engines.pnpm`,
+  and `engine-strict=true` in `.npmrc`.
+- Added a root `pnpm dev` watch script and Next.js workspace transpilation
+  so editing `shared` or `dash-ts` triggers viewer HMR.
+
+### Fixed
+
+- CLI: resolved a Node ESM crash when importing `webvtt-parser` by using a
+  default import and destructuring the `WebVTTParser` class, working around
+  cjs-module-lexer's inability to detect the package's IIFE-assigned exports.
+- dash-ts: corrected the `exports` map to reference the `.d.mts`/`.d.cts`
+  declaration files actually emitted by the build, restoring type resolution
+  for downstream consumers.
+
 ## [0.5.2] - 2026-05-20
 ### Changed
 - Refactoring and directory structure cleanup
