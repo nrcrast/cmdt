@@ -122,6 +122,8 @@ jobs:
       - name: create pnpm cache directory
         shell: bash
         run: mkdir -vp $(pnpm store path --silent)
+      - name: Check changelog
+        run: node scripts/check-changelog.mjs --release
       - run: pnpm i
       - name: Build Viewer
         run: pnpm run build

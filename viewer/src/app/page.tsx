@@ -24,7 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { H1 } from "@/components/ui/typography";
+import { AppHeader } from "./components/AppHeader";
 import { FilesystemWriter } from "./components/plugins/FilesystemWriter";
 import Report from "./report";
 
@@ -109,12 +109,7 @@ export default function Home() {
 	return (
 		<div className="min-h-screen bg-background font-[family-name:var(--font-geist-sans)]">
 			<main className="mx-auto max-w-4xl p-6 space-y-6">
-				<div className="text-center sm:text-left">
-					<H1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-						Common Media Diagnostic Tool (CMDT)
-					</H1>
-					<p className="text-muted-foreground mt-2">v{process.env.NEXT_PUBLIC_CMDT_VERSION}</p>
-				</div>
+				<AppHeader />
 
 				<div className="grid gap-4 sm:grid-cols-2">
 					{/* Option 1: Load from file */}
