@@ -36,6 +36,8 @@
     "rimraf": "6.0.1"
   },
   "engines": {
-    "pnpm": ">9.1.0"
-  }
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@10.28.1"
 }

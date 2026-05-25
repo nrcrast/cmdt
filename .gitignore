@@ -10,6 +10,7 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 .npmrc
+!/.npmrc
 .augment
 openspec
 .github/prompts
