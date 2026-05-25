@@ -99,4 +99,45 @@ export type Manifest = {
 };
 ```
 
-For more detailed info on `Manifest` content, see source. 
+For more detailed info on `Manifest` content, see source.
+
+# Contributing
+
+## Changelog
+
+User-facing changes are tracked in [`CHANGELOG.md`](./CHANGELOG.md) following the
+[Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/) format. The viewer
+bundles this file at build time and surfaces it from the version badge in the
+header and on the `/changelog` route.
+
+When you open a PR that introduces a user-visible change, append a bullet under
+the appropriate subsection of `## [Unreleased]`. The available subsections are:
+
+```markdown
+## [Unreleased]
+
+### Added
+- New capability for end users.
+
+### Changed
+- Behavior that existing users will notice.
+
+### Fixed
+- User-visible bug that was repaired.
+
+### Removed
+- Capability that no longer ships.
+
+### Deprecated
+- Capability still present but slated for removal.
+
+### Security
+- Vulnerability fixes worth flagging.
+```
+
+When you open a PR that bumps the root `package.json` `version` field, rename
+the existing `## [Unreleased]` heading to `## [X.Y.Z] - YYYY-MM-DD` and insert a
+fresh empty `## [Unreleased]` block above it. CI (`scripts/check-changelog.mjs`,
+run from both `.github/workflows/pr.yaml` and the release job in
+`.github/workflows/push.yaml`) enforces that every version bump has a matching
+non-empty changelog section.

@@ -7,6 +7,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - name: Check changelog
+        run: node scripts/check-changelog.mjs --base=origin/${{ github.base_ref }}
+      - name: Run changelog parser tests
+        run: node --test scripts/check-changelog.test.mjs
+
   build:
     runs-on: ubuntu-latest
     steps:

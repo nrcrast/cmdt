@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build-changelog": "node ../scripts/build-changelog.mjs",
+    "predev": "pnpm run build-changelog",
+    "prebuild": "pnpm run build-changelog",
+    "pretypecheck": "pnpm run build-changelog",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "mkdir -p out/cmdt; mv out/* out/cmdt; serve out",
