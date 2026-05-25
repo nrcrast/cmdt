@@ -7,11 +7,11 @@ import {
 	type ParseResult,
 	type Representation,
 	UniqueRepresentationMap,
-} from "../manifest.js";
-import { getCommonEntries } from "../utils/arrayUtils.js";
-import { wrapUrl } from "../utils/url.js";
-import { HlsParser } from "./hls/parser.js";
-import { type ExtXMedia, type ExtXStreamInf, HlsMediaType } from "./hls/types.js";
+} from "../../manifest.js";
+import { getCommonEntries } from "../../utils/array-utils.js";
+import { wrapUrl } from "../../utils/url.js";
+import { HlsParser } from "./hls-parser.js";
+import { type ExtXMedia, type ExtXStreamInf, HlsMediaType } from "./types.js";
 export class HlsManifest implements ManifestParser {
 	private logger: Logger<ILogObj>;
 	private scteParser: SCTE35;

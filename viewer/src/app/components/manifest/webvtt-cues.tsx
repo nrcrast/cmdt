@@ -2,12 +2,12 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { RawReport as Report } from "cmdt-shared";
-import { formatTime } from "@/app/lib/format";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CopyButton } from "@/components/ui/copy-button";
+import { formatTime } from "@/lib/format";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
-import { CopyButton } from "../ui/copy-button";
 
 type VttCue = {
 	id: string;

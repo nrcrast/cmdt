@@ -1,6 +1,6 @@
 import type { Manifest, Representation, Segment } from "../../manifest.js";
 import type { Report } from "../../report.js";
-import Mp4Parser from "../../utils/mp4/parser.js";
+import Mp4Parser from "../../utils/mp4/mp4-parser.js";
 import type { Emsg, ParsedBox } from "../../utils/mp4/types.js";
 import { Plugin } from "../plugin.js";
 

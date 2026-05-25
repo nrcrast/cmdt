@@ -13,7 +13,7 @@ import { mkdirp } from "mkdirp";
 import { rimraf } from "rimraf";
 import { getOpts } from "./cli-opts.js";
 import { getInstance as getLogger } from "./logger.js";
-import { loadPlugins } from "./plugins/loadPlugins.js";
+import { loadPlugins } from "./plugins/load-plugins.js";
 
 const options = getOpts();
 const logger = getLogger();

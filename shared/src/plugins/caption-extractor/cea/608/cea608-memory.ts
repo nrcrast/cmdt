@@ -1,7 +1,7 @@
 import type { Cue } from "../../../../cue.js";
-import getParsedCaption from "../../../../utils/cea/getParsedCaption.js";
+import getParsedCaption from "../../../../utils/cea/get-parsed-caption.js";
 import { CharSet, type StyledChar } from "../../../../utils/text/types.js";
-import { CC_ROWS, DEFAULT_BG_COLOR, DEFAULT_TXT_COLOR } from "../../../../utils/textConstants.js";
+import { CC_ROWS, DEFAULT_BG_COLOR, DEFAULT_TXT_COLOR } from "../../../../utils/text-constants.js";
 
 class Cea608Memory {
 	// Buffer for storing decoded characters

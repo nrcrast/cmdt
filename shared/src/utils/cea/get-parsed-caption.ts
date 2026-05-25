@@ -1,8 +1,8 @@
 import type { Cue, Style, Text } from "../../cue.js";
-import buildRawText from "../buildRawText.js";
+import buildRawText from "../build-raw-text.js";
 import type { StyledChar } from "../text/types.js";
 
-import { DEFAULT_BG_COLOR, DEFAULT_TXT_COLOR } from "../textConstants.js";
+import { DEFAULT_BG_COLOR, DEFAULT_TXT_COLOR } from "../text-constants.js";
 
 const createTextCue = (underline: boolean, italics: boolean, txtColor: string, bgColor: string): Text => {
 	const style: Style = {};

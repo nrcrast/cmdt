@@ -1,6 +1,6 @@
 import axios from "axios";
 import { describe, expect, it, vi } from "vitest";
-import { getTestFile } from "../../test/utils.js";
+import { getTestFile } from "../../../test/utils.js";
 import { HlsManifest } from "./hls.js";
 
 vi.mock("axios");

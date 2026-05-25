@@ -1,5 +1,5 @@
-import type DataViewReader from "./dataViewReader.js";
-import type Mp4Parser from "./parser.js";
+import type DataViewReader from "./data-view-reader.js";
+import type Mp4Parser from "./mp4-parser.js";
 
 // Enums
 export enum BoxFormat {

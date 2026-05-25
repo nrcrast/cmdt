@@ -1,5 +1,5 @@
 import { CcType, type Cea708ClosedCaptionByte } from "../../../../utils/text/types.js";
-import DtvccPacket from "./dtvccPacket.js";
+import DtvccPacket from "./dtvcc-packet.js";
 
 /**
  * CEA-708 DTVCC Packet Builder.

@@ -3,7 +3,7 @@ import { PsshParser } from "../../drm/pssh.js";
 import type { WidevineData } from "../../drm/widevine/widevine.js";
 import { type Manifest, MediaType, type Representation, type Segment } from "../../manifest.js";
 import { MismatchedContentProtectionType, type Report } from "../../report.js";
-import Mp4Parser from "../../utils/mp4/parser.js";
+import Mp4Parser from "../../utils/mp4/mp4-parser.js";
 import type { ParsedBox } from "../../utils/mp4/types.js";
 import { Plugin } from "../plugin.js";
 

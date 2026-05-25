@@ -10,37 +10,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check-version:
-    runs-on: ubuntu-latest
-    outputs:
-      changed: ${{ steps.check-version.outputs.changed }}
-      version: ${{ steps.check-version.outputs.version }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        with:
-          version: 9
-          run_install: false
-      - name: Use Node.js
-        uses: actions/setup-node@v6
-        with:
-          always-auth: 'true'
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-          cache-dependency-path: 'pnpm-lock.yaml'
-        # To avoid setup-node cache failure.
-        # ref. https://github.com/actions/setup-node/issues/1137
-      - name: create pnpm cache directory
-        shell: bash
-        run: mkdir -vp $(pnpm store path --silent)
-      - name: Check Version
-        id: check-version
-        uses: EndBug/version-check@v2
-        with:
-          diff-search: true
-
-      
   build:
     runs-on: ubuntu-latest
     permissions:
@@ -96,9 +65,8 @@ jobs:
       - run: pnpm test
 
   release:
-    needs: [build, test, check-version]
+    needs: [build, test]
     runs-on: macos-latest
-    if: ${{ needs.check-version.outputs.changed == 'true' }}
     permissions:
         contents: write
         pages: write
@@ -122,13 +90,17 @@ jobs:
       - name: create pnpm cache directory
         shell: bash
         run: mkdir -vp $(pnpm store path --silent)
-      - name: Check changelog
-        run: node scripts/check-changelog.mjs --release
+      - name: Read version
+        id: pkg-version
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - run: pnpm i
       - name: Build Viewer
         run: pnpm run build
         env:
-          NEXT_PUBLIC_CMDT_VERSION: ${{ needs.check-version.outputs.version }}
+          NEXT_PUBLIC_CMDT_VERSION: ${{ steps.pkg-version.outputs.version }}
       - name: Build Pages Artifact
         uses: actions/upload-pages-artifact@v3.0.1
         with:
@@ -141,7 +113,7 @@ jobs:
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
-          custom_tag: ${{ needs.check-version.outputs.version }}
+          custom_tag: ${{ steps.pkg-version.outputs.version }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - uses: ncipollo/release-action@v1
         with:

@@ -1,9 +1,9 @@
 import type { ILogObj, Logger } from "tslog";
 import { stringify } from "uuid";
-import createView from "../createView.js";
-import hexToUint8 from "../hexToUint8.js";
+import createView from "../create-view.js";
+import hexToUint8 from "../hex-to-uint8.js";
 import type { SchemeUri } from "../types.js";
-import DataViewReader from "./dataViewReader.js";
+import DataViewReader from "./data-view-reader.js";
 import type {
 	Elst,
 	Emsg,

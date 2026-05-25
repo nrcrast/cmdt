@@ -2,9 +2,9 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { Segment } from "cmdt-shared";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
-import { CopyButton } from "../ui/copy-button";
 
 type TextSegment = Segment & {
 	urlString: string;

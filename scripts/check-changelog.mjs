@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 // Verifies that root package.json version bumps are accompanied by a matching
 // CHANGELOG.md section. Runs in two modes:
-//   --base=<ref>   compare working-tree package.json against <ref>:package.json
-//                  (PR mode; <ref> is typically $GITHUB_BASE_REF)
-//   --release      compare HEAD:package.json against HEAD~1:package.json
-//                  (release mode; defense-in-depth on push to main)
+//   --base=<ref>      compare working-tree package.json against <ref>:package.json
+//                     (PR mode; <ref> is typically $GITHUB_BASE_REF)
+//   --release         compare HEAD:package.json against HEAD~1:package.json
+//                     (release mode; defense-in-depth on push to main)
+// Additional flag:
+//   --require-bump    fail if the version is unchanged relative to the comparison
+//                     ref (PR policy: every PR must bump the root version)
 import { execFileSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -14,10 +17,11 @@ import { parseChangelog, hasNonEmptyVersionSection, hasUnreleased } from "./chec
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function parseArgs(argv) {
-	const args = { base: null, release: false };
+	const args = { base: null, release: false, requireBump: false };
 	for (const arg of argv) {
 		if (arg.startsWith("--base=")) args.base = arg.slice("--base=".length);
 		else if (arg === "--release") args.release = true;
+		else if (arg === "--require-bump") args.requireBump = true;
 		else if (arg === "--help" || arg === "-h") args.help = true;
 		else throw new Error(`Unknown argument: ${arg}`);
 	}
@@ -26,9 +30,10 @@ function parseArgs(argv) {
 
 function printUsage() {
 	process.stderr.write(
-		"Usage: check-changelog.mjs (--base=<ref> | --release)\n" +
-			"  --base=<ref>  Compare working-tree package.json against <ref>:package.json\n" +
-			"  --release     Compare HEAD against HEAD~1 (release-time guard)\n",
+		"Usage: check-changelog.mjs (--base=<ref> | --release) [--require-bump]\n" +
+			"  --base=<ref>     Compare working-tree package.json against <ref>:package.json\n" +
+			"  --release        Compare HEAD against HEAD~1 (release-time guard)\n" +
+			"  --require-bump   Fail when the version is unchanged (PR policy)\n",
 	);
 }
 
@@ -99,6 +104,12 @@ function main() {
 	}
 
 	if (priorVersion === currentVersion) {
+		if (args.requireBump) {
+			fail(
+				`root package.json 'version' (${currentVersion}) is unchanged relative to ${args.base ?? "HEAD~1"}. ` +
+					`Every PR must bump the version (and add a matching '## [<new-version>] - <today>' section to CHANGELOG.md).`,
+			);
+		}
 		process.stdout.write(`changelog check: version unchanged (${currentVersion}); ok\n`);
 		return;
 	}

@@ -1,8 +1,8 @@
 import { type ILogObj, Logger } from "tslog";
 import type { Cue } from "../../../../cue.js";
 import { CaptionType, type Cea608ClosedCaptionPacket, CharSet, CommandCode } from "../../../../utils/text/types.js";
-import { CC_ROWS, DEFAULT_BG_COLOR, DEFAULT_TXT_COLOR } from "../../../../utils/textConstants.js";
-import Cea608Memory from "./cea608Memory.js";
+import { CC_ROWS, DEFAULT_BG_COLOR, DEFAULT_TXT_COLOR } from "../../../../utils/text-constants.js";
+import Cea608Memory from "./cea608-memory.js";
 
 class Cea608DataChannel {
 	// Current Caption Type

@@ -2,7 +2,7 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { H1 } from "@/components/ui/typography";
 import { useUnreadChangelog } from "@/lib/use-unread-changelog";
-import { ChangelogPopoverContent } from "./ChangelogPopover";
+import { ChangelogPopoverContent } from "./changelog-popover";
 
 const VERSION = process.env.NEXT_PUBLIC_CMDT_VERSION ?? null;
 
