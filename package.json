@@ -22,6 +22,7 @@
     "test": "pnpm -r run test",
     "clean": "pnpm -r exec -- rm -rf node_modules dist && rimraf node_modules",
     "build": "pnpm -r run build",
+    "dev": "pnpm -r --parallel run dev",
     "prepare": "husky"
   },
   "lint-staged": {

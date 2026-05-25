@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: "export",
   basePath: "/cmdt",
+  transpilePackages: ["cmdt-shared", "dash-ts"],
   env: {
     NEXT_PUBLIC_CMDT_VERSION: cmdtVersion,
   },
