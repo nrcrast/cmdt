@@ -1,6 +1,6 @@
 {
   "name": "cmdt",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Common Media Diagnostic Tool",
   "repository": {
     "type": "git",
@@ -16,11 +16,13 @@
     "lint": "pnpm -r --parallel run lint",
     "lint:fix": "pnpm -r --parallel run lint:fix",
     "format": "pnpm -r --parallel run format",
+    "format:fix": "pnpm -r --parallel run format:fix",
     "package": "pnpm -r --parallel run package",
     "typecheck": "pnpm -r --parallel run typecheck",
     "test": "pnpm -r run test",
     "clean": "pnpm -r exec -- rm -rf node_modules dist && rimraf node_modules",
     "build": "pnpm -r run build",
+    "dev": "pnpm -r --parallel run dev",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -30,12 +32,13 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
-    "cross-env": "7.0.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
     "rimraf": "6.0.1"
   },
   "engines": {
-    "pnpm": ">9.1.0"
-  }
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@10.28.1"
 }
