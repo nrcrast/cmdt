@@ -25,6 +25,25 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.5.4] - 2026-05-25
+
+### Fixed
+
+- Viewer: fixed a `SCTE35 is not a constructor` runtime error in the
+  production Next.js build by removing a stale
+  `config.resolve.alias["scte35"] = false` webpack override in
+  `viewer/next.config.ts`. The alias dated back to when scte35 was
+  considered type-only, but `shared`'s HLS and DASH parsers call
+  `new SCTE35()` at runtime, so stubbing the module to an empty value
+  crashed the browser as soon as a manifest analysis ran. `next dev`
+  (turbopack) ignores the `webpack:` config block, which is why the
+  regression only reproduced in the built app.
+- Shared: defensively switched the `scte35` imports in the HLS and DASH
+  manifest parsers to the default-import + destructure pattern for parity
+  with the existing `webvtt-parser` workaround, so the named import
+  preserved by tsdown's ESM output keeps resolving correctly across both
+  Node ESM and bundlers' CJS interop.
+
 ## [0.5.3] - 2026-05-25
 
 ### Changed
@@ -42,16 +61,6 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 - CLI: resolved a Node ESM crash when importing `webvtt-parser` by using a
   default import and destructuring the `WebVTTParser` class, working around
   cjs-module-lexer's inability to detect the package's IIFE-assigned exports.
-- Viewer: removed a stale `config.resolve.alias["scte35"] = false` webpack
-  override in `next.config.ts` that stubbed the `scte35` module to an
-  empty value at production-build time. The comment claimed scte35 was
-  type-only, but `shared`'s HLS and DASH parsers call `new SCTE35()` at
-  runtime; the alias surfaced as a `SCTE35 is not a constructor` browser
-  error only in the built app (turbopack-driven `next dev` ignores the
-  `webpack:` config block, which is why dev was unaffected). Also
-  defensively switched the `scte35` imports in those parsers to the
-  default-import + destructure pattern for parity with the webvtt-parser
-  workaround.
 - dash-ts: corrected the `exports` map to reference the `.d.mts`/`.d.cts`
   declaration files actually emitted by the build, restoring type resolution
   for downstream consumers.
