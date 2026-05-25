@@ -10,22 +10,21 @@
 		"typecheck": "tsc --noEmit",
 		"test": "vitest --run"
 	},
-	"main": "./dist/index.mjs",
+	"main": "./dist/index.cjs",
 	"module": "./dist/index.mjs",
 	"browser": "./dist/index.cjs",
-	"types": "./dist/index.d.ts",
+	"types": "./dist/index.d.cts",
 	"exports": {
-		"types": "./dist/index.d.ts",
-		"require": {
-			"types": "./dist/index.d.ts",
+		"browser": {
+			"types": "./dist/index.d.cts",
 			"default": "./dist/index.cjs"
 		},
 		"import": {
-			"types": "./dist/index.d.ts",
+			"types": "./dist/index.d.mts",
 			"default": "./dist/index.mjs"
 		},
-		"browser": {
-			"types": "./dist/index.d.ts",
+		"require": {
+			"types": "./dist/index.d.cts",
 			"default": "./dist/index.cjs"
 		}
 	},
