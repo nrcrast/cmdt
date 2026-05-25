@@ -25,6 +25,11 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.5.1] - 2026-05-20
+
+### Added
+- Added a changelog to the viewer
+
 ## [0.5.0] - 2026-05-17
 
 ### Changed
