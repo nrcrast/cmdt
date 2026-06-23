@@ -1,6 +1,6 @@
 import { fromBinary } from "@bufbuild/protobuf";
-import { stringify } from "uuid";
 import { DrmSystem } from "../../manifest.js";
+import uint8ToUuid from "../../utils/uint8-to-uuid.js";
 import { DrmParser, type PsshBox } from "../drm-system.js";
 import { type WidevinePsshData, WidevinePsshDataSchema } from "./gen/license-protocol_pb.js";
 
@@ -27,7 +27,7 @@ export class WidevineParser extends DrmParser<WidevineData> {
 		const { $typeName, ...rest } = widevinePsshData;
 		const friendlyPsshData = {
 			...rest,
-			keyIds: widevinePsshData.keyIds.map((kid) => stringify(kid)),
+			keyIds: widevinePsshData.keyIds.map((kid) => uint8ToUuid(kid)),
 			protectionScheme,
 		};
 		let box: PsshBox | undefined;

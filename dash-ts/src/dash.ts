@@ -527,12 +527,16 @@ function parseAdaptationSet(adaptationSetRoot: XmlNode, period: Period): Adaptat
 
 function parseEvent(eventRoot: XmlNode): Event[] | undefined {
 	return eventRoot?.map((e: XmlNode) => {
+		// The SCTE-35 XML schema defines capitalized <Signal>/<Binary>, but some
+		// packagers emit lowercase. xml2js preserves element-name case, so accept both.
+		const signal = e["scte35:Signal"]?.[0] ?? e["scte35:signal"]?.[0];
+		const binary = signal?.["scte35:Binary"]?.[0]?._ ?? signal?.["scte35:binary"]?.[0]?._;
 		return {
 			id: e.$?.id?.toString(),
 			duration: e.$?.duration,
 			presentationTime: e.$.presentationTime,
 			"scte35:signal": {
-				"scte35:binary": e["scte35:signal"]?.[0]?.["scte35:binary"]?.[0]?._,
+				"scte35:binary": binary,
 			},
 		};
 	});

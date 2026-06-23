@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import axios from "axios";
 import {
 	type DownloadMode,
@@ -32,7 +33,26 @@ function sanitizeUri(uri: string): string {
 	return uri.replaceAll("\\", "");
 }
 
+/**
+ * Normalizes a manifest URI so it is always a valid absolute URL string.
+ * Bare local paths are converted to absolute file:// URLs; http(s) and file://
+ * URIs are returned unchanged. This prevents wrapUrl from throwing on raw paths.
+ * @param uri - The manifest URI (http(s) URL, file:// URL, or local path)
+ * @returns An absolute URL string
+ */
+function normalizeManifestUri(uri: string): string {
+	if (uri.startsWith("http") || uri.startsWith("file:")) {
+		return uri;
+	}
+	return pathToFileURL(path.resolve(uri)).href;
+}
+
 async function fetchManifest(uri: string): Promise<string> {
+	if (uri.startsWith("file:")) {
+		const filePath = fileURLToPath(uri);
+		logger.info(`Reading manifest from ${filePath}`);
+		return fs.readFile(filePath, "utf-8");
+	}
 	if (!uri.startsWith("http")) {
 		logger.info(`Reading manifest from ${path.resolve(uri)}`);
 		return fs.readFile(path.resolve(uri), "utf-8");
@@ -77,7 +97,7 @@ function normalizeCustomBaseUrl(baseUrl?: string): string | undefined {
 
 async function processManifest(uri: string) {
 	await cleanupOutputDirectory();
-	const sanitizedUri = sanitizeUri(uri);
+	const sanitizedUri = normalizeManifestUri(sanitizeUri(uri));
 	const manifestText = await fetchManifest(sanitizedUri);
 	const parser = getManifestParser(sanitizedUri);
 	const baseUrl = normalizeCustomBaseUrl(options.baseUrl);

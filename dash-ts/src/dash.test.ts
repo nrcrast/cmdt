@@ -10,6 +10,24 @@ describe("RawDashManifest", () => {
 		const manifest = await getRawDashManifest(testManifest);
 		expect(manifest).toMatchSnapshot();
 	});
+	it("should parse capitalized SCTE-35 <Signal>/<Binary> events", async () => {
+		const binary = "/DA6AAAAAAAAAP/wBQb+AHhl1gAkAiJDVUVJAAAAAX//AAAAAAAODkdUTVYwMDAwMTA1MTkzIgEBdihHBw==";
+		const manifestXml = `<?xml version="1.0" encoding="utf-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:scte35="urn:scte:scte35:2014:xml+bin" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="static" minBufferTime="PT5S" mediaPresentationDuration="PT1M">
+  <Period duration="PT1M">
+    <EventStream schemeIdUri="urn:scte:scte35:2014:xml+bin" value="scte35" timescale="90000">
+      <Event id="1" presentationTime="7890390" duration="0">
+        <scte35:Signal>
+          <scte35:Binary>${binary}</scte35:Binary>
+        </scte35:Signal>
+      </Event>
+    </EventStream>
+  </Period>
+</MPD>`;
+		const manifest = await getRawDashManifest(manifestXml);
+		const event = manifest.periods[0]?.eventStream?.[0]?.event?.[0];
+		expect(event?.["scte35:signal"]?.["scte35:binary"]).toBe(binary);
+	});
 	describe("DASH-IF test vectors", async () => {
 		const dashTestVectors = await getTestFile("manifests/DASH IF Test Assets Database.csv");
 		await new Promise<void>((resolve, reject) => {
