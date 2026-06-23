@@ -28,4 +28,15 @@ describe("Widevine", () => {
 		expect(psshData).toBeDefined();
 		expect(psshData?.type).toEqual("widevine");
 	});
+	it("should read PSSH with a key ID that is not a valid RFC-4122 UUID", async () => {
+		// Real PSSH whose KID (20079b7c-cdf3-fbc4-...) has non-standard version/variant
+		// nibbles. uuid's validating stringify throws on it; the non-validating
+		// formatter must parse it without aborting.
+		const buf = Buffer.from("AAAAOHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABgSECAHm3zN8/vEYyXG09/DT2NI49yVmwY=", "base64");
+		const parser = new PsshParser();
+		const psshData = parser.parse(buf) as WidevineData;
+		expect(psshData).toBeDefined();
+		expect(psshData?.type).toEqual("widevine");
+		expect(psshData?.widevinePsshData.keyIds).toContain("20079b7c-cdf3-fbc4-6325-c6d3dfc34f63");
+	});
 });

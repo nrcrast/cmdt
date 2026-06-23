@@ -1,8 +1,8 @@
 import type { ILogObj, Logger } from "tslog";
-import { stringify } from "uuid";
 import createView from "../create-view.js";
 import hexToUint8 from "../hex-to-uint8.js";
 import type { SchemeUri } from "../types.js";
+import uint8ToUuid from "../uint8-to-uuid.js";
 import DataViewReader from "./data-view-reader.js";
 import type {
 	Elst,
@@ -109,13 +109,13 @@ class Mp4Parser {
 
 	public static parsePssh(box: ParsedBox): Pssh {
 		const { reader, version } = box;
-		const systemId: string = stringify(reader.readBytes(16));
+		const systemId: string = uint8ToUuid(reader.readBytes(16));
 		let kids: Array<string> | undefined;
 		if (version > 0) {
 			kids = [];
 			const kidCount = reader.readUint32();
 			for (let i = 0; i < kidCount; i++) {
-				kids.push(stringify(reader.readBytes(16)));
+				kids.push(uint8ToUuid(reader.readBytes(16)));
 			}
 		}
 		const dataSize = reader.readUint32();
