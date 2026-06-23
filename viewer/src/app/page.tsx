@@ -13,6 +13,7 @@ import {
 	SegmentDownloader,
 	WebVttParser,
 } from "cmdt-shared";
+import { Github, Globe } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { useFilePicker } from "use-file-picker";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -27,6 +28,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { AppHeader } from "./components/app-header";
+import { ModeToggle } from "./components/mode-toggle";
 import { FilesystemWriter } from "./components/plugins/filesystem-writer";
 import Report from "./report";
 
@@ -241,7 +243,22 @@ export default function Home() {
 	return (
 		<div className="min-h-screen bg-background font-[family-name:var(--font-geist-sans)]">
 			<main className="mx-auto max-w-4xl p-6 space-y-6">
-				<AppHeader />
+				<div className="flex items-start justify-between gap-4">
+					<AppHeader />
+					<div className="flex items-center gap-2">
+						<Button variant="outline" size="icon" asChild aria-label="GitHub repository">
+							<a href="https://github.com/nrcrast/cmdt" target="_blank" rel="noopener noreferrer">
+								<Github className="size-4" />
+							</a>
+						</Button>
+						<Button variant="outline" size="icon" asChild aria-label="Website (cra.st)">
+							<a href="https://cra.st" target="_blank" rel="noopener noreferrer">
+								<Globe className="size-4" />
+							</a>
+						</Button>
+						<ModeToggle />
+					</div>
+				</div>
 
 				<div className="space-y-4">
 					{/* Primary flow: analyze a manifest via URL or file upload */}

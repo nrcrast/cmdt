@@ -1,12 +1,14 @@
 # CMDT (Common Media Diagnostics Tool)
 CMDT is a CLI tool designed to help video engineers diagnose issues with DASH/HLS manifests and the (mp4) content within! Given a manifest, it will perform the following tasks:
 - Parse the manifest
-- Download all segments for all renditions (audio, video, thumbnails, captions) to filesystem
-- Parse captions from all media files and write to filesystem
-- Parse EMSG boxes from all media files and write to filesystem
+- Download segments for all renditions (audio, video, thumbnails, captions) to filesystem
+- Parse captions (CEA-608/708 and WebVTT) from media files and write to filesystem
+- Parse EMSG boxes from media files and write to filesystem
+- Extract PSSH / content protection information
 - Check for CEA caption inconsistencies between video renditions
 - Check for gaps between segments
-- Run Apple's Media Stream Validator (optionally for HLS)
+
+How much is downloaded and analyzed depends on the `--mode` option (see below).
 
 # Installation
 ## Pre-built binaries
@@ -28,15 +30,16 @@ At this point, you should be able to run `cd cli && pnpm start -h` and get the h
 # Usage
 ```
 Options:
-  -m, --manifest <string>       Manifest URI. Can also be a local path.
-  -o, --output <string>         Output directory (default: "download")
-  -s, --skip-download           Skip download (debug)
-  -l, --log-level <string>      Log level
-  --dash-conformance            Run DASH-IF conformance tool (DASH only)
-  -t, --thumbnails              Validate thumbnails (check for duplicates)
-  --media-stream-validator      Run apple's media stream validator (HLS only)
-  -p, --log-periods             Print a table of periods in manifest (DASH only)
-  -h, --help                    display help for command
+  -m, --manifest <string>     Manifest URI. Can also be a local path.
+  -b, --base-url <string>     Base URL for relative URIs in manifest, if using local manifest.
+  -o, --output <string>       Output directory (default: "download")
+  -d, --mode <downloadMode>   Download mode (choices: "manifest-only", "quick", "full", default: "full")
+                                manifest-only — Parse the manifest; skip all segment downloads.
+                                quick — Download init segments fully and only the head of each media segment.
+                                full — Download every byte of every segment.
+  -l, --log-level <logLevel>  Log Level (choices: "off", "error", "info", "debug", default: "info")
+  -p, --log-periods           Print a table of periods in DASH manifests
+  -h, --help                  display help for command
 ```
 
 Typical usage is something like:
@@ -46,16 +49,16 @@ pnpm start -m "https://my-site/manifest.mpd" -o output
 
 If you're running a pre-built binary, replace `pnpm start` with `./cmdt`. 
 
-After running the tool, all output will be in a directory called `output`, as specified by the `-o` option.
+After running the tool, all output will be in a directory called `output`, as specified by the `-o` option. This includes a parsed `manifest.json`, a `debug.log`, per-plugin artifacts (captions, EMSG, etc.), and the full report as `report.cmdt`.
 
 ## Viewer
-The tool will output a large `.cmdt` file. This is human readable (JSON), but there's a graphical tool that can be helpful for viewing the data. 
+The tool writes the full report to a `report.cmdt` file. This is human readable (JSON), but there's a graphical tool that can be helpful for viewing the data.
 
 This tool lives in the 'viewer' directory, but a hosted version can be found [here](https://cra.st/cmdt).
 
 ## Report format
 ```typescript
-type RawReport = {
+export type RawReport = {
 	missingCues: {
 		[representation: RepresentationId]: {
 			[cue: string]: Array<RepresentationId>;
@@ -66,36 +69,47 @@ type RawReport = {
 			[thumbnail: string]: Set<RepresentationId>;
 		};
 	};
-    gaps: {
-        [mediaType: string]: {
-            [representation: string]: Array<{
-                expectedStartTime: number;
-                previousSegment: Segment;
-                segment: Segment;
-            }>;
-        };
-    };
+	gaps: {
+		[mediaType: string]: {
+			[representation: string]: Array<{ expectedStartTime: number; previousSegment: Segment; segment: Segment }>;
+		};
+	};
 	decodeTimeMismatches: Array<Segment>;
-    durationMismatches: Array<Segment>;
+	durationMismatches: Array<Segment>;
 	emsgs: {
 		[representation: RepresentationId]: {
 			segment: Segment;
-			emsgs: Array<IEmsg>;
+			emsgs: Array<Emsg>;
 		};
 	};
-    mediaStreamValidator?: Object;
-    dashConformance?: Object;
-    manifest: Manifest;
-    captions?: {
-        [stream: string]: Array<Cue>;
-    };
+	manifest: Omit<Manifest, "video" | "audio" | "images" | "text" | "raw"> & {
+		video: Array<Representation>;
+		audio: Array<Representation>;
+		images: Array<Representation>;
+		text: Array<Representation>;
+	};
+	captions?: {
+		[stream: string]: Array<Cue>;
+	};
+	textCues: {
+		[representation: RepresentationId]: {
+			language?: string;
+		} & Pick<VTTData, "cues" | "styles">;
+	};
+	mismatchedContentProtection: Array<MismatchedContentProtectionEntry>;
 };
 
 export type Manifest = {
-	video: Array<Representation>;
-	audio: Array<Representation>;
-	images: Array<Representation>;
+	url: URL;
+	video: UniqueRepresentationMap;
+	audio: UniqueRepresentationMap;
+	images: UniqueRepresentationMap;
+	text: UniqueRepresentationMap;
+	scte35?: Array<Scte35Marker>;
+	contentProtection: Array<ContentProtection>;
 	captionStreamToLanguage: Record<string, string>;
+	periods: Array<Period>;
+	raw: string;
 };
 ```
 

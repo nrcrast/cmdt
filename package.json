@@ -1,17 +1,17 @@
 {
   "name": "cmdt",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Common Media Diagnostic Tool",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NBCUDTC/cmdt.git"
+    "url": "git+https://github.com/nrcrast/cmdt.git"
   },
   "author": "nrcrast",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/NBCUDTC/cmdt/issues"
+    "url": "https://github.com/nrcrast/cmdt/issues"
   },
-  "homepage": "https://github.com/NBCUDTC/cmdt#readme",
+  "homepage": "https://github.com/nrcrast/cmdt#readme",
   "scripts": {
     "lint": "pnpm -r --parallel run lint",
     "lint:fix": "pnpm -r --parallel run lint:fix",

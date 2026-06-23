@@ -44,7 +44,7 @@ export function CopyButton({ value, className }: CopyButtonProps) {
 
 	return (
 		<Button variant="ghost" size="sm" className={className} onClick={handleCopy} title="Copy to clipboard">
-			{copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+			{copied ? <Check className="h-3 w-3 text-primary" /> : <Copy className="h-3 w-3" />}
 		</Button>
 	);
 }

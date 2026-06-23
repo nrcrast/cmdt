@@ -25,6 +25,25 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.7.1] - 2026-06-23
+
+### Added
+
+- Viewer: unified seafoam-green color palette with a light/dark/system theme
+  toggle in the header.
+- Viewer: header links to the GitHub repository and the project website.
+
+### Fixed
+
+- Docs: corrected the root README usage/options, output description, and report
+  type snippets to match the current source; pointed `package.json` repository
+  links at `nrcrast/cmdt`.
+
+### Removed
+
+- Removed the stale, unmaintained `shared/README.md` (an old copy of the root
+  README that described removed CLI flags).
+
 ## [0.7.0] - 2026-06-23
 
 ### Added
