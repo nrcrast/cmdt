@@ -1,10 +1,12 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Emsg } from "cmdt-shared";
+import type { Emsg, Segment } from "cmdt-shared";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { emsgDurationMs, emsgPresentationTimeMs } from "@/lib/emsg";
+import { formatTimeMs } from "@/lib/format";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
 
@@ -12,52 +14,60 @@ type EmsgWithExpanded = Emsg & {
 	isExpanded?: boolean;
 };
 
-export const columns: ColumnDef<EmsgWithExpanded>[] = [
-	{
-		accessorKey: "id",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="ID" />,
-		enableHiding: true,
-		sortingFn: "basic",
-	},
-	{
-		accessorKey: "schemeIdUri",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Scheme URI" />,
-		enableHiding: true,
-		enableSorting: true,
-	},
-	{
-		accessorKey: "value",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Value" />,
-		enableHiding: true,
-		enableSorting: true,
-	},
-	{
-		accessorKey: "presentationTime",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Presentation Time" />,
-		enableHiding: true,
-		enableSorting: true,
-		sortingFn: "basic",
-		cell: ({ row }) => {
-			const emsg = row.original;
-			// Use presentationTime if available, otherwise show presentationTimeDelta
-			const time = emsg.presentationTime ?? emsg.presentationTimeDelta ?? "N/A";
-			return <span>{time}</span>;
+/** Minimal segment context needed to place emsg events on the presentation timeline. */
+type EmsgSegment = Pick<Segment, "startTime" | "rawSegmentTime">;
+
+/**
+ * Build the EMSG table columns. Presentation Time and Duration are converted from
+ * raw timescale units into seconds using each event's timescale; presentation time
+ * is realigned to the segment timeline via the containing segment.
+ */
+function buildColumns(segment: EmsgSegment): ColumnDef<EmsgWithExpanded>[] {
+	return [
+		{
+			accessorKey: "id",
+			header: ({ column }) => <DataTableColumnHeader column={column} title="ID" />,
+			enableHiding: true,
+			sortingFn: "basic",
 		},
-	},
-	{
-		accessorKey: "eventDuration",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Duration" />,
-		enableHiding: true,
-		enableSorting: true,
-		sortingFn: "basic",
-	},
-	{
-		accessorKey: "timescale",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Timescale" />,
-		enableHiding: true,
-		enableSorting: true,
-	},
-];
+		{
+			accessorKey: "schemeIdUri",
+			header: ({ column }) => <DataTableColumnHeader column={column} title="Scheme URI" />,
+			enableHiding: true,
+			enableSorting: true,
+		},
+		{
+			accessorKey: "value",
+			header: ({ column }) => <DataTableColumnHeader column={column} title="Value" />,
+			enableHiding: true,
+			enableSorting: true,
+		},
+		{
+			id: "presentationTime",
+			accessorFn: (row) => emsgPresentationTimeMs(row, segment),
+			header: ({ column }) => <DataTableColumnHeader column={column} title="Presentation Time" />,
+			enableHiding: true,
+			enableSorting: true,
+			sortingFn: "basic",
+			cell: ({ row }) => <span>{formatTimeMs(emsgPresentationTimeMs(row.original, segment))}</span>,
+		},
+		{
+			id: "eventDuration",
+			accessorFn: (row) => emsgDurationMs(row),
+			header: ({ column }) => <DataTableColumnHeader column={column} title="Duration" />,
+			enableHiding: true,
+			enableSorting: true,
+			sortingFn: "basic",
+			cell: ({ row }) => <span>{formatTimeMs(emsgDurationMs(row.original))}</span>,
+		},
+		{
+			accessorKey: "timescale",
+			header: ({ column }) => <DataTableColumnHeader column={column} title="Timescale" />,
+			enableHiding: true,
+			enableSorting: true,
+		},
+	];
+}
 
 const defaultVisibleColumns = {
 	id: true,
@@ -68,8 +78,9 @@ const defaultVisibleColumns = {
 	timescale: false,
 };
 
-export function EmsgTable(props: { emsgs: Array<Emsg> }) {
+export function EmsgTable(props: { emsgs: Array<Emsg>; segment: EmsgSegment }) {
 	const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+	const columns = useMemo(() => buildColumns(props.segment), [props.segment]);
 
 	const toggleRow = (index: number) => {
 		setExpandedRows((prev) => {

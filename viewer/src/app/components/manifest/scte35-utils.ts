@@ -1,4 +1,5 @@
 import type { Scte35Marker } from "cmdt-shared";
+import { formatTimeSeconds } from "@/lib/format";
 
 // Splice Command Types (SCTE-35 Table 6)
 export const SPLICE_COMMAND_TYPES: Record<number, string> = {
@@ -132,7 +133,7 @@ export function isIntegerUpidType(type: number): boolean {
 export function getMarkerSummary(marker: Scte35Marker): string {
 	// biome-ignore lint/suspicious/noExplicitAny: ISpliceInfoSection fields are loosely typed from scte35 library
 	const data = marker.data as any;
-	const time = `${marker.presentationTimeS.toFixed(3)}s`;
+	const time = formatTimeSeconds(marker.presentationTimeS);
 	const cmdType = SPLICE_COMMAND_TYPES[data?.spliceCommandType ?? -1] ?? "Unknown";
 
 	let detail = "";

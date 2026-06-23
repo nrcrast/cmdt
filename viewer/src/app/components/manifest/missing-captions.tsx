@@ -3,6 +3,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatTimeSeconds } from "@/lib/format";
 
 function Caption(props: { cue: Cue }) {
 	const { cue } = props;
@@ -20,8 +21,8 @@ function Caption(props: { cue: Cue }) {
 			<TableBody>
 				<TableRow key={cue.id}>
 					<TableCell className="font-medium">{cue.id}</TableCell>
-					<TableCell>{cue.begin.toFixed(2)}</TableCell>
-					<TableCell>{cue.end.toFixed(2)}</TableCell>
+					<TableCell>{formatTimeSeconds(cue.begin)}</TableCell>
+					<TableCell>{formatTimeSeconds(cue.end)}</TableCell>
 					<TableCell>{cue.position}</TableCell>
 					<TableCell>{cue.rawText}</TableCell>
 				</TableRow>

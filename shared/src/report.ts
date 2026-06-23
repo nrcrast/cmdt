@@ -70,7 +70,11 @@ export type RawReport = {
 	captions?: {
 		[stream: string]: Array<Cue>;
 	};
-	textCues: Pick<VTTData, "cues" | "styles">;
+	textCues: {
+		[representation: RepresentationId]: {
+			language?: string;
+		} & Pick<VTTData, "cues" | "styles">;
+	};
 	mismatchedContentProtection: Array<MismatchedContentProtectionEntry>;
 };
 
@@ -96,10 +100,7 @@ export class Report {
 			gaps: {},
 			emsgs: {},
 			captions: {},
-			textCues: {
-				cues: [],
-				styles: [],
-			},
+			textCues: {},
 		};
 	}
 	public addMissingCue(targetRepresentation: string, candidateRepresentation: string, cueId: string) {
@@ -113,7 +114,9 @@ export class Report {
 	}
 	public getRaw() {
 		this.raw.manifest.scte35?.sort((a, b) => a.presentationTimeS - b.presentationTimeS);
-		this.raw.textCues.cues.sort((a, b) => a.startTime - b.startTime);
+		for (const entry of Object.values(this.raw.textCues)) {
+			entry.cues.sort((a, b) => a.startTime - b.startTime);
+		}
 		return this.raw;
 	}
 	public addCaptionStream(stream: string, captions: Array<Cue>) {
@@ -164,9 +167,18 @@ export class Report {
 		}
 		emsgsForRepresentation.emsgs.push(emsg);
 	}
-	public addVttCues(cues: VTTData) {
-		this.raw.textCues.cues.push(...cues.cues);
-		this.raw.textCues.styles.push(...cues.styles);
+	public addVttCues(representation: Representation, cues: VTTData) {
+		let entry = this.raw.textCues[representation.id];
+		if (!entry) {
+			entry = { language: representation.language, cues: [], styles: [] };
+			this.raw.textCues[representation.id] = entry;
+		}
+		entry.cues.push(...cues.cues);
+		for (const style of cues.styles) {
+			if (!entry.styles.includes(style)) {
+				entry.styles.push(style);
+			}
+		}
 	}
 	public ingestManifest(manifest: Manifest) {
 		const { video, audio, images, text, ...rest } = manifest;

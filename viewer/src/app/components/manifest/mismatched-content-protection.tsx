@@ -40,7 +40,7 @@ export const columns: ColumnDef<MismatchedContentProtectionEntry>[] = [
 const defaultVisibleColumns = {
 	type: true,
 	detectedInMedia: true,
-	detectedInManifest: true,
+	expectedInManifest: true,
 	segment: false,
 };
 
