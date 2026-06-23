@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { RawReport as Report, Segment } from "cmdt-shared";
 import { CopyButton } from "@/components/ui/copy-button";
+import { formatTimeMs } from "@/lib/format";
 import { DataTable } from "../data-table/data-table";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
 
@@ -26,6 +27,7 @@ export const columns: ColumnDef<HydratedSegment>[] = [
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Start Time" />,
 		enableHiding: true,
 		sortingFn: "basic",
+		cell: ({ row }) => formatTimeMs(row.original.startTime),
 	},
 	{
 		accessorKey: "duration",
@@ -33,6 +35,7 @@ export const columns: ColumnDef<HydratedSegment>[] = [
 		enableHiding: true,
 		enableSorting: true,
 		sortingFn: "basic",
+		cell: ({ row }) => formatTimeMs(row.original.duration),
 	},
 	{
 		accessorKey: "contentProtection",
@@ -93,18 +96,21 @@ export const columns: ColumnDef<HydratedSegment>[] = [
 		header: "Base Media Decode Time",
 		enableHiding: true,
 		enableSorting: true,
+		cell: ({ row }) => formatTimeMs(row.original.baseMediaDecodeTime),
 	},
 	{
 		accessorKey: "mediaDuration",
 		header: "Media Duration",
 		enableHiding: true,
 		enableSorting: true,
+		cell: ({ row }) => formatTimeMs(row.original.mediaDuration),
 	},
 	{
 		accessorKey: "rawSegmentTime",
 		header: "Raw Segment Time",
 		enableHiding: true,
 		enableSorting: true,
+		cell: ({ row }) => formatTimeMs(row.original.rawSegmentTime),
 	},
 ];
 
@@ -121,7 +127,11 @@ const defaultVisibleColumns = {
 	contentProtection: true,
 };
 
-export function SegmentTable(props: { manifest: Report["manifest"]; segments: Array<Segment> }) {
+export function SegmentTable(props: {
+	manifest: Report["manifest"];
+	segments: Array<Segment>;
+	defaultVisibleColumns?: Record<string, boolean>;
+}) {
 	const hydratedSegments: HydratedSegment[] = props.segments.map((segment) => {
 		return {
 			...segment,
@@ -135,5 +145,11 @@ export function SegmentTable(props: { manifest: Report["manifest"]; segments: Ar
 			initSegmentUrlString: getUrlString(segment.initSegment?.url),
 		};
 	});
-	return <DataTable columns={columns} data={hydratedSegments} defaultVisibleColumns={defaultVisibleColumns} />;
+	return (
+		<DataTable
+			columns={columns}
+			data={hydratedSegments}
+			defaultVisibleColumns={props.defaultVisibleColumns ?? defaultVisibleColumns}
+		/>
+	);
 }

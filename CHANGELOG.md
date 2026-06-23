@@ -25,6 +25,45 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.6.0] - 2026-06-23
+
+### Added
+
+- Viewer: interactive Timeline view powered by D3 — fit-to-screen by default
+  with wheel-zoom and drag-pan (1x–64x), a hover crosshair with a time
+  tooltip, per-type lanes (periods, video/audio/text) showing segment runs
+  and gaps, and SCTE-35/EMSG markers with an adjustable gap threshold.
+- Viewer: Report Summary panel surfacing key findings at a glance.
+- Viewer: side-by-side rendition comparison tables for video, audio, text,
+  and image representations.
+- Viewer: WebVTT cues are now grouped into selectable per-rendition
+  (per-language) tabs instead of a single merged table.
+
+### Changed
+
+- Viewer: EMSG presentation time and duration are now derived from each
+  event's timescale and aligned to the segment presentation timeline (the
+  presentation time offset is removed so markers and table rows line up with
+  their segments); unknown-duration events (the 0xFFFFFFFF sentinel) display
+  as N/A.
+- Viewer: consolidated and standardized the representation tables across
+  video/audio/text/image for a consistent UI.
+- Shared: more precise time handling — seconds-to-milliseconds conversion no
+  longer floors, avoiding rounding drift in segment, cue, and SCTE-35 times.
+
+### Fixed
+
+- Viewer: copy-to-clipboard now works in insecure contexts (e.g. plain-HTTP
+  LAN access) via a fallback path.
+- Viewer: removed TanStack Table column-safety console warnings.
+- Viewer: timeline axis labels (e.g. "00s") are no longer clipped by card
+  padding.
+- Viewer: EMSG markers and table values now align with the segment timeline.
+- Viewer: WebVTT cues from different language tracks are no longer mixed
+  together in one table.
+- Shared: gap detection is more robust — gaps are now evaluated
+  independently of a segment's decode-time/duration metadata.
+
 ## [0.5.4] - 2026-05-25
 
 ### Fixed

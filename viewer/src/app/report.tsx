@@ -10,22 +10,28 @@ import ImageRepresentations from "./components/manifest/image-representations";
 import MismatchedContentProtection from "./components/manifest/mismatched-content-protection";
 import Periods from "./components/manifest/periods";
 import Scte35Markers from "./components/manifest/scte35-markers";
+import SegmentIssues from "./components/manifest/segment-issues";
 import TextRepresentations from "./components/manifest/text-representations";
 import VideoRepresentations from "./components/manifest/video-representations";
 import WebVttCues from "./components/manifest/webvtt-cues";
+import ReportSummary from "./components/report-summary";
+import Timeline from "./components/timeline";
 
 export default function Report(props: { rawReport: ReportData }) {
 	const { rawReport } = props;
 	return (
 		<div className="space-y-4">
+			<ReportSummary report={rawReport} />
 			<Tabs defaultValue="manifest">
 				<TabsList>
 					<TabsTrigger value="manifest">Manifest</TabsTrigger>
+					<TabsTrigger value="timeline">Timeline</TabsTrigger>
 					<TabsTrigger value="mismatched-content-protection">Mismatched Content Protection</TabsTrigger>
 					<TabsTrigger value="captions">Captions</TabsTrigger>
 					<TabsTrigger value="emsgs">EMSGs</TabsTrigger>
 					<TabsTrigger value="webvtt-cues">WebVTT Cues</TabsTrigger>
 					<TabsTrigger value="scte35">SCTE-35 Markers</TabsTrigger>
+					<TabsTrigger value="segment-issues">Segment Issues</TabsTrigger>
 				</TabsList>
 				<TabsContent value="manifest">
 					<Accordion type="single" collapsible className="w-full">
@@ -67,6 +73,9 @@ export default function Report(props: { rawReport: ReportData }) {
 						</AccordionItem>
 					</Accordion>
 				</TabsContent>
+				<TabsContent value="timeline">
+					<Timeline report={rawReport} />
+				</TabsContent>
 				<TabsContent value="mismatched-content-protection">
 					<MismatchedContentProtection report={rawReport} />
 				</TabsContent>
@@ -81,6 +90,9 @@ export default function Report(props: { rawReport: ReportData }) {
 				</TabsContent>
 				<TabsContent value="scte35">
 					<Scte35Markers markers={rawReport.manifest.scte35 ?? []} />
+				</TabsContent>
+				<TabsContent value="segment-issues">
+					<SegmentIssues report={rawReport} />
 				</TabsContent>
 			</Tabs>
 		</div>

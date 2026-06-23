@@ -62,7 +62,7 @@ export default function Emsgs({ report }: EmsgsProps) {
 								</TableRow>
 							</TableBody>
 						</Table>
-						<EmsgTable emsgs={data.emsgs} />
+						<EmsgTable emsgs={data.emsgs} segment={data.segment} />
 					</TabsContent>
 				))}
 			</Tabs>

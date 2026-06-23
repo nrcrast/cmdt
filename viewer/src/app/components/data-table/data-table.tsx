@@ -25,10 +25,19 @@ interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
 	defaultVisibleColumns?: Record<string, boolean>;
+	/**
+	 * Id of the column the toolbar filter input targets. The input is only rendered
+	 * when a column with this id exists on the table. Defaults to "text".
+	 */
+	filterColumnId?: string;
 }
 
-export function DataTable<TData, TValue>({ columns, data, defaultVisibleColumns }: DataTableProps<TData, TValue>) {
-	const [rowSelection, setRowSelection] = React.useState({});
+export function DataTable<TData, TValue>({
+	columns,
+	data,
+	defaultVisibleColumns,
+	filterColumnId = "text",
+}: DataTableProps<TData, TValue>) {
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(defaultVisibleColumns ?? {});
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 	const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -39,11 +48,8 @@ export function DataTable<TData, TValue>({ columns, data, defaultVisibleColumns 
 		state: {
 			sorting,
 			columnVisibility,
-			rowSelection,
 			columnFilters,
 		},
-		enableRowSelection: true,
-		onRowSelectionChange: setRowSelection,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onColumnVisibilityChange: setColumnVisibility,
@@ -57,7 +63,7 @@ export function DataTable<TData, TValue>({ columns, data, defaultVisibleColumns 
 
 	return (
 		<div className="space-y-4">
-			<DataTableToolbar table={table} />
+			<DataTableToolbar table={table} filterColumnId={filterColumnId} />
 			<div className="rounded-md border">
 				<Table>
 					<TableHeader>
@@ -76,7 +82,7 @@ export function DataTable<TData, TValue>({ columns, data, defaultVisibleColumns 
 					<TableBody>
 						{table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
-								<TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+								<TableRow key={row.id}>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
 									))}

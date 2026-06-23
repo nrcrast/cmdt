@@ -23,6 +23,6 @@ export class WebVttParser extends Plugin {
 			return;
 		}
 		const cues = this.parser.parse(new TextDecoder().decode(segment));
-		this.report.addVttCues(cues);
+		this.report.addVttCues(representation, cues);
 	}
 }

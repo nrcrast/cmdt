@@ -135,6 +135,17 @@ export class GapChecker extends Plugin {
 		report: Report,
 		representation: Representation,
 	) {
+		const expectedStart = previousSegment.startTime + previousSegment.duration;
+		// TODO -- be smarter about this. Check for compatible segments across periods
+		if (!previousSegment.isLastInPeriod && !segment.isFirstInPeriod && this.isGap(expectedStart, segment.startTime)) {
+			report.addGap(representation, expectedStart, previousSegment, segment);
+			this.logger.warn(
+				`Gap detected in representation ${representation.id}. Expected start: ${expectedStart} Start: ${segment.startTime}`,
+			);
+			this.logger.warn(JSON.stringify(previousSegment, null, 2));
+			this.logger.warn(JSON.stringify(segment, null, 2));
+		}
+
 		const segmentInfo = this.segmentInfo.get(segment);
 		if (!segmentInfo) {
 			this.logger.warn(`No segment info for ${segment}`);
@@ -142,7 +153,6 @@ export class GapChecker extends Plugin {
 		}
 		segment.baseMediaDecodeTime = segmentInfo.decodeTime;
 		segment.mediaDuration = segmentInfo.duration;
-		const expectedStart = previousSegment.startTime + previousSegment.duration;
 		if (segment.rawSegmentTime !== undefined && Math.abs(segment.rawSegmentTime - segment.baseMediaDecodeTime) > 10) {
 			report.addDecodeTimeMismatch(segment);
 			this.logger.warn(
@@ -152,15 +162,6 @@ export class GapChecker extends Plugin {
 		if (segment.duration && segment.mediaDuration && Math.abs(segment.duration - segment.mediaDuration) > 10) {
 			report.addDurationMismatch(segment);
 			this.logger.warn(`Expected duration ${segment.duration} does not match media duration ${segment.mediaDuration}`);
-		}
-		// TODO -- be smarter about this. Check for compatible segments across periods
-		if (!previousSegment.isLastInPeriod && !segment.isFirstInPeriod && this.isGap(expectedStart, segment.startTime)) {
-			report.addGap(representation, expectedStart, previousSegment, segment);
-			this.logger.warn(
-				`Gap detected in representation ${representation.id}. Expected start: ${expectedStart} Start: ${segment.startTime}`,
-			);
-			this.logger.warn(JSON.stringify(previousSegment, null, 2));
-			this.logger.warn(JSON.stringify(segment, null, 2));
 		}
 	}
 }

@@ -42,7 +42,7 @@ export const columns: ColumnDef<Period>[] = [
 	},
 	{
 		accessorKey: "end",
-		header: ({ column }) => <DataTableColumnHeader column={column} title="Duration" />,
+		header: ({ column }) => <DataTableColumnHeader column={column} title="End" />,
 		enableHiding: true,
 		sortingFn: "basic",
 	},
