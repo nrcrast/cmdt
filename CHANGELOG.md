@@ -25,6 +25,23 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.7.0] - 2026-06-23
+
+### Added
+
+- CLI: accept local manifest files — bare filesystem paths (e.g.
+  `~/Downloads/master.mpd`) and `file://` URLs are now normalized and read
+  directly, instead of crashing with an invalid-URL error.
+
+### Fixed
+
+- DASH: SCTE-35 markers using the standard capitalized `<scte35:Signal>` /
+  `<scte35:Binary>` element casing are now parsed instead of being silently
+  dropped (only lowercase was previously recognized).
+- DRM: PSSH parsing no longer aborts with a "Stringified UUID is invalid"
+  warning when a system ID or key ID is not a strict RFC-4122 UUID; these
+  16-byte identifiers are now formatted without validation.
+
 ## [0.6.0] - 2026-06-23
 
 ### Added
