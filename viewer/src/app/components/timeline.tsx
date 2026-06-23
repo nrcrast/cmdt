@@ -298,8 +298,8 @@ export default function Timeline({ report }: { report: Report }) {
 						</div>
 					))}
 
-					<MarkerLane label="SCTE-35" markers={scte35} x={x} className="bg-amber-500" />
-					<MarkerLane label="EMSG" markers={emsg} x={x} className="bg-blue-500" />
+					<MarkerLane label="SCTE-35" markers={scte35} x={x} className="bg-chart-4" />
+					<MarkerLane label="EMSG" markers={emsg} x={x} className="bg-chart-5" />
 
 					{hoverX !== null && (
 						<>

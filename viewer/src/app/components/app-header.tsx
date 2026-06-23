@@ -1,6 +1,5 @@
 "use client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { H1 } from "@/components/ui/typography";
 import { useUnreadChangelog } from "@/lib/use-unread-changelog";
 import { ChangelogPopoverContent } from "./changelog-popover";
 
@@ -15,9 +14,9 @@ export function AppHeader() {
 
 	return (
 		<div className="text-center sm:text-left">
-			<H1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+			<h1 className="scroll-m-20 bg-gradient-to-r from-primary to-chart-2 bg-clip-text text-2xl font-semibold tracking-tight text-transparent sm:text-3xl">
 				Common Media Diagnostic Tool (CMDT)
-			</H1>
+			</h1>
 			<div className="mt-2">
 				<Popover onOpenChange={handleOpenChange}>
 					<PopoverTrigger asChild>

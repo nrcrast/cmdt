@@ -2,7 +2,7 @@ export default function Button(props: { children: React.ReactNode; className?: s
 	return (
 		<button
 			type="button"
-			className={`items-center px-3 py-2 border rounded text-gray-500 border-gray-600 hover:border-gray-800 hover:border-2 ${props.className}`}
+			className={`items-center px-3 py-2 border rounded text-muted-foreground border-border hover:border-foreground hover:border-2 ${props.className}`}
 			onClick={props.onClick}
 		>
 			{props.children}
