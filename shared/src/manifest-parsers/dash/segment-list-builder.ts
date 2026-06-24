@@ -1,4 +1,4 @@
-import type { Representation as RawRepresentation, SegmentTemplate } from "dash-ts";
+import type { Representation as RawRepresentation, SegmentBase, SegmentTemplate } from "dash-ts";
 import type { Segment } from "../../manifest.js";
 import { MemoryCachedChunk } from "../../manifest.js";
 import { secondsToMilliseconds } from "../../utils/time-utils.js";
@@ -100,4 +100,27 @@ export function getSegmentsFromSegmentTemplate(
 	}
 
 	return getSegmentsFromSegmentTimeline(segmentTemplate, baseUrl, representation);
+}
+
+export function getSegmentsFromSegmentBase(
+	baseUrl: string,
+	periodDuration: number,
+	representation: RawRepresentation,
+	_segmentBase: SegmentBase,
+): Array<Segment> {
+	const periodStart = representation.adaptationSet.period.start ?? 0;
+	if (!baseUrl) {
+		throw new Error(`No base URL for SegmentBase representation ${representation.id}`);
+	}
+	const url = new URL(baseUrl);
+	return [
+		{
+			initSegment: new MemoryCachedChunk(url),
+			media: new MemoryCachedChunk(url),
+			url,
+			duration: secondsToMilliseconds(periodDuration),
+			startTime: secondsToMilliseconds(periodStart),
+			rawSegmentTime: 0,
+		},
+	];
 }
