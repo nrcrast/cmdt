@@ -25,6 +25,13 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.7.2] - 2026-06-24
+
+### Fixed
+
+- DASH: parse on-demand `SegmentBase` representations (single-file renditions
+  with `indexRange`/`Initialization`) so they report segments instead of zero.
+
 ## [0.7.1] - 2026-06-23
 
 ### Added

@@ -7,6 +7,7 @@ import {
 	type MPD,
 	type Period,
 	type Representation as RawRepresentation,
+	type SegmentBase,
 	type SegmentTemplate,
 } from "dash-ts";
 import { deepmergeCustom } from "deepmerge-ts";
@@ -33,7 +34,7 @@ import getStreamAndLanguages from "../../utils/cea/get-stream-and-languages.js";
 import { getDrmSystemFromSystemId } from "../../utils/drm.js";
 import { CeaSchemeUri } from "../../utils/types.js";
 import { getUrlFilePathHref, isFileUrl, wrapUrl } from "../../utils/url.js";
-import { getSegmentsFromSegmentTemplate } from "./segment-list-builder.js";
+import { getSegmentsFromSegmentBase, getSegmentsFromSegmentTemplate } from "./segment-list-builder.js";
 
 const { SCTE35 } = scte35Pkg;
 
@@ -235,6 +236,19 @@ export class DashManifest implements ManifestParser {
 				representation,
 				mergedTemplate,
 			);
+		} else {
+			const segmentBase =
+				representation.segmentBase ??
+				representation.adaptationSet.segmentBase ??
+				representation.adaptationSet.period.segmentBase;
+			if (segmentBase) {
+				segments = getSegmentsFromSegmentBase(
+					this.getBaseUrl(representation),
+					this.getPeriodDurationSeconds(representation.adaptationSet.period) ?? 0,
+					representation,
+					segmentBase as SegmentBase,
+				);
+			}
 		}
 		const contentProtection =
 			representation.contentProtection ??
