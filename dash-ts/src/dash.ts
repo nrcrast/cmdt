@@ -87,7 +87,7 @@ type ProducerReferenceTime = {
 	applicationScheme?: string;
 	wallClockTime: string;
 	presentationTime: string;
-	utcTiming?: Descriptor;
+	utcTiming?: Descriptor[];
 };
 
 type RepresentationBase = {
@@ -367,7 +367,7 @@ function parseLabel(labelRoot: XmlNode): Label[] | undefined {
 }
 
 function parseProducerReferenceTime(producerReferenceTimeRoot: XmlNode): ProducerReferenceTime[] | undefined {
-	return producerReferenceTimeRoot?.map((e: XmlNode) => {
+	return producerReferenceTimeRoot?.map((e: XmlNode): ProducerReferenceTime => {
 		return {
 			id: e.$.id,
 			inBand: e.$.inBand,

@@ -1,53 +1,53 @@
 {
-	"name": "dash-ts",
-	"version": "0.0.9",
-	"description": "TypeScript MPEG-DASH manifest parser used by cmdt",
-	"type": "module",
-	"scripts": {
-		"build": "tsdown",
-		"dev": "tsdown --watch",
-		"lint": "biome check && pnpm typecheck",
-		"lint:fix": "biome check --write",
-		"format": "biome format",
-		"format:fix": "biome format --write",
-		"typecheck": "tsc --noEmit",
-		"test": "vitest --run"
-	},
-	"main": "./dist/index.cjs",
-	"module": "./dist/index.mjs",
-	"browser": "./dist/index.cjs",
-	"types": "./dist/index.d.cts",
-	"exports": {
-		"browser": {
-			"types": "./dist/index.d.cts",
-			"default": "./dist/index.cjs"
-		},
-		"import": {
-			"types": "./dist/index.d.mts",
-			"default": "./dist/index.mjs"
-		},
-		"require": {
-			"types": "./dist/index.d.cts",
-			"default": "./dist/index.cjs"
-		}
-	},
-	"keywords": [],
-	"author": "nrcrast",
-	"license": "MIT",
-	"files": [
-		"dist"
-	],
-	"dependencies": {
-		"@fast-csv/parse": "^5.0.5",
-		"@types/xml2js": "^0.4.14",
-		"axios": "^1.8.3",
-		"iso8601-duration": "^2.1.2",
-		"xml2js": "^0.6.2"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.2.4",
-		"tsdown": "^0.15.9",
-		"typescript": "^5.8.2",
-		"vitest": "^3.1.1"
-	}
+  "name": "dash-ts",
+  "version": "1.0.0",
+  "description": "TypeScript MPEG-DASH manifest parser used by cmdt",
+  "type": "module",
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "lint": "biome check && pnpm typecheck",
+    "lint:fix": "biome check --write",
+    "format": "biome format",
+    "format:fix": "biome format --write",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "browser": "./dist/index.cjs",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    "browser": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    },
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    }
+  },
+  "keywords": [],
+  "author": "nrcrast",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@fast-csv/parse": "^5.0.5",
+    "@types/xml2js": "^0.4.14",
+    "axios": "^1.8.3",
+    "iso8601-duration": "^2.1.2",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.4",
+    "tsdown": "^0.15.9",
+    "typescript": "^5.8.2",
+    "vitest": "^3.1.1"
+  }
 }

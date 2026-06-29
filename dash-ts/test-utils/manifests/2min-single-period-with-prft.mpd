@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD profiles="urn:mpeg:dash:profile:isoff-live:2011,http://www.dashif.org/guidelines/low-latency-live-v5,http://dashif.org/guidelines/dash-if-uhd#hevc-hdr-pq10" type="dynamic" availabilityStartTime="2026-06-24T12:21:16.396Z" minimumUpdatePeriod="PT2.0S" minBufferTime="PT0.8S" publishTime="2026-06-26T21:15:24.006Z" timeShiftBufferDepth="PT2M0.000000S" xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:scte35="urn:scte:scte35:2014:xml+bin" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" xmlns:dolby="http://www.dolby.com/ns/online/DASH" xmlns:scte214="urn:scte:dash:scte214-extensions">
+    <Period start="PT56H50M39.6434750S" id="64399">
+        <AdaptationSet mimeType="video/mp4" startWithSAP="1" segmentAlignment="true" par="16:9">
+            <EssentialProperty schemeIdUri="urn:mpeg:mpegB:cicp:ColourPrimaries" value="9"></EssentialProperty>
+            <EssentialProperty schemeIdUri="urn:mpeg:mpegB:cicp:MatrixCoefficients" value="9"></EssentialProperty>
+            <EssentialProperty schemeIdUri="urn:mpeg:mpegB:cicp:TransferCharacteristics" value="16"></EssentialProperty>
+            <InbandEventStream schemeIdUri="https://aomedia.org/emsg/ID3" value="urn:com:sle:inbandmetadata:2017"></InbandEventStream>
+            <InbandEventStream schemeIdUri="urn:scte:scte35:2013:xml" value="1"></InbandEventStream>
+            <ProducerReferenceTime id="0" type="encoder" wallClockTime="2026-06-26T21:11:55.139Z" presentationTime="49113514434" inband="true">
+                <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-iso:2014" value="https://time.akamai.com/?iso&amp;ms"></UTCTiming>
+            </ProducerReferenceTime>
+            <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015" value="CC1=ENG"></Accessibility>
+            <SegmentTemplate timescale="240000" presentationTimeOffset="49113498434" media="$RepresentationID$_Segment-$Number$.m4v" initialization="$RepresentationID$_init.m4i" startNumber="64427" availabilityTimeOffset="2.4" availabilityTimeComplete="false">
+                <SegmentTimeline>
+                    <S t="49134458434" d="768000" r="37"></S>
+                </SegmentTimeline>
+            </SegmentTemplate>
+            <Representation width="640" height="360" frameRate="30" codecs="hvc1.2.4.L90.B0" scte214:supplementalCodecs="dvh1.08.01" scte214:supplementalProfiles="db1p" scanType="progressive" sar="1:1" id="1782303675496item-01item" bandwidth="500000"></Representation>
+            <Representation width="960" height="540" frameRate="30" codecs="hvc1.2.4.L93.B0" scte214:supplementalCodecs="dvh1.08.01" scte214:supplementalProfiles="db1p" scanType="progressive" sar="1:1" id="1782303675496item-02item" bandwidth="1000000"></Representation>
+            <Representation width="1280" height="720" frameRate="60" codecs="hvc1.2.4.L120.B0" scte214:supplementalCodecs="dvh1.08.04" scte214:supplementalProfiles="db1p" scanType="progressive" sar="1:1" id="1782303675496item-03item" bandwidth="2500000"></Representation>
+            <Representation width="1920" height="1080" frameRate="60" codecs="hvc1.2.4.L123.B0" scte214:supplementalCodecs="dvh1.08.05" scte214:supplementalProfiles="db1p" scanType="progressive" sar="1:1" id="1782303675496item-04item" bandwidth="5800000"></Representation>
+            <Representation width="1920" height="1080" frameRate="60" codecs="hvc1.2.4.L123.B0" scte214:supplementalCodecs="dvh1.08.05" scte214:supplementalProfiles="db1p" scanType="progressive" sar="1:1" id="1782303675496item-05item" bandwidth="10000000"></Representation>
+            <Representation width="3840" height="2160" frameRate="60" codecs="hvc1.2.4.L153.B0" scte214:supplementalCodecs="dvh1.08.09" scte214:supplementalProfiles="db1p" scanType="progressive" sar="1:1" id="1782303675496item-06item" bandwidth="13000000"></Representation>
+        </AdaptationSet>
+        <AdaptationSet mimeType="audio/mp4" startWithSAP="1" lang="en" segmentAlignment="true">
+            <SegmentTemplate timescale="240000" presentationTimeOffset="49113517697" media="$RepresentationID$_Segment-$Number$.m4a" initialization="$RepresentationID$_init.m4i" startNumber="64427" availabilityTimeOffset="2.4" availabilityTimeComplete="false">
+                <SegmentTimeline>
+                    <S t="49134458497" d="768000" r="37"></S>
+                </SegmentTimeline>
+            </SegmentTemplate>
+            <Representation audioSamplingRate="48000" codecs="mp4a.40.2" id="1782303675496item-07item" bandwidth="128000">
+                <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2" />
+            </Representation>
+        </AdaptationSet>
+        <AdaptationSet mimeType="audio/mp4" startWithSAP="1" lang="en" segmentAlignment="true">
+            <SegmentTemplate timescale="240000" presentationTimeOffset="49113515137" media="$RepresentationID$_Segment-$Number$.m4a" initialization="$RepresentationID$_init.m4i" startNumber="64427" availabilityTimeOffset="2.4" availabilityTimeComplete="false">
+                <SegmentTimeline>
+                    <S t="49134458497" d="768000" r="37"></S>
+                </SegmentTimeline>
+            </SegmentTemplate>
+            <Representation audioSamplingRate="48000" codecs="ec-3" id="1782303675496item-09item" bandwidth="640000">
+                <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801" />
+				<SupplementalProperty schemeIdUri="tag:dolby.com,2018:dash:EC3_ExtensionType:2018" value="JOC" />
+				<SupplementalProperty schemeIdUri="tag:dolby.com,2018:dash:EC3_ExtensionComplexityIndex:2018" value="12" />
+            </Representation>
+        </AdaptationSet>
+    </Period>
+    <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-iso:2014" value="https://time.akamai.com/?iso&amp;ms"></UTCTiming>
+    <LeapSecondInformation availabilityStartLeapOffset="0"></LeapSecondInformation>
+</MPD>

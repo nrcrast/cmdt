@@ -86,3 +86,21 @@ export function hasNonEmptyVersionSection(section) {
 export function knownSubsections() {
 	return [...KNOWN_SUBSECTIONS];
 }
+
+// Path prefixes whose changes do not require a root version bump:
+//   dash-ts/           - versioned independently of the root package
+//   scripts/           - repo tooling, not shipped in the released artifacts
+//   .github/workflows/ - CI configuration, not shipped in the released artifacts
+const BUMP_EXEMPT_PREFIXES = ["dash-ts", "scripts", ".github/workflows"];
+
+/**
+ * True iff `files` is a non-empty list whose every entry lives under one of the
+ * bump-exempt path prefixes (see BUMP_EXEMPT_PREFIXES). Such PRs are exempt from
+ * the root version-bump requirement.
+ */
+export function isBumpExempt(files) {
+	if (!Array.isArray(files) || files.length === 0) return false;
+	return files.every((file) =>
+		BUMP_EXEMPT_PREFIXES.some((prefix) => file === prefix || file.startsWith(`${prefix}/`)),
+	);
+}
