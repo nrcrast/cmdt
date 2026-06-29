@@ -86,3 +86,13 @@ export function hasNonEmptyVersionSection(section) {
 export function knownSubsections() {
 	return [...KNOWN_SUBSECTIONS];
 }
+
+/**
+ * True iff `files` is a non-empty list whose every entry lives under the
+ * `dash-ts/` workspace package. Such PRs are exempt from the root version-bump
+ * requirement (dash-ts is versioned independently).
+ */
+export function isDashTsOnly(files) {
+	if (!Array.isArray(files) || files.length === 0) return false;
+	return files.every((file) => file === "dash-ts" || file.startsWith("dash-ts/"));
+}

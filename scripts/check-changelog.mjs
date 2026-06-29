@@ -12,7 +12,12 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseChangelog, hasNonEmptyVersionSection, hasUnreleased } from "./check-changelog-lib.mjs";
+import {
+	parseChangelog,
+	hasNonEmptyVersionSection,
+	hasUnreleased,
+	isDashTsOnly,
+} from "./check-changelog-lib.mjs";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -53,6 +58,25 @@ function readVersionAtRef(ref) {
 function readVersionAtPath(path) {
 	const json = readFileSync(path, "utf8");
 	return JSON.parse(json).version ?? null;
+}
+
+// Returns the list of files that differ between <ref> and the working tree, or
+// null if the diff cannot be computed (in which case callers should not relax
+// any policy based on the file list).
+function changedFilesSinceRef(ref) {
+	try {
+		const out = execFileSync("git", ["diff", "--name-only", ref, "--"], {
+			cwd: REPO_ROOT,
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "pipe"],
+		});
+		return out
+			.split("\n")
+			.map((line) => line.trim())
+			.filter((line) => line.length > 0);
+	} catch {
+		return null;
+	}
 }
 
 function fail(message) {
@@ -105,9 +129,18 @@ function main() {
 
 	if (priorVersion === currentVersion) {
 		if (args.requireBump) {
+			const changedFiles = args.base ? changedFilesSinceRef(args.base) : null;
+			if (isDashTsOnly(changedFiles)) {
+				process.stdout.write(
+					`changelog check: version unchanged (${currentVersion}); ` +
+						`changes are confined to dash-ts/, which is versioned independently; ok\n`,
+				);
+				return;
+			}
 			fail(
 				`root package.json 'version' (${currentVersion}) is unchanged relative to ${args.base ?? "HEAD~1"}. ` +
-					`Every PR must bump the version (and add a matching '## [<new-version>] - <today>' section to CHANGELOG.md).`,
+					`Every PR must bump the version (and add a matching '## [<new-version>] - <today>' section to CHANGELOG.md). ` +
+					`(PRs touching only dash-ts/ are exempt.)`,
 			);
 		}
 		process.stdout.write(`changelog check: version unchanged (${currentVersion}); ok\n`);

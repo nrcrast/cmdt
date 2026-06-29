@@ -2,7 +2,12 @@
 // Run with: node --test scripts/check-changelog.test.mjs
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { parseChangelog, hasUnreleased, hasNonEmptyVersionSection } from "./check-changelog-lib.mjs";
+import {
+	parseChangelog,
+	hasUnreleased,
+	hasNonEmptyVersionSection,
+	isDashTsOnly,
+} from "./check-changelog-lib.mjs";
 
 const WELL_FORMED = `# Changelog
 
@@ -81,6 +86,32 @@ describe("hasNonEmptyVersionSection", () => {
 
 	it("returns false for undefined section", () => {
 		assert.equal(hasNonEmptyVersionSection(undefined), false);
+	});
+});
+
+describe("isDashTsOnly", () => {
+	it("returns true when every changed file is under dash-ts/", () => {
+		assert.equal(isDashTsOnly(["dash-ts/src/index.ts", "dash-ts/README.md"]), true);
+	});
+
+	it("returns true for the dash-ts directory entry itself", () => {
+		assert.equal(isDashTsOnly(["dash-ts"]), true);
+	});
+
+	it("returns false when a non-dash-ts file is changed", () => {
+		assert.equal(isDashTsOnly(["dash-ts/src/index.ts", "package.json"]), false);
+	});
+
+	it("does not treat lookalike paths as dash-ts", () => {
+		assert.equal(isDashTsOnly(["dash-ts-extra/file.ts"]), false);
+	});
+
+	it("returns false for an empty list", () => {
+		assert.equal(isDashTsOnly([]), false);
+	});
+
+	it("returns false for non-array input", () => {
+		assert.equal(isDashTsOnly(null), false);
 	});
 });
 
