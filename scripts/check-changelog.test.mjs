@@ -6,7 +6,7 @@ import {
 	parseChangelog,
 	hasUnreleased,
 	hasNonEmptyVersionSection,
-	isDashTsOnly,
+	isBumpExempt,
 } from "./check-changelog-lib.mjs";
 
 const WELL_FORMED = `# Changelog
@@ -89,29 +89,50 @@ describe("hasNonEmptyVersionSection", () => {
 	});
 });
 
-describe("isDashTsOnly", () => {
+describe("isBumpExempt", () => {
 	it("returns true when every changed file is under dash-ts/", () => {
-		assert.equal(isDashTsOnly(["dash-ts/src/index.ts", "dash-ts/README.md"]), true);
+		assert.equal(isBumpExempt(["dash-ts/src/index.ts", "dash-ts/README.md"]), true);
 	});
 
-	it("returns true for the dash-ts directory entry itself", () => {
-		assert.equal(isDashTsOnly(["dash-ts"]), true);
+	it("returns true for changes confined to scripts/", () => {
+		assert.equal(isBumpExempt(["scripts/check-changelog.mjs"]), true);
 	});
 
-	it("returns false when a non-dash-ts file is changed", () => {
-		assert.equal(isDashTsOnly(["dash-ts/src/index.ts", "package.json"]), false);
+	it("returns true for changes confined to .github/workflows/", () => {
+		assert.equal(isBumpExempt([".github/workflows/pr.yaml"]), true);
 	});
 
-	it("does not treat lookalike paths as dash-ts", () => {
-		assert.equal(isDashTsOnly(["dash-ts-extra/file.ts"]), false);
+	it("returns true for a mix of exempt paths", () => {
+		assert.equal(
+			isBumpExempt(["dash-ts/src/index.ts", "scripts/x.mjs", ".github/workflows/pr.yaml"]),
+			true,
+		);
+	});
+
+	it("returns true for a bare exempt directory entry", () => {
+		assert.equal(isBumpExempt(["dash-ts"]), true);
+	});
+
+	it("returns false when a non-exempt file is changed", () => {
+		assert.equal(isBumpExempt(["dash-ts/src/index.ts", "package.json"]), false);
+	});
+
+	it("does not treat lookalike paths as exempt", () => {
+		assert.equal(isBumpExempt(["dash-ts-extra/file.ts"]), false);
+		assert.equal(isBumpExempt(["scripts-extra/file.mjs"]), false);
+		assert.equal(isBumpExempt([".github/workflows-extra/x.yaml"]), false);
+	});
+
+	it("does not exempt other .github/ paths", () => {
+		assert.equal(isBumpExempt([".github/CODEOWNERS"]), false);
 	});
 
 	it("returns false for an empty list", () => {
-		assert.equal(isDashTsOnly([]), false);
+		assert.equal(isBumpExempt([]), false);
 	});
 
 	it("returns false for non-array input", () => {
-		assert.equal(isDashTsOnly(null), false);
+		assert.equal(isBumpExempt(null), false);
 	});
 });
 

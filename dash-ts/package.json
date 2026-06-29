@@ -1,6 +1,6 @@
 {
   "name": "dash-ts",
-  "version": "0.0.10",
+  "version": "1.0.0",
   "description": "TypeScript MPEG-DASH manifest parser used by cmdt",
   "type": "module",
   "scripts": {
