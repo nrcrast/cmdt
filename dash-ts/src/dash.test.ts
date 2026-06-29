@@ -10,6 +10,17 @@ describe("RawDashManifest", () => {
 		const manifest = await getRawDashManifest(testManifest);
 		expect(manifest).toMatchSnapshot();
 	});
+	it("should parse a single-period dynamic manifest with ProducerReferenceTime", async () => {
+		const testManifest = await getTestFile("manifests/2min-single-period-with-prft.mpd");
+		const manifest = await getRawDashManifest(testManifest);
+		expect(manifest).toMatchSnapshot();
+		expect(manifest.type).toBe("dynamic");
+		expect(manifest.periods).toHaveLength(1);
+		const prft = manifest.periods[0]?.adaptationSet?.[0]?.producerReferenceTime?.[0];
+		expect(prft).toBeDefined();
+		expect(prft?.wallClockTime).toBe("2026-06-26T21:11:55.139Z");
+		expect(prft?.utcTiming?.[0]?.schemeIdUri).toBe("urn:mpeg:dash:utc:http-iso:2014");
+	});
 	it("should parse capitalized SCTE-35 <Signal>/<Binary> events", async () => {
 		const binary = "/DA6AAAAAAAAAP/wBQb+AHhl1gAkAiJDVUVJAAAAAX//AAAAAAAODkdUTVYwMDAwMTA1MTkzIgEBdihHBw==";
 		const manifestXml = `<?xml version="1.0" encoding="utf-8"?>
