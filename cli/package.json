@@ -1,6 +1,7 @@
 {
 	"name": "cmdt-cli",
-	"version": "0.1.4",
+	"version": "0.0.0",
+	"private": true,
 	"description": "CLI for the Common Media Diagnostic Tool",
 	"type": "module",
 	"scripts": {
@@ -10,7 +11,7 @@
 		"format": "biome format",
 		"format:fix": "biome format --write",
 		"typecheck": "tsc --noEmit",
-		"package": "rm -rf bin && mkdir bin && pkg dist/index.cjs --output bin/cmdt --target node22-linux-arm64,node22-macos-arm64,node22-win-arm64",
+		"package": "rm -rf bin && mkdir bin && pkg dist/index.cjs --output bin/cmdt --target node22-linux-x64,node22-macos-x64,node22-win-x64",
 		"start": "tsx src/index.ts",
 		"dev": "tsx watch src/index.ts"
 	},
@@ -29,10 +30,10 @@
 	},
 	"keywords": [],
 	"author": "nrcrast",
-	"license": "MIT",
+	"license": "GPL-3.0-only",
 	"dependencies": {
 		"@commander-js/extra-typings": "^14.0.0",
-		"axios": "^1.8.3",
+		"axios": "catalog:",
 		"cmdt-shared": "workspace:*",
 		"commander": "^14.0.1",
 		"mkdirp": "^3.0.1",
@@ -40,12 +41,12 @@
 		"winston": "^3.17.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.4",
-		"@types/node": "^22.13.10",
+		"@biomejs/biome": "catalog:",
+		"@types/node": "catalog:",
 		"@yao-pkg/pkg": "^6.3.2",
 		"tsdown": "^0.15.9",
 		"tsx": "^4.19.3",
-		"typescript": "^5.8.2",
+		"typescript": "catalog:",
 		"uuid": "^13.0.0"
 	}
 }

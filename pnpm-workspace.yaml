@@ -3,3 +3,12 @@ packages:
   - 'cli'
   - 'viewer'
   - 'shared'
+
+# Single source of truth for versions of deps shared across packages.
+# Reference from a package with e.g. "axios": "catalog:".
+catalog:
+  '@biomejs/biome': 2.2.4
+  '@types/node': ^22.18.12
+  axios: ^1.15.0
+  typescript: ^5.8.2
+  vitest: ^3.2.4

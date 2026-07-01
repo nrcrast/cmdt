@@ -100,7 +100,5 @@ const BUMP_EXEMPT_PREFIXES = ["dash-ts", "scripts", ".github/workflows"];
  */
 export function isBumpExempt(files) {
 	if (!Array.isArray(files) || files.length === 0) return false;
-	return files.every((file) =>
-		BUMP_EXEMPT_PREFIXES.some((prefix) => file === prefix || file.startsWith(`${prefix}/`)),
-	);
+	return files.every((file) => BUMP_EXEMPT_PREFIXES.some((prefix) => file === prefix || file.startsWith(`${prefix}/`)));
 }

@@ -1,0 +1,71 @@
+name: Publish dash-ts
+
+# Publishes the dash-ts package to npm whenever its version changes on main.
+# pnpm publish resolves the catalog:/workspace: protocols to concrete versions,
+# so the package must be published with pnpm (not npm).
+#
+# Requires an NPM_TOKEN repository secret (npm automation token with publish
+# rights). Add it under Settings -> Secrets and variables -> Actions.
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'dash-ts/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need HEAD~1 to diff the version against the previous commit.
+          fetch-depth: 2
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          run_install: false
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+          registry-url: 'https://registry.npmjs.org'
+        # To avoid setup-node cache failure.
+        # ref. https://github.com/actions/setup-node/issues/1137
+      - name: create pnpm cache directory
+        shell: bash
+        run: mkdir -vp $(pnpm store path --silent)
+      - name: Detect dash-ts version change
+        id: check
+        shell: bash
+        run: |
+          current=$(node -p "require('./dash-ts/package.json').version")
+          previous=$(git show HEAD~1:dash-ts/package.json 2>/dev/null \
+            | node -p "JSON.parse(require('node:fs').readFileSync(0, 'utf8')).version" 2>/dev/null || echo "")
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "previous=$previous" >> "$GITHUB_OUTPUT"
+          if [ "$current" != "$previous" ]; then
+            echo "dash-ts version changed: ${previous:-<none>} -> $current"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "dash-ts version unchanged ($current); nothing to publish"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install dependencies
+        if: steps.check.outputs.changed == 'true'
+        run: pnpm i
+      - name: Build dash-ts
+        if: steps.check.outputs.changed == 'true'
+        run: pnpm --filter dash-ts build
+      - name: Publish dash-ts
+        if: steps.check.outputs.changed == 'true'
+        run: pnpm --filter dash-ts publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

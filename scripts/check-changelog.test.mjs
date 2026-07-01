@@ -1,13 +1,9 @@
 // Fixture-based tests for the changelog parser and predicates.
 // Run with: node --test scripts/check-changelog.test.mjs
-import { describe, it } from "node:test";
+
 import assert from "node:assert/strict";
-import {
-	parseChangelog,
-	hasUnreleased,
-	hasNonEmptyVersionSection,
-	isBumpExempt,
-} from "./check-changelog-lib.mjs";
+import { describe, it } from "node:test";
+import { hasNonEmptyVersionSection, hasUnreleased, isBumpExempt, parseChangelog } from "./check-changelog-lib.mjs";
 
 const WELL_FORMED = `# Changelog
 
@@ -103,10 +99,7 @@ describe("isBumpExempt", () => {
 	});
 
 	it("returns true for a mix of exempt paths", () => {
-		assert.equal(
-			isBumpExempt(["dash-ts/src/index.ts", "scripts/x.mjs", ".github/workflows/pr.yaml"]),
-			true,
-		);
+		assert.equal(isBumpExempt(["dash-ts/src/index.ts", "scripts/x.mjs", ".github/workflows/pr.yaml"]), true);
 	});
 
 	it("returns true for a bare exempt directory entry", () => {
