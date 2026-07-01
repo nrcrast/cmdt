@@ -39,7 +39,7 @@ function main() {
 		`export const CHANGELOG_DATA: ParsedChangelog = ${JSON.stringify(parsed, null, 2)} as const;\n`;
 
 	mkdirSync(dirname(OUT_PATH), { recursive: true });
-	writeFileSync(OUT_PATH, banner + "\n" + body, "utf8");
+	writeFileSync(OUT_PATH, `${banner}\n${body}`, "utf8");
 	process.stdout.write(`build-changelog: wrote ${OUT_PATH} (${parsed.releases.length} releases)\n`);
 }
 
