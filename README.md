@@ -23,6 +23,11 @@ pnpm i
 pnpm build
 ```
 
+> Note: this repo pins its pnpm version via the `packageManager` field in
+> `package.json`. If you have a recent Node with Corepack, you can run
+> `corepack enable` instead of `npm i -g pnpm` to use the exact pinned pnpm
+> version automatically.
+
 You must run the full build once before attempting to run the CLI.
 
 At this point, you should be able to run `cd cli && pnpm start -h` and get the help output from the application. 

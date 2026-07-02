@@ -1,6 +1,7 @@
 download
 bin
 test-output
+.DS_Store
 # Logs
 logs
 *.log

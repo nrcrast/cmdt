@@ -33,10 +33,14 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          always-auth: 'true'
           node-version-file: '.nvmrc'
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
+        # To avoid setup-node cache failure.
+        # ref. https://github.com/actions/setup-node/issues/1137
+      - name: create pnpm cache directory
+        shell: bash
+        run: mkdir -vp $(pnpm store path --silent)
       - name: Install Dependencies
         run: pnpm i
       - name: Build

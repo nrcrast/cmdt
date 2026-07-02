@@ -1,44 +1,44 @@
 {
-  "name": "cmdt",
-  "version": "0.7.2",
-  "description": "Common Media Diagnostic Tool",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nrcrast/cmdt.git"
-  },
-  "author": "nrcrast",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/nrcrast/cmdt/issues"
-  },
-  "homepage": "https://github.com/nrcrast/cmdt#readme",
-  "scripts": {
-    "lint": "pnpm -r --parallel run lint",
-    "lint:fix": "pnpm -r --parallel run lint:fix",
-    "format": "pnpm -r --parallel run format",
-    "format:fix": "pnpm -r --parallel run format:fix",
-    "package": "pnpm -r --parallel run package",
-    "typecheck": "pnpm -r --parallel run typecheck",
-    "test": "pnpm -r run test",
-    "clean": "pnpm -r exec -- rm -rf node_modules dist && rimraf node_modules",
-    "build": "pnpm -r run build",
-    "dev": "pnpm -r --parallel run dev",
-    "prepare": "husky"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "biome check --no-errors-on-unmatched --files-ignore-unknown=true"
-    ]
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.2.4",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.6",
-    "rimraf": "6.0.1"
-  },
-  "engines": {
-    "node": ">=22",
-    "pnpm": ">=10"
-  },
-  "packageManager": "pnpm@10.28.1"
+	"name": "cmdt",
+	"version": "0.7.3",
+	"description": "Common Media Diagnostic Tool",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nrcrast/cmdt.git"
+	},
+	"author": "nrcrast",
+	"license": "GPL-3.0-only",
+	"bugs": {
+		"url": "https://github.com/nrcrast/cmdt/issues"
+	},
+	"homepage": "https://github.com/nrcrast/cmdt#readme",
+	"scripts": {
+		"lint": "biome check scripts *.json && pnpm -r --parallel run lint",
+		"lint:fix": "biome check --write scripts *.json && pnpm -r --parallel run lint:fix",
+		"format": "biome format scripts *.json && pnpm -r --parallel run format",
+		"format:fix": "biome format --write scripts *.json && pnpm -r --parallel run format:fix",
+		"package": "pnpm -r --parallel run package",
+		"typecheck": "pnpm -r --parallel run typecheck",
+		"test": "pnpm -r run test",
+		"clean": "pnpm -r exec -- rm -rf node_modules dist && rimraf node_modules",
+		"build": "pnpm -r run build",
+		"dev": "pnpm -r --parallel run dev",
+		"prepare": "husky"
+	},
+	"lint-staged": {
+		"*.{ts,tsx}": [
+			"biome check --no-errors-on-unmatched --files-ignore-unknown=true"
+		]
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.1.6",
+		"rimraf": "6.0.1"
+	},
+	"engines": {
+		"node": ">=22",
+		"pnpm": ">=10"
+	},
+	"packageManager": "pnpm@10.28.1"
 }

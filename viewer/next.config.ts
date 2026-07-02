@@ -9,13 +9,13 @@ const rootPkg = JSON.parse(readFileSync(resolve(__dirname, "../package.json"), "
 const cmdtVersion = process.env.NEXT_PUBLIC_CMDT_VERSION ?? rootPkg.version;
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  output: "export",
-  basePath: "/cmdt",
-  transpilePackages: ["cmdt-shared", "dash-ts"],
-  env: {
-    NEXT_PUBLIC_CMDT_VERSION: cmdtVersion,
-  },
+	/* config options here */
+	output: "export",
+	basePath: "/cmdt",
+	transpilePackages: ["cmdt-shared", "dash-ts"],
+	env: {
+		NEXT_PUBLIC_CMDT_VERSION: cmdtVersion,
+	},
 };
 
 export default nextConfig;

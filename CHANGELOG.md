@@ -25,6 +25,15 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.7.3] - 2026-07-01
+
+### Changed
+
+- Pre-built release binaries are now built for x64 (Linux, Windows, macOS)
+  instead of arm64, matching the platforms most users run.
+- Relicensed the project under GPL-3.0; the published `license` fields now
+  match the bundled `LICENSE` file.
+
 ## [0.7.2] - 2026-06-24
 
 ### Fixed

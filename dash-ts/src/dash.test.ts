@@ -1,7 +1,7 @@
 import { parse } from "@fast-csv/parse";
 import axios from "axios";
 import { describe, expect, it } from "vitest";
-import { getTestFile, writeTestFile } from "../test-utils/utils.js";
+import { getTestFile, writeTestFile } from "../test/utils.js";
 import { getRawDashManifest } from "./dash.js";
 
 describe("RawDashManifest", () => {

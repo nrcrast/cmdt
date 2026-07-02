@@ -3,8 +3,8 @@
 // typed TypeScript module at viewer/src/lib/changelog.generated.ts.
 // The viewer imports the module synchronously; no markdown parser ships in the
 // runtime bundle. Build aborts with an actionable error on missing/malformed input.
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseChangelog } from "./check-changelog-lib.mjs";
 
@@ -39,7 +39,7 @@ function main() {
 		`export const CHANGELOG_DATA: ParsedChangelog = ${JSON.stringify(parsed, null, 2)} as const;\n`;
 
 	mkdirSync(dirname(OUT_PATH), { recursive: true });
-	writeFileSync(OUT_PATH, banner + "\n" + body, "utf8");
+	writeFileSync(OUT_PATH, `${banner}\n${body}`, "utf8");
 	process.stdout.write(`build-changelog: wrote ${OUT_PATH} (${parsed.releases.length} releases)\n`);
 }
 

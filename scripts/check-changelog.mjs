@@ -9,15 +9,10 @@
 //   --require-bump    fail if the version is unchanged relative to the comparison
 //                     ref (PR policy: every PR must bump the root version)
 import { execFileSync } from "node:child_process";
-import { readFileSync, existsSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-	parseChangelog,
-	hasNonEmptyVersionSection,
-	hasUnreleased,
-	isBumpExempt,
-} from "./check-changelog-lib.mjs";
+import { hasNonEmptyVersionSection, hasUnreleased, isBumpExempt, parseChangelog } from "./check-changelog-lib.mjs";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
