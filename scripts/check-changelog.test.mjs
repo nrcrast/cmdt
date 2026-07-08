@@ -2,8 +2,17 @@
 // Run with: node --test scripts/check-changelog.test.mjs
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { describe, it } from "node:test";
-import { hasNonEmptyVersionSection, hasUnreleased, isBumpExempt, parseChangelog } from "./check-changelog-lib.mjs";
+import { fileURLToPath } from "node:url";
+import {
+	BUMP_REQUIRED_PREFIXES,
+	hasNonEmptyVersionSection,
+	hasUnreleased,
+	parseChangelog,
+	requiresBump,
+} from "./check-changelog-lib.mjs";
 
 const WELL_FORMED = `# Changelog
 
@@ -85,47 +94,68 @@ describe("hasNonEmptyVersionSection", () => {
 	});
 });
 
-describe("isBumpExempt", () => {
-	it("returns true when every changed file is under dash-ts/", () => {
-		assert.equal(isBumpExempt(["dash-ts/src/index.ts", "dash-ts/README.md"]), true);
+describe("requiresBump", () => {
+	it("requires a bump when shipped cli/ code changes", () => {
+		assert.equal(requiresBump(["cli/src/index.ts"]), true);
 	});
 
-	it("returns true for changes confined to scripts/", () => {
-		assert.equal(isBumpExempt(["scripts/check-changelog.mjs"]), true);
+	it("requires a bump when shipped shared/ code changes", () => {
+		assert.equal(requiresBump(["shared/src/manifest.ts"]), true);
 	});
 
-	it("returns true for changes confined to .github/workflows/", () => {
-		assert.equal(isBumpExempt([".github/workflows/pr.yaml"]), true);
+	it("requires a bump when shipped viewer/ code changes", () => {
+		assert.equal(requiresBump(["viewer/src/app/page.tsx"]), true);
 	});
 
-	it("returns true for a mix of exempt paths", () => {
-		assert.equal(isBumpExempt(["dash-ts/src/index.ts", "scripts/x.mjs", ".github/workflows/pr.yaml"]), true);
+	it("requires a bump when any changed file is shipped code", () => {
+		assert.equal(requiresBump(["scripts/x.mjs", ".ruler/AGENTS.md", "shared/src/manifest.ts"]), true);
 	});
 
-	it("returns true for a bare exempt directory entry", () => {
-		assert.equal(isBumpExempt(["dash-ts"]), true);
+	it("requires a bump for a bare shipped directory entry", () => {
+		assert.equal(requiresBump(["cli"]), true);
 	});
 
-	it("returns false when a non-exempt file is changed", () => {
-		assert.equal(isBumpExempt(["dash-ts/src/index.ts", "package.json"]), false);
+	it("does not require a bump when no shipped code changes", () => {
+		assert.equal(
+			requiresBump([
+				"dash-ts/src/index.ts",
+				"scripts/x.mjs",
+				".github/workflows/pr.yaml",
+				".ruler/AGENTS.md",
+				".gitignore",
+				"CHANGELOG.md",
+			]),
+			false,
+		);
 	});
 
-	it("does not treat lookalike paths as exempt", () => {
-		assert.equal(isBumpExempt(["dash-ts-extra/file.ts"]), false);
-		assert.equal(isBumpExempt(["scripts-extra/file.mjs"]), false);
-		assert.equal(isBumpExempt([".github/workflows-extra/x.yaml"]), false);
+	it("does not treat lookalike paths as shipped", () => {
+		assert.equal(requiresBump(["cli-extra/file.ts"]), false);
+		assert.equal(requiresBump(["shared-extra/file.ts"]), false);
+		assert.equal(requiresBump(["viewerz/file.ts"]), false);
 	});
 
-	it("does not exempt other .github/ paths", () => {
-		assert.equal(isBumpExempt([".github/CODEOWNERS"]), false);
+	it("does not require a bump for an empty change set", () => {
+		assert.equal(requiresBump([]), false);
 	});
 
-	it("returns false for an empty list", () => {
-		assert.equal(isBumpExempt([]), false);
+	it("fails closed (requires a bump) when the file list is unknown", () => {
+		assert.equal(requiresBump(null), true);
 	});
+});
 
-	it("returns false for non-array input", () => {
-		assert.equal(isBumpExempt(null), false);
+describe("BUMP_REQUIRED_PREFIXES stays in sync with shipped workspaces", () => {
+	// Guards the allow-list's fail-open risk: if a new shipped workspace is added
+	// to pnpm-workspace.yaml without updating BUMP_REQUIRED_PREFIXES, this fails.
+	// dash-ts is excluded because it is versioned independently of the root.
+	const INDEPENDENTLY_VERSIONED = ["dash-ts"];
+
+	it("covers every workspace except the independently-versioned ones", () => {
+		const wsPath = resolve(dirname(fileURLToPath(import.meta.url)), "..", "pnpm-workspace.yaml");
+		const ws = readFileSync(wsPath, "utf8");
+		const workspaces = [...ws.matchAll(/^\s*-\s*['"]([^'"]+)['"]/gm)].map((m) => m[1]);
+		const expected = workspaces.filter((w) => !INDEPENDENTLY_VERSIONED.includes(w)).sort();
+		assert.deepEqual([...BUMP_REQUIRED_PREFIXES].sort(), expected);
 	});
 });
 

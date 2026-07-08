@@ -87,18 +87,27 @@ export function knownSubsections() {
 	return [...KNOWN_SUBSECTIONS];
 }
 
-// Path prefixes whose changes do not require a root version bump:
-//   dash-ts/           - versioned independently of the root package
-//   scripts/           - repo tooling, not shipped in the released artifacts
-//   .github/workflows/ - CI configuration, not shipped in the released artifacts
-const BUMP_EXEMPT_PREFIXES = ["dash-ts", "scripts", ".github/workflows"];
+// Path prefixes whose changes DO require a root version bump. These are the
+// shipped workspaces released together under the root package version:
+//   cli/    - the CLI, packaged into the release binaries
+//   shared/ - the core engine consumed by cli and viewer
+//   viewer/ - the web viewer deployed to Pages
+// Everything else is not gated: dash-ts/ is versioned independently, and
+// scripts/, .github/, .ruler/, .gitignore, root config, and docs are not shipped
+// in the released artifacts. This allow-list must stay in sync with the shipped
+// workspaces in pnpm-workspace.yaml (guarded by a test in check-changelog.test.mjs).
+export const BUMP_REQUIRED_PREFIXES = ["cli", "shared", "viewer"];
 
 /**
- * True iff `files` is a non-empty list whose every entry lives under one of the
- * bump-exempt path prefixes (see BUMP_EXEMPT_PREFIXES). Such PRs are exempt from
- * the root version-bump requirement.
+ * True iff a root version bump is required for a PR that changed `files`, i.e.
+ * at least one changed file lives under a shipped path (see
+ * BUMP_REQUIRED_PREFIXES). When the changed-file list cannot be determined
+ * (`files` is not an array), returns true so callers fail closed and require a
+ * bump rather than silently skipping the check.
  */
-export function isBumpExempt(files) {
-	if (!Array.isArray(files) || files.length === 0) return false;
-	return files.every((file) => BUMP_EXEMPT_PREFIXES.some((prefix) => file === prefix || file.startsWith(`${prefix}/`)));
+export function requiresBump(files) {
+	if (!Array.isArray(files)) return true;
+	return files.some((file) =>
+		BUMP_REQUIRED_PREFIXES.some((prefix) => file === prefix || file.startsWith(`${prefix}/`)),
+	);
 }

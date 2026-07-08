@@ -1,0 +1,15 @@
+# Ruler configuration — single source of truth for AI agent rules lives in .ruler/*.md
+# Regenerate agent config files with: npx @intellectronica/ruler apply
+
+# Agents to generate config for. Cursor -> AGENTS.md, Claude Code -> CLAUDE.md,
+# AugmentCode -> .augment/rules/ruler_augment_instructions.md.
+default_agents = ["cursor", "claude", "augmentcode"]
+
+# We don't manage MCP servers through ruler.
+[mcp]
+enabled = false
+
+# Generated agent files are kept out of version control; contributors run
+# `npx @intellectronica/ruler apply` after pulling changes to .ruler/.
+[gitignore]
+enabled = true

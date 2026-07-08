@@ -144,3 +144,12 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# START Ruler Generated Files
+/.augment/rules/ruler_augment_instructions.md
+/.augment/rules/ruler_augment_instructions.md.bak
+/AGENTS.md
+/AGENTS.md.bak
+/CLAUDE.md
+/CLAUDE.md.bak
+# END Ruler Generated Files
