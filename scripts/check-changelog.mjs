@@ -12,7 +12,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { hasNonEmptyVersionSection, hasUnreleased, isBumpExempt, parseChangelog } from "./check-changelog-lib.mjs";
+import { hasNonEmptyVersionSection, hasUnreleased, parseChangelog, requiresBump } from "./check-changelog-lib.mjs";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -125,17 +125,17 @@ function main() {
 	if (priorVersion === currentVersion) {
 		if (args.requireBump) {
 			const changedFiles = args.base ? changedFilesSinceRef(args.base) : null;
-			if (isBumpExempt(changedFiles)) {
+			if (!requiresBump(changedFiles)) {
 				process.stdout.write(
 					`changelog check: version unchanged (${currentVersion}); ` +
-						`changes are confined to bump-exempt paths (dash-ts/, scripts/, .github/workflows/, .ruler/, .gitignore); ok\n`,
+						`no shipped code changed (cli/, shared/, viewer/); ok\n`,
 				);
 				return;
 			}
 			fail(
 				`root package.json 'version' (${currentVersion}) is unchanged relative to ${args.base ?? "HEAD~1"}. ` +
-					`Every PR must bump the version (and add a matching '## [<new-version>] - <today>' section to CHANGELOG.md). ` +
-					`(PRs touching only dash-ts/, scripts/, .github/workflows/, .ruler/, or .gitignore are exempt.)`,
+					`PRs that touch shipped code (cli/, shared/, viewer/) must bump the version ` +
+					`(and add a matching '## [<new-version>] - <today>' section to CHANGELOG.md).`,
 			);
 		}
 		process.stdout.write(`changelog check: version unchanged (${currentVersion}); ok\n`);

@@ -29,6 +29,8 @@ packages stay at `0.0.0` (except the independently published `dash-ts`). To bump
    fresh empty `[Unreleased]` block above it, with entries under the right
    subsection (`Added`/`Changed`/`Fixed`/…).
 
-`scripts/check-changelog.mjs --require-bump` gates this on PRs. PRs touching
-only `dash-ts/`, `scripts/`, or `.github/workflows/` are exempt. The viewer's
+`scripts/check-changelog.mjs --require-bump` gates this on PRs: a bump is
+required only when a PR touches shipped code (`cli/`, `shared/`, `viewer/` —
+see `BUMP_REQUIRED_PREFIXES`). Changes confined to `dash-ts/` (versioned
+independently), tooling, config, or docs don't need one. The viewer's
 `changelog.generated.ts` is built from `CHANGELOG.md` and is not committed.
