@@ -128,14 +128,14 @@ function main() {
 			if (isBumpExempt(changedFiles)) {
 				process.stdout.write(
 					`changelog check: version unchanged (${currentVersion}); ` +
-						`changes are confined to bump-exempt paths (dash-ts/, scripts/, .github/workflows/); ok\n`,
+						`changes are confined to bump-exempt paths (dash-ts/, scripts/, .github/workflows/, .ruler/, .gitignore); ok\n`,
 				);
 				return;
 			}
 			fail(
 				`root package.json 'version' (${currentVersion}) is unchanged relative to ${args.base ?? "HEAD~1"}. ` +
 					`Every PR must bump the version (and add a matching '## [<new-version>] - <today>' section to CHANGELOG.md). ` +
-					`(PRs touching only dash-ts/, scripts/, or .github/workflows/ are exempt.)`,
+					`(PRs touching only dash-ts/, scripts/, .github/workflows/, .ruler/, or .gitignore are exempt.)`,
 			);
 		}
 		process.stdout.write(`changelog check: version unchanged (${currentVersion}); ok\n`);

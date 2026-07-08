@@ -98,8 +98,25 @@ describe("isBumpExempt", () => {
 		assert.equal(isBumpExempt([".github/workflows/pr.yaml"]), true);
 	});
 
+	it("returns true for changes confined to .ruler/", () => {
+		assert.equal(isBumpExempt([".ruler/AGENTS.md", ".ruler/ruler.toml"]), true);
+	});
+
+	it("returns true for a .gitignore-only change", () => {
+		assert.equal(isBumpExempt([".gitignore"]), true);
+	});
+
 	it("returns true for a mix of exempt paths", () => {
-		assert.equal(isBumpExempt(["dash-ts/src/index.ts", "scripts/x.mjs", ".github/workflows/pr.yaml"]), true);
+		assert.equal(
+			isBumpExempt([
+				"dash-ts/src/index.ts",
+				"scripts/x.mjs",
+				".github/workflows/pr.yaml",
+				".ruler/AGENTS.md",
+				".gitignore",
+			]),
+			true,
+		);
 	});
 
 	it("returns true for a bare exempt directory entry", () => {

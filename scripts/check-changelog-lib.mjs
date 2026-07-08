@@ -91,7 +91,9 @@ export function knownSubsections() {
 //   dash-ts/           - versioned independently of the root package
 //   scripts/           - repo tooling, not shipped in the released artifacts
 //   .github/workflows/ - CI configuration, not shipped in the released artifacts
-const BUMP_EXEMPT_PREFIXES = ["dash-ts", "scripts", ".github/workflows"];
+//   .ruler/            - AI agent instructions, not shipped in the released artifacts
+//   .gitignore         - repo hygiene, not shipped in the released artifacts
+const BUMP_EXEMPT_PREFIXES = ["dash-ts", "scripts", ".github/workflows", ".ruler", ".gitignore"];
 
 /**
  * True iff `files` is a non-empty list whose every entry lives under one of the
