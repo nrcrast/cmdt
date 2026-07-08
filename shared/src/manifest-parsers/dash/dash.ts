@@ -223,6 +223,29 @@ export class DashManifest implements ManifestParser {
 		return undefined;
 	}
 
+	/**
+	 * Resolves a period's start time on the presentation timeline.
+	 *
+	 * When a Period declares an explicit `start`, it is used verbatim. Otherwise
+	 * (per the DASH spec) the start is derived from the previous period's start
+	 * plus its duration, so periods without a `start` attribute follow one after
+	 * another rather than all collapsing to 0.
+	 */
+	private getPeriodStartSeconds(period: Period): number {
+		if (period.start !== undefined) {
+			return period.start;
+		}
+		const periodIndex = this.dashManifest?.periods.indexOf(period) ?? -1;
+		if (periodIndex <= 0) {
+			return 0;
+		}
+		const previousPeriod = this.dashManifest?.periods[periodIndex - 1];
+		if (!previousPeriod) {
+			return 0;
+		}
+		return this.getPeriodStartSeconds(previousPeriod) + (this.getPeriodDurationSeconds(previousPeriod) ?? 0);
+	}
+
 	private getSegmentsFromRepresentation(representation: RawRepresentation): Array<Segment> {
 		let segments: Array<Segment> = [];
 		if (representation.segmentTemplate || representation.adaptationSet.segmentTemplate) {
@@ -412,7 +435,7 @@ export class DashManifest implements ManifestParser {
 		}
 	}
 
-	private extractScte35MarkersFromPeriod(period: Period): Array<Scte35Marker> {
+	private extractScte35MarkersFromPeriod(period: Period, periodStart: number): Array<Scte35Marker> {
 		const parser = new SCTE35();
 		const markers: Array<Scte35Marker> = [];
 		for (const eStream of period.eventStream ?? []) {
@@ -427,7 +450,7 @@ export class DashManifest implements ManifestParser {
 				const presentationTimeS =
 					((e.presentationTime ?? 0) + (eStream.presentationTimeOffset ?? 0)) / (eStream.timescale ?? 1);
 				markers.push({
-					presentationTimeS: (period.start ?? 0) + presentationTimeS,
+					presentationTimeS: periodStart + presentationTimeS,
 					data: rawData.startsWith("0x") ? parser.parseFromHex(rawData) : parser.parseFromB64(rawData),
 				});
 			}
@@ -444,12 +467,13 @@ export class DashManifest implements ManifestParser {
 		}
 
 		const segments = this.manifest.video.entries().next().value?.[1].segments ?? [];
-		const scteMarkers = this.extractScte35MarkersFromPeriod(period);
+		const periodStart = this.getPeriodStartSeconds(period);
+		const scteMarkers = this.extractScte35MarkersFromPeriod(period, periodStart);
 		this.manifest.scte35 ||= [];
 		this.manifest.scte35.push(...scteMarkers);
 		const p = <ParsedPeriod>{};
 		p.id = period.id;
-		p.start = period.start ?? 0;
+		p.start = periodStart;
 		p.baseUrl = period.baseUrl?.map((u) => u.url) ?? [];
 		p.startString = period.startString;
 		p.segmentsAvailable = segments.length;
