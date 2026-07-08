@@ -25,6 +25,14 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.7.4] - 2026-07-08
+
+### Fixed
+
+- DASH periods that declare only a `duration` (no explicit `start`) now derive
+  their start time from the running sum of preceding period durations instead
+  of all collapsing to 0, so multi-period timelines render correctly.
+
 ## [0.7.3] - 2026-07-01
 
 ### Changed
