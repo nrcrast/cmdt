@@ -25,6 +25,14 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.7.5] - 2026-07-08
+
+### Added
+
+- Centralized AI agent instructions in a `.ruler/` directory (managed with
+  [ruler](https://github.com/intellectronica/ruler)) that generate per-agent
+  guidance files. Regenerate with `pnpm ruler:apply`.
+
 ## [0.7.4] - 2026-07-08
 
 ### Fixed
