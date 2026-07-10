@@ -99,6 +99,30 @@ describe("DashManifest", () => {
 			expect(starts[i]).toBeGreaterThan(starts[i - 1] as number);
 		}
 	});
+	it("marks MPD@type=dynamic as live and static (default) as not live", async () => {
+		const staticManifest = await getTestFile("manifests/dash-single-period.mpd");
+		const { manifest: staticParsed } = await new DashManifest().parse(
+			staticManifest,
+			"http://example.com/manifest.mpd",
+		);
+		expect(staticParsed.isLive).toBe(false);
+
+		const dynamicManifest = [
+			'<?xml version="1.0" encoding="UTF-8"?>',
+			'<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="dynamic"',
+			'  profiles="urn:mpeg:dash:profile:isoff-live:2011"',
+			'  availabilityStartTime="2020-01-01T00:00:00Z" minimumUpdatePeriod="PT2S" minBufferTime="PT4S">',
+			'  <Period id="0" start="PT0S">',
+			'    <AdaptationSet mimeType="video/mp4" contentType="video">',
+			'      <SegmentTemplate media="$Number$.m4s" initialization="init.m4s" duration="2" timescale="1" startNumber="1"/>',
+			'      <Representation id="v0" bandwidth="1000000" codecs="avc1.4d401f" width="640" height="360"/>',
+			"    </AdaptationSet>",
+			"  </Period>",
+			"</MPD>",
+		].join("\n");
+		const { manifest: dynamicParsed } = await new DashManifest().parse(dynamicManifest, "http://example.com/live.mpd");
+		expect(dynamicParsed.isLive).toBe(true);
+	});
 	// describe("DASH-IF test vectors", async () => {
 	// 	const dashTestVectors = await getTestFile("manifests/DASH IF Test Assets Database.csv");
 	// 	await new Promise<void>((resolve, reject) => {

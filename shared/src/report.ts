@@ -86,6 +86,7 @@ export class Report {
 			duplicateThumbnails: {},
 			manifest: {
 				url: new URL("http://localhost"), // Placeholder
+				isLive: false,
 				video: [],
 				audio: [],
 				images: [],

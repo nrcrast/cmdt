@@ -1,5 +1,5 @@
-import { type ILogObj, Logger } from "tslog";
 import type { Cue } from "../../../cue.js";
+import { getLogger } from "../../../utils/logger.js";
 import Mp4Parser from "../../../utils/mp4/mp4-parser.js";
 import type { Frma, Mdhd, ParsedBox, Tfdt, Tfhd, Tkhd, Trex, Trun } from "../../../utils/mp4/types.js";
 import { BitstreamFormat } from "../../../utils/text/types.js";
@@ -10,7 +10,7 @@ type CeaSegment = DataSegment & { periodId: string };
 
 class CeaParser {
 	private _ceaDecoder: CeaDecoder;
-	private logger: Logger<ILogObj>;
+	private logger = getLogger();
 
 	private _defaultSampleDuration = 0;
 	private _defaultSampleSize = 0;
@@ -37,7 +37,6 @@ class CeaParser {
 
 	constructor() {
 		this._ceaDecoder = new CeaDecoder();
-		this.logger = new Logger<ILogObj>();
 	}
 
 	private parseInit(data: ArrayBuffer): void {

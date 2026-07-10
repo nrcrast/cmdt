@@ -3,11 +3,17 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import axios from "axios";
 import {
+	type AbsoluteTimeRange,
 	type DownloadMode,
 	getManifestParser,
+	LogLevel,
+	latestWindowToTimeRange,
+	type Manifest,
 	type PluginArtifact,
 	Report,
 	SegmentDownloader,
+	secondsToTimeRange,
+	setLogLevel,
 	wrapUrl,
 } from "cmdt-shared";
 import { mkdirp } from "mkdirp";
@@ -17,6 +23,17 @@ import { getInstance as getLogger } from "./logger.js";
 import { loadPlugins } from "./plugins/load-plugins.js";
 
 const options = getOpts();
+
+// Mirror the CLI's --log-level onto the shared engine so its loggers honor the
+// same verbosity as the winston CLI logger (they log independently via tslog).
+const CLI_LEVEL_TO_LOG_LEVEL: Record<string, LogLevel> = {
+	off: LogLevel.Silent,
+	error: LogLevel.Error,
+	info: LogLevel.Info,
+	debug: LogLevel.Debug,
+};
+setLogLevel(CLI_LEVEL_TO_LOG_LEVEL[options.logLevel] ?? LogLevel.Info);
+
 const logger = getLogger();
 const report = new Report();
 
@@ -95,6 +112,37 @@ function normalizeCustomBaseUrl(baseUrl?: string): string | undefined {
 	return wrapped.href;
 }
 
+/**
+ * Resolves the CLI time-range flags into the absolute (millisecond) range the
+ * downloader understands. `--live-edge-window` is resolved against the parsed
+ * manifest's live edge; the absolute `--range-*` flags are converted from
+ * seconds. Returns undefined when no range flag was supplied (download all).
+ */
+function resolveDownloadTimeRange(manifest: Manifest): AbsoluteTimeRange | undefined {
+	if (options.liveEdgeWindow !== undefined) {
+		const range = latestWindowToTimeRange(manifest, options.liveEdgeWindow);
+		logger.info(
+			`Restricting download to the latest ${options.liveEdgeWindow}s from the live edge (>= ${range.start}ms).`,
+		);
+		return range;
+	}
+
+	if (options.rangeStart === undefined && options.rangeEnd === undefined) {
+		return undefined;
+	}
+
+	const startSeconds = options.rangeStart ?? 0;
+	if (options.rangeEnd !== undefined && startSeconds >= options.rangeEnd) {
+		logger.error(`--range-start (${startSeconds}s) must be less than --range-end (${options.rangeEnd}s).`);
+		process.exit(1);
+	}
+
+	const range = secondsToTimeRange(startSeconds, options.rangeEnd);
+	const endLabel = range.end === undefined ? "end of stream" : `${range.end}ms`;
+	logger.info(`Restricting download to segments in [${range.start}ms, ${endLabel}).`);
+	return range;
+}
+
 async function processManifest(uri: string) {
 	await cleanupOutputDirectory();
 	const sanitizedUri = normalizeManifestUri(sanitizeUri(uri));
@@ -106,6 +154,7 @@ async function processManifest(uri: string) {
 	logger.info("Manifest parsed successfully!");
 	const plugins = await loadPlugins(manifest, report);
 	const downloader = new SegmentDownloader(manifest);
+	const downloadTimeRange = resolveDownloadTimeRange(manifest);
 
 	const fsArtifacts: Array<FilesystemArtifact> = artifacts.map((artifact) => {
 		return {
@@ -117,6 +166,7 @@ async function processManifest(uri: string) {
 	await downloader.start({
 		batchSize: 5,
 		downloadMode: options.mode as DownloadMode,
+		downloadTimeRange,
 		onSegmentAvailable: async (segment, representation) => {
 			for (const plugin of plugins) {
 				await plugin.processSegment(segment, representation);

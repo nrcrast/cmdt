@@ -172,6 +172,13 @@ export type ContentProtection = {
 
 export type Manifest = {
 	url: URL;
+	/**
+	 * Whether the stream is live/ongoing rather than a complete VOD asset.
+	 * DASH: `MPD@type == "dynamic"`. HLS: at least one media playlist omits
+	 * `#EXT-X-ENDLIST`. Consumers use this to offer live-oriented options such
+	 * as downloading only the latest window from the live edge.
+	 */
+	isLive: boolean;
 	video: UniqueRepresentationMap;
 	audio: UniqueRepresentationMap;
 	images: UniqueRepresentationMap;

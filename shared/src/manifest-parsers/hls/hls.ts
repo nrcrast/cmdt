@@ -1,5 +1,4 @@
 import { SCTE35 } from "scte35";
-import { type ILogObj, Logger } from "tslog";
 import {
 	type Manifest,
 	type ManifestParser,
@@ -9,16 +8,16 @@ import {
 	UniqueRepresentationMap,
 } from "../../manifest.js";
 import { getCommonEntries } from "../../utils/array-utils.js";
+import { getLogger } from "../../utils/logger.js";
 import { wrapUrl } from "../../utils/url.js";
 import { HlsParser } from "./hls-parser.js";
 import { type ExtXMedia, type ExtXStreamInf, HlsMediaType } from "./types.js";
 
 export class HlsManifest implements ManifestParser {
-	private logger: Logger<ILogObj>;
+	private logger = getLogger();
 	private scteParser: SCTE35;
 	constructor() {
 		this.scteParser = new SCTE35();
-		this.logger = new Logger();
 	}
 	public async parse(manifest: string, manifestUrl: string, _baseUrl?: string): Promise<ParseResult> {
 		const parser = new HlsParser();
@@ -26,6 +25,7 @@ export class HlsManifest implements ManifestParser {
 
 		const commonManifest: Manifest = {
 			url: wrapUrl(manifestUrl),
+			isLive: false,
 			video: new UniqueRepresentationMap(),
 			audio: new UniqueRepresentationMap(),
 			images: new UniqueRepresentationMap(),
@@ -112,6 +112,13 @@ export class HlsManifest implements ManifestParser {
 				};
 			});
 		}
+
+		// A media playlist is a complete (VOD) playlist only if it carries
+		// `#EXT-X-ENDLIST`; a live stream's playlists omit it. Treat the stream as
+		// live if any hydrated, segment-bearing playlist lacks the end marker.
+		commonManifest.isLive = [...master.streamInfTags, ...master.mediaTags, ...master.imageStreamInfTags].some(
+			(playlist) => (playlist.playlist?.segments.length ?? 0) > 0 && playlist.playlist?.endList === false,
+		);
 
 		return {
 			manifest: commonManifest,

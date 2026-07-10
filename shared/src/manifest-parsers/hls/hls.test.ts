@@ -31,6 +31,17 @@ describe("HlsManifest", () => {
 		const manifest = await parser.parse(testManifest, manifestUrl);
 		expect(manifest).toMatchSnapshot();
 	});
+	it("marks a stream whose media playlist omits EXT-X-ENDLIST as live", async () => {
+		vi.mocked(axios.get).mockImplementation(async (url: string) => {
+			return {
+				data: await getTestFile(`manifests/hls-live/${new URL(url).pathname.split("/").pop()}`),
+			};
+		});
+		const manifestUrl = "http://example.com/manifest.m3u8";
+		const testManifest = await getTestFile("manifests/hls-live/master.m3u8");
+		const { manifest } = await new HlsManifest().parse(testManifest, manifestUrl);
+		expect(manifest.isLive).toBe(true);
+	});
 });
 
 /**
@@ -59,6 +70,10 @@ describe("HlsManifest — Disney+ VOD (real manifest)", () => {
 		expect(manifest.text.toArray()).toHaveLength(10);
 		expect(manifest.images.toArray()).toHaveLength(0);
 		expect(manifest.scte35).toHaveLength(0);
+	});
+
+	it("is a VOD asset (its media playlists carry EXT-X-ENDLIST)", () => {
+		expect(manifest.isLive).toBe(false);
 	});
 
 	it("parses video variants with resolution/codec/bandwidth", () => {
@@ -161,6 +176,10 @@ describe("HlsManifest — Peacock VOD (real manifest)", () => {
 		expect(manifest.text.toArray()).toHaveLength(2);
 		expect(manifest.images.toArray()).toHaveLength(3);
 		expect(manifest.scte35).toHaveLength(22);
+	});
+
+	it("is a VOD asset (its media playlists carry EXT-X-ENDLIST)", () => {
+		expect(manifest.isLive).toBe(false);
 	});
 
 	it("resolves absolute-URL video variants and dedupes shared playlists", () => {

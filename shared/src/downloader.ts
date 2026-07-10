@@ -1,6 +1,8 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import { type ILogObj, Logger } from "tslog";
 import { type Manifest, MediaType, type Representation, type Segment } from "../src/manifest.js";
+import { fixedPointInRange } from "./utils/float-utils.js";
+import { getLogger } from "./utils/logger.js";
+import { type AbsoluteTimeRange, getLiveEdgeMs } from "./utils/time-range.js";
 
 export enum DownloadMode {
 	ManifestOnly = "manifest-only",
@@ -42,21 +44,38 @@ export const DownloadModeInfo: Record<DownloadMode, ModeInfo> = {
 
 const LARGE_SEGMENT_TYPES = new Set([MediaType.Video, MediaType.Audio]);
 
+export type DownloadOptions = {
+	batchSize: number;
+	downloadMode: DownloadMode;
+	downloadTimeRange?: AbsoluteTimeRange;
+	onSegmentAvailable: (segment: Segment, representation: Representation) => Promise<void>;
+	onProgress: (nSegment: number, totalSegments: number) => void;
+};
+
 export class SegmentDownloader {
-	private logger: Logger<ILogObj>;
+	private logger = getLogger();
 	private cancelled = false;
-	constructor(private manifest: Manifest) {
-		this.logger = new Logger<ILogObj>();
-	}
+	constructor(private manifest: Manifest) {}
 	public cancel() {
 		this.cancelled = true;
 	}
-	public async start(options: {
-		batchSize: number;
-		downloadMode: DownloadMode;
-		onSegmentAvailable: (segment: Segment, representation: Representation) => Promise<void>;
-		onProgress: (nSegment: number, totalSegments: number) => void;
-	}): Promise<void> {
+	private isSegmentInRange(range: DownloadOptions["downloadTimeRange"], streamEnd: number, segment: Segment): boolean {
+		if (!range) {
+			return true;
+		}
+
+		return (
+			fixedPointInRange(segment.startTime, range.start, range.end ?? streamEnd, 2, {
+				inclusiveEnd: false,
+				inclusiveStart: true,
+			}) &&
+			fixedPointInRange(segment.startTime + segment.duration, range.start, range.end ?? streamEnd, 2, {
+				inclusiveEnd: true,
+				inclusiveStart: false,
+			})
+		);
+	}
+	public async start(options: DownloadOptions): Promise<void> {
 		if (this.cancelled || options.downloadMode === DownloadMode.ManifestOnly) {
 			return;
 		}
@@ -66,6 +85,10 @@ export class SegmentDownloader {
 			...this.manifest.images.toArray(),
 			...this.manifest.text.toArray(),
 		];
+
+		// When a range leaves its end open, segments are kept up to the live edge.
+		const maxEndTime = getLiveEdgeMs(this.manifest);
+
 		const nSegments = representations.reduce((acc, representation) => {
 			return acc + representation.segments.length;
 		}, 0);
@@ -85,6 +108,10 @@ export class SegmentDownloader {
 						return pool.stop();
 					}
 					nSegmentProgress++;
+					if (!this.isSegmentInRange(options.downloadTimeRange, maxEndTime, segment)) {
+						this.logger.debug(`Segment at ${segment.startTime} not in range. Skipping`);
+						return;
+					}
 					await segment.initSegment?.download();
 					await segment.media?.download({
 						partial: LARGE_SEGMENT_TYPES.has(representation.type) && options.downloadMode === DownloadMode.Quick,

@@ -1,5 +1,5 @@
-import { type ILogObj, Logger } from "tslog";
 import { DrmSystem } from "../../manifest.js";
+import { getLogger } from "../../utils/logger.js";
 import DataViewReader from "../../utils/mp4/data-view-reader.js";
 import { Endian } from "../../utils/mp4/types.js";
 import { DrmParser, type PsshBox } from "../drm-system.js";
@@ -23,7 +23,7 @@ export type PlayreadyData = {
 };
 
 export class PlayreadyParser extends DrmParser<PlayreadyData> {
-	private logger = new Logger<ILogObj>();
+	private logger = getLogger();
 	public static override readonly systemId = "9a04f079-9840-4286-ab92-e65be0885f95";
 	public parse(): PlayreadyData {
 		const reader = new DataViewReader(this.psshBox.data, Endian.LITTLE, this.logger);

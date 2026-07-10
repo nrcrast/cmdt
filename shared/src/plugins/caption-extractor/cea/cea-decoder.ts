@@ -1,5 +1,5 @@
-import { type ILogObj, Logger } from "tslog";
 import type { Cue } from "../../../cue.js";
+import { getLogger } from "../../../utils/logger.js";
 import DataViewReader from "../../../utils/mp4/data-view-reader.js";
 import { Endian } from "../../../utils/mp4/types.js";
 import { CcType, type Cea608ClosedCaptionPacket, type Cea708ClosedCaptionByte } from "../../../utils/text/types.js";
@@ -205,7 +205,7 @@ class CeaDecoder {
 			this._shouldSetFirstPts = false;
 		}
 
-		const reader: DataViewReader = new DataViewReader(userDataSeiMessage, Endian.BIG, new Logger<ILogObj>());
+		const reader: DataViewReader = new DataViewReader(userDataSeiMessage, Endian.BIG, getLogger());
 
 		if (reader.getLength() < this._MIN_LENGTH) {
 			return;
