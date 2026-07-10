@@ -25,6 +25,21 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.7.5] - 2026-07-09
+
+### Fixed
+
+- CLI: the packaged standalone binaries no longer crash with
+  `TypeError: Cannot read properties of undefined (reading 'SCTE35')` when
+  analyzing a manifest. The `scte35` imports in the DASH and HLS parsers used a
+  default-import + destructure (`scte35Pkg.SCTE35`), which the CommonJS build's
+  ESM-interop helper resolved to `scte35.default.SCTE35`. Because `scte35` sets
+  `__esModule: true` but exposes no `default` export, that path was `undefined`
+  only in the bundled/packaged CJS output — running from source or in the viewer
+  (both ESM) was unaffected. Switched to a plain named import
+  (`import { SCTE35 } from "scte35"`) so it resolves correctly across Node ESM,
+  bundler CJS interop, and the browser build.
+
 ## [0.7.4] - 2026-07-08
 
 ### Fixed
