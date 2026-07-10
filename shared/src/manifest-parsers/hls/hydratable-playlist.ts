@@ -2,13 +2,14 @@
 import axios from "axios";
 import type { Segment } from "../../manifest.js";
 import { MemoryCachedChunk } from "../../manifest.js";
-import { secondsToMilliseconds } from "../../utils/time-utils.js";
+import { millisecondsToSeconds, secondsToMilliseconds } from "../../utils/time-utils.js";
 import { wrapUrl } from "../../utils/url.js";
 import type { MediaPlaylist } from "./types.js";
 import { parseAttributes, parseBooleanAttribute } from "./utils.js";
 
 export abstract class HydratablePlaylist {
 	public playlist?: MediaPlaylist;
+	/** Running start time of the current segment, in milliseconds. */
 	private currentStartTime = 0;
 	private currentInitSegmentUri?: string;
 	private rawManifest?: string;
@@ -80,7 +81,7 @@ export abstract class HydratablePlaylist {
 				}
 				this.playlist?.scte35Markers.push({
 					markerString: cue,
-					presentationTimeS: this.currentStartTime,
+					presentationTimeS: millisecondsToSeconds(this.currentStartTime),
 				});
 				break;
 			}
@@ -138,7 +139,7 @@ export abstract class HydratablePlaylist {
 		url = this.getUrl(segmentUri, this.uri);
 		const segment: Segment = {
 			duration: secondsToMilliseconds(Number.parseFloat(duration)),
-			startTime: secondsToMilliseconds(this.currentStartTime),
+			startTime: this.currentStartTime,
 			url: new URL(url),
 			initSegment: this.currentInitSegmentUri ? new MemoryCachedChunk(new URL(this.currentInitSegmentUri)) : undefined,
 			media: new MemoryCachedChunk(new URL(url)),
