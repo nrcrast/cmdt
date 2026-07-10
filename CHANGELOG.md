@@ -25,6 +25,19 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.7.6] - 2026-07-10
+
+### Fixed
+
+- HLS: segment `startTime` values were off by a factor of 1000 (e.g. a segment
+  6 seconds in showed `6016000` instead of `6016` ms), which made the viewer's
+  segment timeline appear to use milliseconds where seconds were expected. The
+  HLS playlist parser accumulated the running start time in milliseconds but then
+  re-applied a seconds→milliseconds conversion when building each segment,
+  double-converting every segment after the first. The same running value fed
+  SCTE-35 `presentationTimeS` in milliseconds instead of seconds. Both now use
+  the correct units, matching the DASH parser.
+
 ## [0.7.5] - 2026-07-09
 
 ### Fixed
