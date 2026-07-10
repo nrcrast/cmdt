@@ -11,7 +11,7 @@ import {
 	type SegmentTemplate,
 } from "dash-ts";
 import { deepmergeCustom } from "deepmerge-ts";
-import scte35Pkg from "scte35";
+import { SCTE35 } from "scte35";
 import { type ILogObj, Logger } from "tslog";
 import type { PlayreadyData } from "../../drm/playready/playready.js";
 import { PsshParser } from "../../drm/pssh.js";
@@ -35,8 +35,6 @@ import { getDrmSystemFromSystemId } from "../../utils/drm.js";
 import { CeaSchemeUri } from "../../utils/types.js";
 import { getUrlFilePathHref, isFileUrl, wrapUrl } from "../../utils/url.js";
 import { getSegmentsFromSegmentBase, getSegmentsFromSegmentTemplate } from "./segment-list-builder.js";
-
-const { SCTE35 } = scte35Pkg;
 
 export class DashManifest implements ManifestParser {
 	private logger: Logger<ILogObj>;
