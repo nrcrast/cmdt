@@ -44,10 +44,14 @@ export const DownloadModeInfo: Record<DownloadMode, ModeInfo> = {
 
 const LARGE_SEGMENT_TYPES = new Set([MediaType.Video, MediaType.Audio]);
 
+/** Default number of segments downloaded in parallel when `concurrency` is unset. */
+export const DEFAULT_CONCURRENCY = 100;
+
 export type DownloadOptions = {
-	batchSize: number;
 	downloadMode: DownloadMode;
 	downloadTimeRange?: AbsoluteTimeRange;
+	numRetries?: number;
+	concurrency?: number;
 	onSegmentAvailable: (segment: Segment, representation: Representation) => Promise<void>;
 	onProgress: (nSegment: number, totalSegments: number) => void;
 };
@@ -96,7 +100,7 @@ export class SegmentDownloader {
 		let nSegmentProgress = 0;
 
 		for (const representation of representations) {
-			await PromisePool.withConcurrency(100)
+			await PromisePool.withConcurrency(options.concurrency ?? DEFAULT_CONCURRENCY)
 				.for(representation.segments)
 				// biome-ignore lint/suspicious/noExplicitAny: error type
 				.handleError(async (error: any, segment: Segment) => {
@@ -112,8 +116,9 @@ export class SegmentDownloader {
 						this.logger.debug(`Segment at ${segment.startTime} not in range. Skipping`);
 						return;
 					}
-					await segment.initSegment?.download();
+					await segment.initSegment?.download({ numRetries: options.numRetries });
 					await segment.media?.download({
+						numRetries: options.numRetries,
 						partial: LARGE_SEGMENT_TYPES.has(representation.type) && options.downloadMode === DownloadMode.Quick,
 					});
 					options.onProgress(nSegmentProgress, nSegments);

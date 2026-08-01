@@ -1,5 +1,5 @@
 import { Command, InvalidArgumentError, Option } from "@commander-js/extra-typings";
-import { DownloadMode, DownloadModeInfo } from "cmdt-shared";
+import { DEFAULT_CONCURRENCY, DownloadMode, DownloadModeInfo } from "cmdt-shared";
 
 const modeDescription = [
 	"Download mode:",
@@ -16,6 +16,30 @@ function parseSeconds(value: string): number {
 		throw new InvalidArgumentError("Expected a non-negative number of seconds.");
 	}
 	return seconds;
+}
+
+/**
+ * Commander arg parser for a positive integer (>= 1). Used for concurrency,
+ * where a value of 0 would stall the download pool.
+ */
+function parsePositiveInt(value: string): number {
+	const parsed = Number.parseInt(value, 10);
+	if (!Number.isInteger(parsed) || parsed < 1) {
+		throw new InvalidArgumentError("Expected a positive integer.");
+	}
+	return parsed;
+}
+
+/**
+ * Commander arg parser for a non-negative integer (>= 0). Used for the retry
+ * count, where 0 means "attempt once, no retries".
+ */
+function parseNonNegativeInt(value: string): number {
+	const parsed = Number.parseInt(value, 10);
+	if (!Number.isInteger(parsed) || parsed < 0) {
+		throw new InvalidArgumentError("Expected a non-negative integer.");
+	}
+	return parsed;
 }
 
 const program = new Command()
@@ -48,6 +72,17 @@ const program = new Command()
 			"--live-edge-window <seconds>",
 			"Live content: only download the latest N seconds from the live edge. Conflicts with --range-start/--range-end.",
 		).argParser(parseSeconds),
+	)
+	.addOption(
+		new Option(
+			"--concurrency <number>",
+			`Maximum number of segments to download in parallel (default: ${DEFAULT_CONCURRENCY}).`,
+		).argParser(parsePositiveInt),
+	)
+	.addOption(
+		new Option("--retries <number>", "Number of times to retry a failed segment download before giving up.")
+			.argParser(parseNonNegativeInt)
+			.default(0),
 	)
 	.addOption(
 		new Option("-l, --log-level <logLevel>", "Log Level").choices(["off", "error", "info", "debug"]).default("info"),

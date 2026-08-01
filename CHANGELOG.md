@@ -25,6 +25,17 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.9.0] - 2026-08-01
+
+### Added
+
+- Download tuning: control how aggressively segments are fetched. The CLI gains
+  `--concurrency` (maximum number of segments downloaded in parallel; defaults
+  to 100) and `--retries` (number of times to retry a failed segment download
+  before giving up). The viewer gains a "Download tuning" control exposing "Max
+  parallel downloads" and "Retries per segment"; leaving a field blank uses the
+  engine default.
+
 ## [0.8.0] - 2026-07-10
 
 ### Added

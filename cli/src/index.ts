@@ -164,9 +164,10 @@ async function processManifest(uri: string) {
 	});
 
 	await downloader.start({
-		batchSize: 5,
 		downloadMode: options.mode as DownloadMode,
 		downloadTimeRange,
+		concurrency: options.concurrency,
+		numRetries: options.retries,
 		onSegmentAvailable: async (segment, representation) => {
 			for (const plugin of plugins) {
 				await plugin.processSegment(segment, representation);

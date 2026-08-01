@@ -17,6 +17,7 @@ export abstract class ManifestParser {
 
 export type DownloadableChunkOptions = {
 	partial?: boolean;
+	numRetries?: number;
 };
 
 export abstract class DownloadableChunk {
@@ -27,14 +28,36 @@ export abstract class DownloadableChunk {
 }
 
 export class MemoryCachedChunk extends DownloadableChunk {
-	public async download(opts?: { partial?: boolean }): Promise<void> {
+	public async download(opts?: DownloadableChunkOptions): Promise<void> {
 		if (SegmentCache.getInstance().get(this.url)) {
 			return;
 		}
+		const numRetries = opts?.numRetries ?? 0;
 		const fetchOpts = opts?.partial ? { headers: { Range: "bytes=0-6480" } } : {};
-		const resp = await fetch(this.url.href, fetchOpts);
-		const data = await resp.arrayBuffer();
-		SegmentCache.getInstance().add(this.url, data);
+		let data: ArrayBuffer | undefined;
+		let nTry = 0;
+		while (nTry <= numRetries) {
+			try {
+				const resp = await fetch(this.url.href, fetchOpts);
+				// fetch only rejects on network errors, not HTTP error statuses, so a
+				// 4xx/5xx would otherwise cache the error body as if it were a segment.
+				// Throw here so the retry loop treats it as a failure.
+				if (!resp.ok) {
+					throw new Error(`Failed to download ${this.url.href}: ${resp.status} ${resp.statusText}`);
+				}
+				data = await resp.arrayBuffer();
+				break;
+			} catch (e) {
+				nTry++;
+				if (nTry > numRetries) {
+					throw e;
+				}
+			}
+		}
+
+		if (data) {
+			SegmentCache.getInstance().add(this.url, data);
+		}
 	}
 
 	public async getData(): Promise<ArrayBuffer | null> {
