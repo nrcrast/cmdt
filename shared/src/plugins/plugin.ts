@@ -1,6 +1,7 @@
-import { type ILogObj, Logger } from "tslog";
+import type { ILogObj, Logger } from "tslog";
 import type { Manifest, Representation, Segment } from "../manifest.js";
 import type { Report } from "../report.js";
+import { getLogger } from "../utils/logger.js";
 
 export type PluginArtifact = {
 	name: string;
@@ -43,7 +44,7 @@ export abstract class Plugin {
 		protected report: Report,
 		public name: string,
 	) {
-		this.logger = new Logger<ILogObj>({
+		this.logger = getLogger({
 			prefix: [name],
 		});
 	}

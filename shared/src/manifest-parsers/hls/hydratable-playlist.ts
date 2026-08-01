@@ -24,6 +24,7 @@ export abstract class HydratablePlaylist {
 			mediaSequence: 0,
 			discontinuitySequence: 0,
 			playlistType: "VOD",
+			endList: false,
 			iFramesOnly: false,
 			scte35Markers: [],
 		};
@@ -71,6 +72,10 @@ export abstract class HydratablePlaylist {
 			}
 			case "#EXT-X-I-FRAMES-ONLY": {
 				this.playlist.iFramesOnly = parseBooleanAttribute(restOfLine);
+				break;
+			}
+			case "#EXT-X-ENDLIST": {
+				this.playlist.endList = true;
 				break;
 			}
 			case "#EXT-X-SCTE35": {

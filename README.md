@@ -10,6 +10,11 @@ CMDT is a CLI tool designed to help video engineers diagnose issues with DASH/HL
 
 How much is downloaded and analyzed depends on the `--mode` option (see below).
 
+> [!NOTE]
+> ### AI Agent Strategy/Philosophy
+> AI should not be used to write code in the shared lib. For the CLI harness and the UI, AI will be accepted, but the
+> main core of CMDT shall be trad-coded artisan mom and pop code.
+
 # Installation
 ## Pre-built binaries
 Pre-built binaries for Linux, Windows, and MacOS are built as part of the release process. The latest release can be found [here](https://github.com/nrcrast/cmdt/releases/latest).
@@ -35,16 +40,22 @@ At this point, you should be able to run `cd cli && pnpm start -h` and get the h
 # Usage
 ```
 Options:
-  -m, --manifest <string>     Manifest URI. Can also be a local path.
-  -b, --base-url <string>     Base URL for relative URIs in manifest, if using local manifest.
-  -o, --output <string>       Output directory (default: "download")
-  -d, --mode <downloadMode>   Download mode (choices: "manifest-only", "quick", "full", default: "full")
-                                manifest-only — Parse the manifest; skip all segment downloads.
-                                quick — Download init segments fully and only the head of each media segment.
-                                full — Download every byte of every segment.
-  -l, --log-level <logLevel>  Log Level (choices: "off", "error", "info", "debug", default: "info")
-  -p, --log-periods           Print a table of periods in DASH manifests
-  -h, --help                  display help for command
+  -m, --manifest <string>       Manifest URI. Can also be a local path.
+  -b, --base-url <string>       Base URL for relative URIs in manifest, if using local manifest.
+  -o, --output <string>         Output directory (default: "download")
+  -d, --mode <downloadMode>     Download mode (choices: "manifest-only", "quick", "full", default: "full")
+                                  manifest-only — Parse the manifest; skip all segment downloads.
+                                  quick — Download init segments fully and only the head of each media segment.
+                                  full — Download every byte of every segment.
+  --range-start <seconds>       Only download segments at or after this presentation time (seconds).
+                                  Absolute range; conflicts with --live-edge-window.
+  --range-end <seconds>         Only download segments before this presentation time (seconds).
+                                  Defaults to the end of the stream. Conflicts with --live-edge-window.
+  --live-edge-window <seconds>  Live content: only download the latest N seconds from the live edge.
+                                  Conflicts with --range-start/--range-end.
+  -l, --log-level <logLevel>    Log Level (choices: "off", "error", "info", "debug", default: "info")
+  -p, --log-periods             Print a table of periods in DASH manifests
+  -h, --help                    display help for command
 ```
 
 Typical usage is something like:
@@ -52,7 +63,73 @@ Typical usage is something like:
 pnpm start -m "https://my-site/manifest.mpd" -o output
 ```
 
-If you're running a pre-built binary, replace `pnpm start` with `./cmdt`. 
+If you're running a pre-built binary, replace `pnpm start` with `./cmdt`.
+
+## Examples
+
+> Run these from the `cli/` directory (`cd cli`). If you're using a pre-built
+> binary, replace `pnpm start` with `./cmdt`. Manifest URIs can be DASH
+> (`.mpd`) or HLS (`.m3u8`), remote or a local path.
+
+Parse a manifest without downloading any segments:
+```
+pnpm start -m "https://example.com/vod.mpd" -d manifest-only
+```
+
+Full download of a VOD stream to a custom output directory:
+```
+pnpm start -m "https://example.com/vod.mpd" -o my-output
+```
+
+Quick structural pass — init segments plus only the head of each media segment:
+```
+pnpm start -m "https://example.com/vod.mpd" -d quick
+```
+
+### VOD: download a specific time range
+
+Time-range flags select a window on the presentation timeline, in seconds.
+`--range-start` is inclusive and `--range-end` is exclusive; either may be
+omitted. They apply to which segments are downloaded, not to manifest parsing.
+
+Only the window from 30s up to (but not including) 90s:
+```
+pnpm start -m "https://example.com/vod.mpd" --range-start 30 --range-end 90
+```
+
+From two minutes in through the end of the stream (open end):
+```
+pnpm start -m "https://example.com/vod.mpd" --range-start 120
+```
+
+Everything up to the 60s mark (open start):
+```
+pnpm start -m "https://example.com/vod.mpd" --range-end 60
+```
+
+### Live: download only the latest window from the live edge
+
+For live content, `--live-edge-window <seconds>` downloads just the most recent
+N seconds of media, resolved against the manifest's live edge. It is mutually
+exclusive with `--range-start`/`--range-end`.
+
+Grab the last 30 seconds of a live HLS stream:
+```
+pnpm start -m "https://example.com/live.m3u8" --live-edge-window 30
+```
+
+### Local manifests and logging
+
+Parse a local manifest, resolving relative segment URIs against a CDN base URL:
+```
+pnpm start -m ./local.mpd -b "https://cdn.example.com/path/"
+```
+
+Silence logs, or turn on debug logging:
+```
+pnpm start -m "https://example.com/vod.mpd" -l off
+pnpm start -m "https://example.com/vod.mpd" -l debug
+```
 
 After running the tool, all output will be in a directory called `output`, as specified by the `-o` option. This includes a parsed `manifest.json`, a `debug.log`, per-plugin artifacts (captions, EMSG, etc.), and the full report as `report.cmdt`.
 

@@ -1,5 +1,5 @@
-import { type ILogObj, Logger } from "tslog";
 import type { Cue } from "../../../../cue.js";
+import { getLogger } from "../../../../utils/logger.js";
 import { CaptionType, type Cea608ClosedCaptionPacket, CharSet, CommandCode } from "../../../../utils/text/types.js";
 import { CC_ROWS, DEFAULT_BG_COLOR, DEFAULT_TXT_COLOR } from "../../../../utils/text-constants.js";
 import Cea608Memory from "./cea608-memory.js";
@@ -24,14 +24,13 @@ class Cea608DataChannel {
 
 	private _TEXT_COLORS: Array<string> = ["white", "green", "blue", "cyan", "red", "yellow", "magenta", "white_italics"];
 	private _BG_COLORS: Array<string> = ["black", "green", "blue", "cyan", "red", "yellow", "magenta", "black"];
-	private logger: Logger<ILogObj>;
+	private logger = getLogger();
 
 	constructor(field: number, channel: number) {
 		this._text = new Cea608Memory(field, channel);
 		this._displayedMemory = new Cea608Memory(field, channel);
 		this._nonDisplayedMemory = new Cea608Memory(field, channel);
 		this._curbuf = this._nonDisplayedMemory;
-		this.logger = new Logger<ILogObj>();
 	}
 
 	// Gets the row index from a Preamble Address Code byte pair

@@ -17,6 +17,7 @@ export abstract class ManifestParser {
 
 export type DownloadableChunkOptions = {
 	partial?: boolean;
+	numRetries?: number;
 };
 
 export abstract class DownloadableChunk {
@@ -27,14 +28,39 @@ export abstract class DownloadableChunk {
 }
 
 export class MemoryCachedChunk extends DownloadableChunk {
-	public async download(opts?: { partial?: boolean }): Promise<void> {
+	public async download(opts?: DownloadableChunkOptions): Promise<void> {
 		if (SegmentCache.getInstance().get(this.url)) {
 			return;
 		}
+		const numRetries = opts?.numRetries ?? 0;
 		const fetchOpts = opts?.partial ? { headers: { Range: "bytes=0-6480" } } : {};
-		const resp = await fetch(this.url.href, fetchOpts);
-		const data = await resp.arrayBuffer();
-		SegmentCache.getInstance().add(this.url, data);
+		let data: ArrayBuffer | undefined;
+		let nTry = 0;
+		while (nTry <= numRetries) {
+			try {
+				const resp = await fetch(this.url.href, fetchOpts);
+				if (!resp.ok) {
+					throw new Error(`Failed to download ${this.url.href}: ${resp.status} ${resp.statusText}`);
+				}
+				data = await resp.arrayBuffer();
+				const contentLength = parseInt(resp.headers.get("Content-Length") ?? "0");
+				if (contentLength !== data.byteLength) {
+					throw new Error(
+						`Content-Length mismatch for ${this.url.href}: ${resp.headers.get("Content-Length")} != ${data.byteLength}`,
+					);
+				}
+				break;
+			} catch (e) {
+				nTry++;
+				if (nTry > numRetries) {
+					throw e;
+				}
+			}
+		}
+
+		if (data) {
+			SegmentCache.getInstance().add(this.url, data);
+		}
 	}
 
 	public async getData(): Promise<ArrayBuffer | null> {
@@ -172,6 +198,13 @@ export type ContentProtection = {
 
 export type Manifest = {
 	url: URL;
+	/**
+	 * Whether the stream is live/ongoing rather than a complete VOD asset.
+	 * DASH: `MPD@type == "dynamic"`. HLS: at least one media playlist omits
+	 * `#EXT-X-ENDLIST`. Consumers use this to offer live-oriented options such
+	 * as downloading only the latest window from the live edge.
+	 */
+	isLive: boolean;
 	video: UniqueRepresentationMap;
 	audio: UniqueRepresentationMap;
 	images: UniqueRepresentationMap;

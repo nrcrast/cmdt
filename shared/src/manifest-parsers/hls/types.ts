@@ -85,6 +85,8 @@ export type MediaPlaylist = {
 	mediaSequence: number;
 	discontinuitySequence: number;
 	playlistType: "EVENT" | "VOD";
+	/** True once `#EXT-X-ENDLIST` is seen; a live playlist never has it. */
+	endList: boolean;
 	iFramesOnly: boolean;
 	partialSegmentInfo?: {
 		target?: number;

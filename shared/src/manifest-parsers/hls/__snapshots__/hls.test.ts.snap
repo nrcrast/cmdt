@@ -19105,6 +19105,7 @@ exports[`HlsManifest > should parse an HLS manifest 1`] = `
         "width": 224,
       },
     ],
+    "isLive": false,
     "periods": [],
     "raw": "#EXTM3U
 #EXT-X-VERSION:6
@@ -53256,6 +53257,7 @@ tile-7.jpg
         "width": 224,
       },
     ],
+    "isLive": false,
     "periods": [],
     "raw": "#EXTM3U
 #EXT-X-VERSION:6

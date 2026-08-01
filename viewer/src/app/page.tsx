@@ -28,8 +28,23 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { AppHeader } from "./components/app-header";
+import {
+	type DownloadTuning,
+	DownloadTuningSelector,
+	defaultDownloadTuning,
+	getDownloadTuningError,
+	resolveDownloadTuning,
+} from "./components/download-tuning-selector";
+import { LogLevelToggle } from "./components/log-level-toggle";
 import { ModeToggle } from "./components/mode-toggle";
 import { FilesystemWriter } from "./components/plugins/filesystem-writer";
+import {
+	defaultSegmentRangeSelection,
+	getSegmentRangeError,
+	resolveSegmentRange,
+	type SegmentRangeSelection,
+	SegmentRangeSelector,
+} from "./components/segment-range-selector";
 import Report from "./report";
 
 /**
@@ -122,6 +137,9 @@ export default function Home() {
 	const [downloader, setDownloader] = useState<null | SegmentDownloader>(null);
 	const [manifest, setManifest] = useState<string>("");
 	const [downloadMode, setDownloadMode] = useState<DownloadMode>(DownloadMode.Full);
+	const [rangeSelection, setRangeSelection] = useState<SegmentRangeSelection>(defaultSegmentRangeSelection);
+	const [uploadRangeSelection, setUploadRangeSelection] = useState<SegmentRangeSelection>(defaultSegmentRangeSelection);
+	const [tuning, setTuning] = useState<DownloadTuning>(defaultDownloadTuning);
 	const [downloadSegments, setDownloadSegments] = useState(false);
 	const [segmentOutputDir, setSegmentOutputDir] = useState<null | FileSystemDirectoryHandle>(null);
 	const [canSaveToFileSystem, setCanSaveToFileSystem] = useState(false);
@@ -166,14 +184,22 @@ export default function Home() {
 		manifestUrl,
 		baseUrl,
 		mode,
+		range,
+		tuning,
 	}: {
 		manifestStr: string;
 		manifestUrl: string;
 		baseUrl?: string;
 		mode: DownloadMode;
+		range: SegmentRangeSelection;
+		tuning: DownloadTuning;
 	}) {
 		const parser = getManifestParser(manifestUrl);
 		const { manifest: manifestData } = await parser.parse(manifestStr, manifestUrl, baseUrl);
+		// The downloader only understands absolute times; resolve the (possibly
+		// live-edge-relative) selection now that the manifest — and its live edge — is known.
+		const downloadTimeRange = resolveSegmentRange(range, manifestData);
+		const { concurrency, numRetries } = resolveDownloadTuning(tuning);
 		const reportData = new ReportData();
 		const plugins = [
 			new CaptionExtractor(manifestData, reportData),
@@ -201,8 +227,10 @@ export default function Home() {
 		reportData.ingestManifest(manifestData);
 
 		await segmentDownloader.start({
-			batchSize: 5,
 			downloadMode: mode,
+			downloadTimeRange,
+			concurrency,
+			numRetries,
 			onSegmentAvailable: async (segment, representation) => {
 				for (const plugin of plugins) {
 					await plugin.processSegment(segment, representation);
@@ -256,6 +284,7 @@ export default function Home() {
 								<Globe className="size-4" />
 							</a>
 						</Button>
+						<LogLevelToggle />
 						<ModeToggle />
 					</div>
 				</div>
@@ -308,6 +337,12 @@ export default function Home() {
 											)}
 										</div>
 									</div>
+									{downloadMode !== DownloadMode.ManifestOnly && (
+										<>
+											<SegmentRangeSelector value={rangeSelection} onChange={setRangeSelection} />
+											<DownloadTuningSelector value={tuning} onChange={setTuning} />
+										</>
+									)}
 									{canSaveToFileSystem && (
 										<Field orientation="horizontal">
 											<Checkbox
@@ -335,7 +370,12 @@ export default function Home() {
 
 									<Button
 										className="w-full"
-										disabled={!manifest || progress.status === "downloading"}
+										disabled={
+											!manifest ||
+											progress.status === "downloading" ||
+											(downloadMode !== DownloadMode.ManifestOnly &&
+												(getSegmentRangeError(rangeSelection) !== null || getDownloadTuningError(tuning) !== null))
+										}
 										onClick={async () => {
 											setAnalysisError(null);
 											const sanitizedManifest = sanitizeUri(manifest);
@@ -345,6 +385,8 @@ export default function Home() {
 													manifestStr,
 													manifestUrl: sanitizedManifest,
 													mode: downloadMode,
+													range: rangeSelection,
+													tuning,
 												});
 											} catch (err) {
 												const reason = err instanceof Error ? err.message : "unknown error";
@@ -414,9 +456,26 @@ export default function Home() {
 										</div>
 									</div>
 
+									{effectiveUploadMode !== DownloadMode.ManifestOnly && (
+										<>
+											<SegmentRangeSelector
+												value={uploadRangeSelection}
+												onChange={setUploadRangeSelection}
+												disabled={!hasUploadBaseUrl}
+											/>
+											<DownloadTuningSelector value={tuning} onChange={setTuning} disabled={!hasUploadBaseUrl} />
+										</>
+									)}
+
 									<Button
 										className="w-full"
-										disabled={!manifestFileContent || progress.status === "downloading"}
+										disabled={
+											!manifestFileContent ||
+											progress.status === "downloading" ||
+											(effectiveUploadMode !== DownloadMode.ManifestOnly &&
+												(getSegmentRangeError(uploadRangeSelection) !== null ||
+													getDownloadTuningError(tuning) !== null))
+										}
 										onClick={async () => {
 											setAnalysisError(null);
 											if (!manifestFileContent) return;
@@ -438,7 +497,14 @@ export default function Home() {
 											}
 											const mode = hasBase ? uploadDownloadMode : DownloadMode.ManifestOnly;
 											try {
-												await analyzeManifest({ manifestStr: manifestFileContent, manifestUrl, baseUrl, mode });
+												await analyzeManifest({
+													manifestStr: manifestFileContent,
+													manifestUrl,
+													baseUrl,
+													mode,
+													range: uploadRangeSelection,
+													tuning,
+												});
 											} catch (err) {
 												setAnalysisError(
 													err instanceof Error ? err.message : "Failed to analyze the uploaded manifest.",

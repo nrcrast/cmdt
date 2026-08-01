@@ -1,6 +1,8 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import { type ILogObj, Logger } from "tslog";
 import { type Manifest, MediaType, type Representation, type Segment } from "../src/manifest.js";
+import { fixedPointInRange } from "./utils/float-utils.js";
+import { getLogger } from "./utils/logger.js";
+import { type AbsoluteTimeRange, getLiveEdgeMs } from "./utils/time-range.js";
 
 export enum DownloadMode {
 	ManifestOnly = "manifest-only",
@@ -42,21 +44,42 @@ export const DownloadModeInfo: Record<DownloadMode, ModeInfo> = {
 
 const LARGE_SEGMENT_TYPES = new Set([MediaType.Video, MediaType.Audio]);
 
+/** Default number of segments downloaded in parallel when `concurrency` is unset. */
+export const DEFAULT_CONCURRENCY = 100;
+
+export type DownloadOptions = {
+	downloadMode: DownloadMode;
+	downloadTimeRange?: AbsoluteTimeRange;
+	numRetries?: number;
+	concurrency?: number;
+	onSegmentAvailable: (segment: Segment, representation: Representation) => Promise<void>;
+	onProgress: (nSegment: number, totalSegments: number) => void;
+};
+
 export class SegmentDownloader {
-	private logger: Logger<ILogObj>;
+	private logger = getLogger();
 	private cancelled = false;
-	constructor(private manifest: Manifest) {
-		this.logger = new Logger<ILogObj>();
-	}
+	constructor(private manifest: Manifest) {}
 	public cancel() {
 		this.cancelled = true;
 	}
-	public async start(options: {
-		batchSize: number;
-		downloadMode: DownloadMode;
-		onSegmentAvailable: (segment: Segment, representation: Representation) => Promise<void>;
-		onProgress: (nSegment: number, totalSegments: number) => void;
-	}): Promise<void> {
+	private isSegmentInRange(range: DownloadOptions["downloadTimeRange"], streamEnd: number, segment: Segment): boolean {
+		if (!range) {
+			return true;
+		}
+
+		return (
+			fixedPointInRange(segment.startTime, range.start, range.end ?? streamEnd, 2, {
+				inclusiveEnd: false,
+				inclusiveStart: true,
+			}) &&
+			fixedPointInRange(segment.startTime + segment.duration, range.start, range.end ?? streamEnd, 2, {
+				inclusiveEnd: true,
+				inclusiveStart: false,
+			})
+		);
+	}
+	public async start(options: DownloadOptions): Promise<void> {
 		if (this.cancelled || options.downloadMode === DownloadMode.ManifestOnly) {
 			return;
 		}
@@ -66,6 +89,10 @@ export class SegmentDownloader {
 			...this.manifest.images.toArray(),
 			...this.manifest.text.toArray(),
 		];
+
+		// When a range leaves its end open, segments are kept up to the live edge.
+		const maxEndTime = getLiveEdgeMs(this.manifest);
+
 		const nSegments = representations.reduce((acc, representation) => {
 			return acc + representation.segments.length;
 		}, 0);
@@ -73,7 +100,7 @@ export class SegmentDownloader {
 		let nSegmentProgress = 0;
 
 		for (const representation of representations) {
-			await PromisePool.withConcurrency(100)
+			await PromisePool.withConcurrency(options.concurrency ?? DEFAULT_CONCURRENCY)
 				.for(representation.segments)
 				// biome-ignore lint/suspicious/noExplicitAny: error type
 				.handleError(async (error: any, segment: Segment) => {
@@ -85,8 +112,13 @@ export class SegmentDownloader {
 						return pool.stop();
 					}
 					nSegmentProgress++;
-					await segment.initSegment?.download();
+					if (!this.isSegmentInRange(options.downloadTimeRange, maxEndTime, segment)) {
+						this.logger.debug(`Segment at ${segment.startTime} not in range. Skipping`);
+						return;
+					}
+					await segment.initSegment?.download({ numRetries: options.numRetries });
 					await segment.media?.download({
+						numRetries: options.numRetries,
 						partial: LARGE_SEGMENT_TYPES.has(representation.type) && options.downloadMode === DownloadMode.Quick,
 					});
 					options.onProgress(nSegmentProgress, nSegments);

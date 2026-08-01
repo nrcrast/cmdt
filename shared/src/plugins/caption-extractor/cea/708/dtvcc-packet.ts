@@ -1,13 +1,11 @@
-import { type ILogObj, Logger } from "tslog";
+import { getLogger } from "../../../../utils/logger.js";
 import type { Cea708ClosedCaptionByte } from "../../../../utils/text/types.js";
 
 class DtvccPacket {
 	private _pos = 0;
-	private logger: Logger<ILogObj>;
+	private logger = getLogger();
 
-	constructor(private _packetData: Array<Cea708ClosedCaptionByte>) {
-		this.logger = new Logger<ILogObj>();
-	}
+	constructor(private _packetData: Array<Cea708ClosedCaptionByte>) {}
 
 	public getPosition(): number {
 		return this._pos;

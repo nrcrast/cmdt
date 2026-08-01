@@ -12,7 +12,6 @@ import {
 } from "dash-ts";
 import { deepmergeCustom } from "deepmerge-ts";
 import { SCTE35 } from "scte35";
-import { type ILogObj, Logger } from "tslog";
 import type { PlayreadyData } from "../../drm/playready/playready.js";
 import { PsshParser } from "../../drm/pssh.js";
 import type { WidevineData } from "../../drm/widevine/widevine.js";
@@ -32,19 +31,20 @@ import {
 import type { Scte35Marker } from "../../report.js";
 import getStreamAndLanguages from "../../utils/cea/get-stream-and-languages.js";
 import { getDrmSystemFromSystemId } from "../../utils/drm.js";
+import { getLogger } from "../../utils/logger.js";
 import { CeaSchemeUri } from "../../utils/types.js";
 import { getUrlFilePathHref, isFileUrl, wrapUrl } from "../../utils/url.js";
 import { getSegmentsFromSegmentBase, getSegmentsFromSegmentTemplate } from "./segment-list-builder.js";
 
 export class DashManifest implements ManifestParser {
-	private logger: Logger<ILogObj>;
+	private logger = getLogger();
 	private manifest: Manifest;
 	private baseUrl?: string;
 	private dashManifest: MPD | undefined;
 	constructor() {
-		this.logger = new Logger();
 		this.manifest = {
 			url: wrapUrl("http://localhost"), // Placeholder
+			isLive: false,
 			video: new UniqueRepresentationMap(),
 			audio: new UniqueRepresentationMap(),
 			images: new UniqueRepresentationMap(),
@@ -110,6 +110,8 @@ export class DashManifest implements ManifestParser {
 	}
 
 	private parseRawManifest(mpd: MPD): Manifest {
+		// MPD@type is "static" (VOD) or "dynamic" (live); default is "static".
+		this.manifest.isLive = mpd.type === "dynamic";
 		for (const period of mpd.periods) {
 			this.processPeriod(period);
 		}

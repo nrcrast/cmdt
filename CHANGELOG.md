@@ -25,6 +25,42 @@ appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`,
 
 ### Security
 
+## [0.9.0] - 2026-08-01
+
+### Added
+
+- Download tuning: control how aggressively segments are fetched. The CLI gains
+  `--concurrency` (maximum number of segments downloaded in parallel; defaults
+  to 100) and `--retries` (number of times to retry a failed segment download
+  before giving up). The viewer gains a "Download tuning" control exposing "Max
+  parallel downloads" and "Retries per segment"; leaving a field blank uses the
+  engine default.
+
+## [0.8.0] - 2026-07-10
+
+### Added
+
+- Segment range downloads: restrict a diagnostic to a slice of the presentation
+  timeline instead of fetching every segment. The CLI gains `--range-start` /
+  `--range-end` (absolute presentation seconds) and `--live-edge-window`
+  (download only the latest N seconds from the live edge); the viewer gains a
+  segment-range selector offering "Entire stream", "Absolute range", and
+  "Latest from live edge". The live-edge window is a relative selection, so it
+  is resolved to an absolute time against the parsed manifest's live edge before
+  the downloader — which deals only in absolute times — runs.
+- Shared: `Manifest.isLive`, derived in the normalized layer (DASH
+  `MPD@type="dynamic"`; HLS media playlists that omit `#EXT-X-ENDLIST`), plus
+  time-range helpers `getLiveEdgeMs`, `secondsToTimeRange`, and
+  `latestWindowToTimeRange`.
+- Log level control: the viewer header gains a log-level selector
+  (Off/Error/Warn/Info/Debug/Trace) that adjusts the shared engine's console
+  verbosity at runtime and persists across reloads. Shared modules now log
+  through a central factory (`getLogger`) governed by `getLogLevel` /
+  `setLogLevel`, and the CLI `--log-level` now drives the shared engine's
+  loggers too (previously it only configured the CLI's own winston logger), so
+  `debug` surfaces shared debug output and `off` silences it. The shared
+  engine's default level is now `info`.
+
 ## [0.7.6] - 2026-07-10
 
 ### Fixed

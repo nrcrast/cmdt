@@ -14787,6 +14787,7 @@ exports[`DashManifest > should parse a DASH manifest 1`] = `
       "width": 1120,
     },
   ],
+  "isLive": false,
   "periods": [
     {
       "baseUrl": [
@@ -56225,6 +56226,7 @@ exports[`DashManifest > should parse a DASH single period manifest 1`] = `
       "width": 1120,
     },
   ],
+  "isLive": false,
   "periods": [
     {
       "baseUrl": [],
