@@ -39,13 +39,16 @@ export class MemoryCachedChunk extends DownloadableChunk {
 		while (nTry <= numRetries) {
 			try {
 				const resp = await fetch(this.url.href, fetchOpts);
-				// fetch only rejects on network errors, not HTTP error statuses, so a
-				// 4xx/5xx would otherwise cache the error body as if it were a segment.
-				// Throw here so the retry loop treats it as a failure.
 				if (!resp.ok) {
 					throw new Error(`Failed to download ${this.url.href}: ${resp.status} ${resp.statusText}`);
 				}
 				data = await resp.arrayBuffer();
+				const contentLength = parseInt(resp.headers.get("Content-Length") ?? "0");
+				if (contentLength !== data.byteLength) {
+					throw new Error(
+						`Content-Length mismatch for ${this.url.href}: ${resp.headers.get("Content-Length")} != ${data.byteLength}`,
+					);
+				}
 				break;
 			} catch (e) {
 				nTry++;

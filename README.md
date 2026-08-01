@@ -10,6 +10,9 @@ CMDT is a CLI tool designed to help video engineers diagnose issues with DASH/HL
 
 How much is downloaded and analyzed depends on the `--mode` option (see below).
 
+> [!NOTE]
+> ### AI Agent Strategy/Philosophy
+
 # Installation
 ## Pre-built binaries
 Pre-built binaries for Linux, Windows, and MacOS are built as part of the release process. The latest release can be found [here](https://github.com/nrcrast/cmdt/releases/latest).
