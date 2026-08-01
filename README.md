@@ -12,6 +12,8 @@ How much is downloaded and analyzed depends on the `--mode` option (see below).
 
 > [!NOTE]
 > ### AI Agent Strategy/Philosophy
+> AI should not be used to write code in the shared lib. For the CLI harness and the UI, AI will be accepted, but the
+> main core of CMDT shall be trad-coded artisan mom and pop code.
 
 # Installation
 ## Pre-built binaries
